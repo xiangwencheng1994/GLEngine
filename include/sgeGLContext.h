@@ -59,10 +59,11 @@ namespace sge {
     public:
 
 #ifdef _WIN32
+        static int  GetFormatForMsaa(int msaa);
         /**
          * Create GLContext from windows handle
          */
-        static GLContext* CreateGLContext(HWND hWnd, HDC hDC = NULL, unsigned format = 0);
+        static GLContext* CreateGLContext(HWND hWnd, HDC hDC = NULL, int format = 0);
 
         /**
          * Get bind window handle

@@ -44,6 +44,9 @@
 #include <sgeGLApp.h>
 #include <sgeLog.h>
 #include <sgeTimer.h>
+#include <imgui/imgui.h>
+#include <imgui/imgui_impl_opengl3.h>
+#include <imgui/imgui_impl_win32.h>
 
 #include <Windows.h>
 
@@ -56,12 +59,16 @@
 
 namespace sge
 {
-    static GLApp*   app =   NULL;
-
     static LRESULT CALLBACK GLAppWndProc(HWND hWnd, UINT msgId, WPARAM wParam, LPARAM lParam)
     {
-        assert(app);
-        return app->wndProc(hWnd, msgId, wParam, lParam);
+        LONG_PTR plptrWin = GetWindowLongPtr(hWnd, GWLP_USERDATA);
+        if (plptrWin)
+        {
+            GLApp* app = reinterpret_cast<GLApp*>(plptrWin);
+            assert(app);
+            return app->wndProc(hWnd, msgId, wParam, lParam);
+        }
+        return DefWindowProc(hWnd, msgId, wParam, lParam);
     }
 
     class GLAppPrivate
@@ -76,10 +83,11 @@ namespace sge
 
         GLContext*  glContext;
         HWND        hWnd;
+        ImGuiContext*   guiContext;
 
 
         GLAppPrivate()
-            : attr(new WinAttr()),hWnd(NULL), glContext(NULL)
+            : attr(new WinAttr()),hWnd(NULL), glContext(NULL), guiContext(NULL)
         {
 			strcpy_s(attr->title, DEFALUT_TITLE);
             attr->size  =   int2(DEFALUT_WIDTH, DEFALUT_HEIGHT);
@@ -161,16 +169,27 @@ namespace sge
             }
         }
 
-        bool createGLContext()
+        bool createGLContext(int format)
         {
             assert(hWnd && "Must createWnd before createGLContext");
             assert(glContext == NULL && "Already has glContext, not need create again");
-            glContext   =   GLContext::CreateGLContext(hWnd, 0, 0);
+            glContext   =   GLContext::CreateGLContext(hWnd, 0, format);
+            guiContext  =   ImGui::CreateContext();
+            ImGui_ImplOpenGL3_Init("#version 330");
+            ImGui_ImplWin32_Init(hWnd);
+            ImGui::StyleColorsDark();
             return glContext != NULL;
         }
 
         void destoryGLContext()
         {
+            if (guiContext)
+            {
+                ImGui_ImplOpenGL3_Shutdown();
+                ImGui_ImplWin32_Shutdown();
+                ImGui::DestroyContext(guiContext);                
+                guiContext  =   NULL;
+            }
             if (glContext)
             {
                 delete glContext;
@@ -233,20 +252,22 @@ namespace sge
 
     int GLApp::run()
     {
-        app = this;
-
         if (! d->registerClass()) return -1;
         if (! d->createWnd()) return -2;
-        if (! d->createGLContext()) return -3;
+        if (! d->createGLContext(GLContext::GetFormatForMsaa(4))) return -3;
+
+        SetWindowLongPtr(d->hWnd, GWL_USERDATA, (LONG)(LONG_PTR)this);
 
         onCreate();
 
         UpdateWindow(d->hWnd);
         ShowWindow(d->hWnd, SW_SHOW);
 
+        SetFocus(d->hWnd);
+
         Timer timer;
         timer.elapsed();
-
+        
         MSG     msg = { 0 };
         while (WM_QUIT != msg.message)
         {
@@ -257,7 +278,18 @@ namespace sge
             }
             else
             {
-                onRender(timer.elapsed());
+                float elapsed = timer.elapsed();
+                // Rendering Game
+                onRender(elapsed);
+                
+                // Rendering UI
+                ImGui::SetCurrentContext(d->guiContext);
+                ImGui_ImplOpenGL3_NewFrame();
+                ImGui_ImplWin32_NewFrame();
+                onRenderUI(elapsed);
+                ImGui::Render();
+                ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
 				d->glContext->SwapBuffers();
             }
         }
@@ -293,6 +325,16 @@ namespace sge
 
     LRESULT GLApp::wndProc(HWND hWnd, UINT msgId, WPARAM wParam, LPARAM lParam)
     {
+        if (ImGui_ImplWin32_WndProcHandler(hWnd, msgId, wParam, lParam))
+        {
+            return S_OK;
+        }
+
+        ImGuiIO& io = ImGui::GetIO();
+        if (!io.WantCaptureMouse
+            && !io.WantCaptureKeyboard 
+            && !io.WantTextInput)
+
         switch (msgId)
         {
         /// key event
@@ -318,7 +360,14 @@ namespace sge
             mevt.pos.y = ((int)(short)HIWORD(lParam));
             if (onMouseEvent(mevt)) return 0;
         } break;
-        
+        case WM_MOUSEWHEEL:
+        {
+            MouseEvent mevt;
+            mevt.type = MouseEvent::MouseWheel;
+            mevt.pos.x = mevt.pos.y = GET_WHEEL_DELTA_WPARAM(wParam);
+            if (onMouseEvent(mevt)) return 0;
+        }break;
+
         /// size event
         case WM_SIZE:
         {
@@ -338,7 +387,7 @@ namespace sge
         } break;
 
         } // !end switch
-
+        
         return  ::DefWindowProc(hWnd, msgId, wParam, lParam);
     }
 }

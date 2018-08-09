@@ -82,8 +82,7 @@
 
 namespace sge {
 
-#pragma push(pack)
-#pragma pack(1)
+#pragma pack(push, 1)
 
     typedef unsigned char   uchar;
     typedef unsigned int    uint;
@@ -492,7 +491,7 @@ namespace sge {
          */
         friend std::ostream& operator<<(std::ostream& lhs, const Vector2<T>& rhs)
         {
-            lhs << "[" << rhs.x << "," << rhs.y << "]";
+            lhs << rhs.toString();
             return lhs;
         }
 
@@ -501,9 +500,9 @@ namespace sge {
          */
         std::string toString() const
         {
-            std::ostringstream oss;
-            oss << *this;
-            return oss.str();
+            char buffer[32];
+            sprintf(buffer, "%f,%f", x, y);
+            return buffer;
         }
 
         /**
@@ -571,6 +570,29 @@ namespace sge {
         {
             return a.x * b.x + a.y * b.y;
         }
+
+        /**
+         * Calc the lengh of vector P project on vector Q dir
+         * @param P vector
+         * @param Q vector
+         */
+        template<typename T>
+        T projLength(const Vector2<T>& p, const Vector2<T>& q)
+        {
+            return dot(p, q) / q.length();
+        }
+
+        /**
+         * Calc the vecotr of vector P project on vector Q dir
+         * @param P vector
+         * @param Q vector
+         */
+        template<typename T>
+        Vector2<T> proj(const Vector2<T>& p, const Vector2<T>& q)
+        {
+            return q * (dot(p, q) / q.lengthSq());
+        }
+
     }
 
     /**
@@ -935,7 +957,7 @@ namespace sge {
          */
         friend std::ostream& operator<<(std::ostream& lhs, const Vector3<T>& rhs)
         {
-            lhs << "[" << rhs.x << "," << rhs.y << "," << rhs.z<< "]";
+            lhs << rhs.toString();
             return lhs;
         }
 
@@ -944,9 +966,9 @@ namespace sge {
          */
         std::string toString() const
         {
-            std::ostringstream oss;
-            oss << *this;
-            return oss.str();
+            char buffer[48];
+            sprintf(buffer, "%f,%f,%f", x, y, z);
+            return buffer;
         }
 
         /**
@@ -989,7 +1011,7 @@ namespace sge {
         {
             Vector3<T> res(v);
             T c, s;
-            math::sincos(math::DEG2RAD(angle), &c, &s);
+            math::sincos(math::DEG2RAD(angle), &s, &c);
             res.y = v.y * c - v.z * s;
             res.z = v.y * s + v.z * c;
             return res;
@@ -1005,7 +1027,7 @@ namespace sge {
         {
             Vector3<T> res = v;
             T c, s;
-            math::sincos(math::DEG2RAD(angle), &c, &s);
+            math::sincos(math::DEG2RAD(angle), &s, &c);
             res.x = v.x * c + v.z * s;
             res.z = -v.x * s + v.z * c;
             return res;
@@ -1021,7 +1043,7 @@ namespace sge {
         {
             Vector3<T> res = v;
             T c, s;
-            math::sincos(math::DEG2RAD(angle), &c, &s);
+            math::sincos(math::DEG2RAD(angle), &s, &c);
             res.x = v.x * c - v.y * s;
             res.y = v.x * s + v.y * c;
             return res;
@@ -1059,6 +1081,30 @@ namespace sge {
         {
             return Vector3<T>(a.y * b.z - b.y * a.z, a.z * b.x - b.z * a.x, a.x * b.y - b.x * a.y);
         }
+
+        
+        /**
+         * Calc the lengh of vector P project on vector Q dir
+         * @param P vector
+         * @param Q vector
+         */
+        template<typename T>
+        T projLength(const Vector3<T>& p, const Vector3<T>& q)
+        {
+            return dot(p, q) / q.length();
+        }
+
+        /**
+         * Calc the vecotr of vector P project on vector Q dir
+         * @param P vector
+         * @param Q vector
+         */
+        template<typename T>
+        Vector3<T> proj(const Vector3<T>& p, const Vector3<T>& q)
+        {
+            return q * (dot(p, q) / q.lengthSq());
+        }
+
     }
 
     /**
@@ -1453,7 +1499,7 @@ namespace sge {
          */
         friend std::ostream& operator<<(std::ostream& lhs, const Vector4<T>& rhs)
         {
-            lhs << "[" << rhs.x << "," << rhs.y << "," << rhs.z << "," << rhs.w << "]";
+            lhs << rhs.toString();
             return lhs;
         }
 
@@ -1462,9 +1508,9 @@ namespace sge {
          */
         std::string toString() const
         {
-            std::ostringstream oss;
-            oss << *this;
-            return oss.str();
+            char buffer[64];
+            sprintf(buffer, "%f,%f,%f,%f", x, y, z, w);
+            return buffer;
         }
 
         /**
@@ -1897,16 +1943,8 @@ namespace sge {
          * Output to stream operator
          */
         friend std::ostream& operator <<(std::ostream& lhs, const Matrix3<T>& rhs)
-        {
-            for (int i = 0; i < 3; i++)
-            {
-                lhs << "|\t";
-                for (int j = 0; j < 3; j++)
-                {
-                    lhs << rhs.cel[j][i] << "\t";
-                }
-                lhs << "|" << std::endl;
-            }
+        {            
+            lhs << rhs.toString();
             return lhs;
         }
 
@@ -1915,9 +1953,14 @@ namespace sge {
          */
         std::string toString() const
         {
-            std::ostringstream oss;
-            oss << *this;
-            return oss.str();
+            char buffer[16 * 4 * 4];
+            sprintf(buffer, "\n\t\t|%f,%f,%f|\n"
+                            "\t\t|%f,%f,%f|\n"
+                            "\t\t|%f,%f,%f|\n",
+                data[0], data[1], data[2], 
+                data[3], data[4], data[5], 
+                data[6], data[7], data[8]);
+            return buffer;
         }
 
     };
@@ -2430,14 +2473,13 @@ namespace sge {
         }
 
         /**
-        * Operator for multiply with a vector
-        * @param rhs Right side vector.
-        */
+         * Operator for multiply with a vector
+         * @param rhs Right side vector.
+         */
         Vector3<T> operator*(const Vector3<T>& rhs) const
         {
-            return Vector3<T>(data[0] * rhs.x + data[4] * rhs.y + data[8] * rhs.z,
-                data[1] * rhs.x + data[5] * rhs.y + data[9] * rhs.z,
-                data[2] * rhs.x + data[6] * rhs.y + data[10] * rhs.z);
+            Vector4<T> ret = operator*(Vector4<T>(rhs, 1));
+            return ret.xyz / ret.w;
         }
 
         /**
@@ -2655,15 +2697,7 @@ namespace sge {
          */
         friend std::ostream& operator <<(std::ostream& lhs, const Matrix4<T>& rhs)
         {
-            for (int i = 0; i < 4; i++)
-            {
-                lhs << "|\t";
-                for (int j = 0; j < 4; j++)
-                {
-                    lhs << rhs.cel[j][i] << "\t";
-                }
-                lhs << "|" << std::endl;
-            }
+            lhs << rhs.toString();
             return lhs;
         }
 
@@ -2672,9 +2706,16 @@ namespace sge {
          */
         std::string toString() const
         {
-            std::ostringstream oss;
-            oss << *this;
-            return oss.str();
+            char buffer[16 * 4 * 4];
+            sprintf(buffer, "\n\t\t|%f,%f,%f,%f|\n"
+                            "\t\t|%f,%f,%f,%f|\n"
+                            "\t\t|%f,%f,%f,%f|\n"
+                            "\t\t|%f,%f,%f,%f|\n",
+                data[0], data[1], data[2], data[3],
+                data[4], data[5], data[6], data[7],
+                data[8], data[9], data[10], data[11],
+                data[12], data[13], data[14], data[15]);
+            return buffer;
         }
     };
 
@@ -2862,6 +2903,19 @@ namespace sge {
         Quaternion<T> operator*(T rhs) const
         {
             return Quaternion<T>(w * rhs, x * rhs, y * rhs, z * rhs);
+        }
+
+        /**
+         * Transform a vector3
+         * @param v The vector
+         */
+        Vector3<T> operator*(Vector3<T> v) const
+        {
+            Vector3<T> uv = math::cross(this->v, v);
+            Vector3<T> uuv = math::cross(this->v, uv);
+            uv *= (2 * w);
+            uuv *= 2;
+            return v + uv + uuv;
         }
 
         /**
@@ -3054,7 +3108,7 @@ namespace sge {
          */
         friend std::ostream& operator <<(std::ostream& oss, const Quaternion<T>& q)
         {
-            oss << "Re: " << q.w << " Im: " << q.v;
+            oss << q.toString();
             return oss;
         }
 
@@ -3063,9 +3117,9 @@ namespace sge {
          */
         std::string toString() const
         {
-            std::ostringstream oss;
-            oss << *this;
-            return oss.str();
+            char buffer[64];
+            sprintf(buffer, "%f,%f,%f,%f", w, x, y, z);
+            return buffer;
         }
 
         /**
@@ -3579,7 +3633,7 @@ namespace sge {
          */
         friend std::ostream& operator<<(std::ostream& lhs, const Aabb2<T>& rhs)
         {
-            lhs << rhs.min << " x " << rhs.max;
+            lhs << rhs.toString();
             return lhs;
         }
 
@@ -3588,9 +3642,9 @@ namespace sge {
          */
         std::string toString() const
         {
-            std::ostringstream oss;
-            oss << *this;
-            return oss.str();
+            char buffer[64];
+            sprintf(buffer, "%f,%f,%f,%f", min.x, min.y, max.x, max.y);
+            return buffer;
         }
 
     };
@@ -3984,7 +4038,7 @@ namespace sge {
          */
         friend std::ostream& operator<<(std::ostream& lhs, const Aabb3<T>& rhs)
         {
-            lhs << rhs.min << " x " << rhs.max;
+            lhs << rhs.toString();
             return lhs;
         }
 
@@ -3993,9 +4047,9 @@ namespace sge {
          */
         std::string toString() const
         {
-            std::ostringstream oss;
-            oss << *this;
-            return oss.str();
+            char buffer[96];
+            sprintf(buffer, "%f,%f,%f,%f,%f,%f", min.x, min.y, min.z, max.x, max.y, max.z);
+            return buffer;
         }
 
     };
@@ -4004,7 +4058,7 @@ namespace sge {
     typedef Aabb3<float> aabb3f;
     typedef Aabb3<double> aabb3r;
 
-#pragma pop(pack)
+#pragma pack(pop)
 
 } // !namespace sge
 

@@ -57,8 +57,8 @@ namespace sge
      */
     enum BufferType
     {
-        Vertex  =   GL_ARRAY_BUFFER,
-        Element =   GL_ELEMENT_ARRAY_BUFFER,
+        VertexBuffer    =   GL_ARRAY_BUFFER,
+        IndexBuffer     =   GL_ELEMENT_ARRAY_BUFFER,
         //TODO: add more type support
     };
 
@@ -92,13 +92,29 @@ namespace sge
     public:
 
         /**
+         * To log OpenGL version
+         */
+        static void LogGLVersion()
+        {
+            const GLubyte* renderer = glGetString(GL_RENDERER);
+            const GLubyte* vendor = glGetString(GL_VENDOR);
+            const GLubyte* glslVersion = glGetString(GL_SHADING_LANGUAGE_VERSION);
+            GLint major, minor;
+            glGetIntegerv(GL_MAJOR_VERSION, &major);
+            glGetIntegerv(GL_MINOR_VERSION, &minor);
+            Log::debug("GL Vendor: %s", vendor);
+            Log::debug("GL Renderer: %s", renderer);
+            Log::debug("GL Version: %d.%d, GLSL%s", major, minor, glslVersion);
+        }
+
+        /**
          * Create a buffer.
          */
         static GLuint CreateBuffer(BufferType type, BufferUsage usage, size_t size, const void* data = NULL)
         {
             GLuint id;
             glGenBuffers(1, &id);
-            glBindBuffer(type, id);            
+            glBindBuffer(type, id);
             glBufferData(type, size, data, usage);
             return id;
         }

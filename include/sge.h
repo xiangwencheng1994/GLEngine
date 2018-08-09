@@ -45,11 +45,11 @@
 
 #ifdef _WIN32
 #include <Windows.h>
-#pragma comment(lib, "opengl32.lib")
-#if GLEngine_EXPORTS
+#if sge_EXPORTS
 #   define SGE_API _declspec(dllexport)
 #else
 #   define SGE_API _declspec(dllimport)
+#pragma comment(linker,"/subsystem:\"Windows\" /entry:\"mainCRTStartup\"")
 #endif
 #else
 #   define SGE_API
@@ -61,6 +61,11 @@
 		Class &operator=(const Class &) = delete;
 
 #include <assert.h>
+
+namespace sge
+{
+
+}
 
 #endif
 

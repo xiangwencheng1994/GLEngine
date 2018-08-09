@@ -74,7 +74,8 @@ namespace sge
             RightBtnDbClk,
             MiddleBtnDown,
             MiddleBtnUp,
-            MiddleBtnDbClk
+            MiddleBtnDbClk,
+            MouseWheel
         }type;
         int2 pos;
     };
@@ -165,6 +166,11 @@ namespace sge
          * This function will called by 'run' in each message loop while no message.
          */
         virtual void onRender(float elapsed) = 0;
+
+        /**
+         * This function will called after 'onRender' for GUI draws.
+         */
+        virtual void onRenderUI(float elapsed) {}
 
         /**
          * This function will called by 'run' after break the message loop and try destory app.
