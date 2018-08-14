@@ -81,6 +81,7 @@ namespace sge
      */
     struct TexureCubeFile
     {
+        enum { PX = 0, NX, PY, NY, PZ, NZ };
         // order: PX,NX, PY, NY, PZ, NZ
         const char* face[6];
     };

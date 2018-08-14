@@ -44,7 +44,6 @@
 #define SGE_GLCONTEXT_H
 
 #include <sge.h>
-
 #include <glew/glew.h>
 
 namespace sge {
@@ -59,7 +58,11 @@ namespace sge {
     public:
 
 #ifdef _WIN32
+        /**
+         * Get the pixel format by msaa
+         */
         static int  GetFormatForMsaa(int msaa);
+
         /**
          * Create GLContext from windows handle
          */

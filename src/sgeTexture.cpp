@@ -112,7 +112,7 @@ namespace sge
         glGenTextures(1, &tex);
         glBindTexture(GL_TEXTURE_CUBE_MAP, tex);
         for (int i = 0; i < 6; ++i)
-        {
+        { 
             byte* data = stbi_load(texFile.face[i], &width, &height, &comp, 3);
             if (!data)
             {
@@ -129,7 +129,6 @@ namespace sge
         glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
         glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
-        glDisable(GL_TEXTURE_CUBE_MAP);
         return tex;
     }
 }

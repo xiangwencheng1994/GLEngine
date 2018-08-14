@@ -62,7 +62,7 @@ namespace sge
     /**
      * Class StreamReader
      */
-    class SGE_API StreamReader
+    class StreamReader
     {
     public:
         /**
@@ -105,6 +105,17 @@ namespace sge
          */
         template<typename T> bool read(T& out) { return 1 == read(&out, sizeof(T), 1); }
 
+        /**
+         * read all  data as text
+         */
+        virtual std::string readAll() 
+        {
+            size_t len = length();
+            std::string data(len, 0);
+            len = read((void*)data.c_str(), len, 1);
+            assert(len == 1);
+            return data;
+        }
     };
 
 

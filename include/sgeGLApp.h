@@ -151,6 +151,10 @@ namespace sge
 
 #ifdef _WIN32
         /**
+         * Get the window handle
+         */
+        HWND getHWND() const;
+        /**
          * App window message process.
          */
         virtual LRESULT wndProc(HWND hWnd, UINT msgId, WPARAM wParam, LPARAM lParam);

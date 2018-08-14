@@ -55,9 +55,7 @@
 
 namespace sge
 {
-    static std::map<int, int> msaaFormat;
-
-    static bool MapSupportedMsaaFormat()
+    static bool MapSupportedMsaaFormat(std::map<int, int>& msaaFormat)
     {
         HINSTANCE hInstance = GetModuleHandle(NULL);
         bool ret = false;
@@ -196,8 +194,10 @@ namespace sge
 
     int GLContext::GetFormatForMsaa(int msaa)
     {
+        static std::map<int, int> msaaFormat;
+
         if (msaaFormat.size() == 0)
-            MapSupportedMsaaFormat();
+            MapSupportedMsaaFormat(msaaFormat);
         while (msaa > 0)
         {
             if (msaaFormat[msaa] > 0)

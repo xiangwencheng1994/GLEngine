@@ -23,6 +23,7 @@ install(TARGETS sge
         LIBRARY DESTINATION lib
         ARCHIVE DESTINATION lib/static)
 		
+install(DIRECTORY res/ DESTINATION bin)
 
 install(DIRECTORY include/ DESTINATION include FILES_MATCHING PATTERN "*.h")
 install(FILES "FindSGE.cmake" DESTINATION .)
@@ -30,4 +31,4 @@ install(FILES "FindSGE.cmake" DESTINATION .)
 set(SGE_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/include)
 set(SGE_LIBS sge ${OPENGL_LIBRARIES})
 
-add_subdirectory(examples)
+add_subdirectory(application)

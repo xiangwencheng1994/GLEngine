@@ -44,6 +44,7 @@
 #define SGE_GLSLPROGRAM_H
 
 #include <sge.h>
+#include <string>
 
 #include <glew/glew.h>
 
@@ -60,8 +61,6 @@ namespace sge
     class SGE_API GLSLProgram
     {
     public:
-
-
         /**
          * Constructor
          */
@@ -113,38 +112,38 @@ namespace sge
          * @return -1 if program is disable or it has no such attribute
          */
         attribute getAttribLocation(const char* name) const;
-
+        
     protected:
 
         /**
          * Get the vertex shader source
          * @return NULL to use opengl default shader
          */
-        virtual const char* getVertexShaderSrc() const = 0;
+        virtual std::string getVertexShaderSrc() const = 0;
 
         /**
          * Get the tess control shader source
          * @return NULL to use opengl default shader
          */
-        virtual const char* getTessControlShaderSrc() const { return NULL; }
+        virtual std::string getTessControlShaderSrc() const { return std::string(); }
         
         /**
          * Get the tess evaluation shader source
          * @return NULL to use opengl default shader
          */
-        virtual const char* getTessEvaluationShaderSrc() const { return NULL; }
+        virtual std::string getTessEvaluationShaderSrc() const { return std::string(); }
         
         /**
          * Get the geometry shader source
          * @return NULL to use opengl default shader
          */
-        virtual const char* getGeometryShaderSrc() const { return NULL; }
+        virtual std::string getGeometryShaderSrc() const { return std::string(); }
         
         /**
          * Get the fragment shader source
          * @return NULL to use opengl default shader
          */
-        virtual const char* getFragmentShaderSrc() const = 0;
+        virtual std::string getFragmentShaderSrc() const = 0;
         
         /**
          * Callback function after program create successed

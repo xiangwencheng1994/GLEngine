@@ -60,10 +60,11 @@ namespace sge
          * @param fileName The fileName for open wanted 
          * @param ret The result of open the file
          */
-        FileReader(const char* fileName, bool& ret)        
+        FileReader(const char* fileName, bool* ret)
         {
             _file = fopen(fileName, "rb");
-            ret = (NULL != _file);
+            if (ret) *ret = (NULL != _file);
+            else assert(NULL != _file);
         }
 
         /**
@@ -98,7 +99,7 @@ namespace sge
             if (seek(0, SEEK_SET))
             {
                 if (seek(0, SEEK_END)) ret = tell();
-                seek(cur);
+                seek(cur, SEEK_SET);
             }
             return ret;
         }
@@ -116,7 +117,7 @@ namespace sge
         }
         
     private:
-        FILE    _file;
+        FILE*       _file;
         DISABLE_COPY(FileReader)
     };
 

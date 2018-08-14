@@ -55,17 +55,19 @@ namespace sge
         GLSLProgramPrivate() : program(0) { }
         ~GLSLProgramPrivate() { destory(); }
 
-        bool addShader(GLenum type, const char* src)
+        bool addShader(GLenum type, std::string src)
         {
-            if (src == NULL)
+            if (src.size() == 0)
             {
                 return false;
             }
+            //src.resize(src.size() + 1, 0);
             GLint   status = 0;
             char    compileLog[512] = { 0 };
             GLint shader = glCreateShader(type);
             assert(shader && "glCreateShader failed");
-            glShaderSource(shader, 1, (const GLchar**)&src, 0);
+            char* source = (char*)src.c_str();
+            glShaderSource(shader, 1, (const GLchar**)&source, 0);
             glCompileShader(shader);
             glGetShaderiv(shader, GL_COMPILE_STATUS, &status);
             if (status == GL_FALSE)
@@ -108,8 +110,10 @@ namespace sge
                 Log::error("Link GLProgram faild: %s", compileLog);
                 glDeleteProgram(program);
                 program = NULL;
-#ifdef _WIN32
-                ::MessageBoxA(NULL, "Link GLProgram failed, see log for more details.", "Error", MB_OK);
+#if defined (_DEBUG) && defined(_MSC_VER)
+                DebugBreak();
+#elif // _DEBUG
+                assert(NULL, "Link GLProgram failed, see log for more details.", "Error", MB_OK);
 #endif
                 return false;
             }

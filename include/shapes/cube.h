@@ -47,6 +47,27 @@
 
 namespace sge
 {
+    /**
+     * The vertices of cube
+     *    v6----- v5
+     *   /|      /|
+     *  v1------v0|
+     *  | |     | |
+     *  | |v7---|-|v4
+     *  |/      |/
+     *  v2------v3
+     */
+    const float3 CubeVertices[8] = 
+    {
+        { +0.5f, +0.5f, -0.5 },
+        { -0.5f, +0.5f, -0.5 },
+        { -0.5f, -0.5f, -0.5 },
+        { +0.5f, -0.5f, -0.5 },
+        { +0.5f, -0.5f, +0.5 },
+        { +0.5f, +0.5f, +0.5 },
+        { -0.5f, +0.5f, +0.5 },
+        { -0.5f, -0.5f, +0.5 },
+    };
 
     /**
      * The draw triangles indices of cube
@@ -69,54 +90,6 @@ namespace sge
         0, 3, 3, 2, 2, 1, 1, 0,
         6, 7, 7, 4, 4, 5, 5, 6,
         6, 1, 2, 7, 4, 3, 0, 5
-    };
-
-    /**
-     * Class Cube
-     */
-    template<typename T>
-    class Cube
-    {
-    public:
-        /** 
-         * The vertices of cube
-         *    v6----- v5
-         *   /|      /|
-         *  v1------v0|
-         *  | |     | |
-         *  | |v7---|-|v4
-         *  |/      |/
-         *  v2------v3
-         */
-        Vector3<T>   vertices[8];
-
-    public:
-
-        /**
-         * Constructor, make a identity cube
-         */
-        Cube()
-        {
-            vertices[0] = { +0.5f, +0.5f, -0.5 };
-            vertices[1] = { -0.5f, +0.5f, -0.5 };
-            vertices[2] = { -0.5f, -0.5f, -0.5 };
-            vertices[3] = { +0.5f, -0.5f, -0.5 };
-            vertices[4] = { +0.5f, -0.5f, +0.5 };
-            vertices[5] = { +0.5f, +0.5f, +0.5 };
-            vertices[6] = { -0.5f, +0.5f, +0.5 };
-            vertices[7] = { -0.5f, -0.5f, +0.5 };
-        }
-
-        /**
-         * Do matrix transform
-         */
-        void transform(const Matrix4<T> mat)
-        {
-            for (size_t i = 0; i < 8; ++i)
-            {
-                vertices[i] = mat * vertices[i];
-            }
-        }
     };
 
 }

@@ -43,24 +43,89 @@
 #ifndef SGE_GLSL_UTIL_H
 #define SGE_GLSL_UTIL_H
 
+#include <sgeLog.h>
 #include <sgeGLSLProgram.h>
 #include <sgeMath.h>
 
-#define ENDL    "\n"
-
-
-#ifdef _DEBUG
-#define GLSL_VERSION "#version 430 core \n" ENDL \
-                     "#pragma debug(on) \n" ENDL \
-                     "#pragma optimize(off) "
-#else
-#define GLSL_VERSION "#version 430 core "
-#endif // _DEBUG
+#include <sgeFileReader.h>
 
 namespace sge
 {
+    class PROGRAM_P3C4 : public GLSLProgram
+    {
+    public:
+        const char* VS_FILE = "shader/P3C4.vs.glsl";
+        const char* FS_FILE = "shader/C4.fs.glsl";
+    public:
+        uniform     _mvp;
+        attribute   _position;
+        attribute   _color;
 
+        void begin() const
+        {
+            __super::begin();
+            glEnableVertexAttribArray(_position);
+            glEnableVertexAttribArray(_color);
+        }
 
+        void end() const
+        {
+            glDisableVertexAttribArray(_position);
+            glDisableVertexAttribArray(_color);
+            __super::end();
+        }
+    private:
+        std::string getVertexShaderSrc() const { return FileReader(VS_FILE, NULL).readAll(); }
+        std::string getFragmentShaderSrc() const { return FileReader(FS_FILE, NULL).readAll(); }        
+        void onCreateAfter()
+        {
+            _mvp = getUniformLocation("_mvp");
+            _position = getAttribLocation("_position");
+            _color = getAttribLocation("_color");
+        }
+    };
+
+    class PROGRAM_SKYBOX : public GLSLProgram
+    {
+    public:
+        const char* VS_FILE = "shader/skybox.vs.glsl";
+        const char* FS_FILE = "shader/skybox.fs.glsl";
+    public:
+        uniform     _mvp;
+        attribute   _position;
+
+        uniform     _cubeTexture;
+
+        void begin() const
+        {
+            __super::begin();
+            glGetIntegerv(GL_CULL_FACE_MODE, (GLint*)&OldCullFaceMode);
+            glGetIntegerv(GL_DEPTH_FUNC, (GLint*)&OldDepthFuncMode);
+            glCullFace(GL_FRONT);
+            glDepthFunc(GL_LEQUAL);
+            glEnableVertexAttribArray(_position);
+        }
+
+        void end() const
+        {
+            glCullFace(OldCullFaceMode);
+            glDepthFunc(OldDepthFuncMode);
+            glDisableVertexAttribArray(_position);
+            __super::end();
+        }
+    private:
+        GLint OldCullFaceMode;
+        GLint OldDepthFuncMode;
+    private:
+        std::string getVertexShaderSrc() const { return FileReader(VS_FILE, NULL).readAll(); }
+        std::string getFragmentShaderSrc() const { return FileReader(FS_FILE, NULL).readAll(); }
+        void onCreateAfter()
+        {
+            _mvp = getUniformLocation("_mvp");
+            _position = getAttribLocation("_position");
+            _cubeTexture = getUniformLocation("_cubeTexture");
+        }                
+    };
 
 }
 

@@ -254,7 +254,7 @@ namespace sge
     {
         if (! d->registerClass()) return -1;
         if (! d->createWnd()) return -2;
-        if (! d->createGLContext(GLContext::GetFormatForMsaa(4))) return -3;
+        if (! d->createGLContext(GLContext::GetFormatForMsaa(8))) return -3;
 
         SetWindowLongPtr(d->hWnd, GWL_USERDATA, (LONG)(LONG_PTR)this);
 
@@ -286,7 +286,9 @@ namespace sge
                 ImGui::SetCurrentContext(d->guiContext);
                 ImGui_ImplOpenGL3_NewFrame();
                 ImGui_ImplWin32_NewFrame();
+                ImGui::NewFrame();
                 onRenderUI(elapsed);
+                ImGui::EndFrame();
                 ImGui::Render();
                 ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
@@ -321,6 +323,11 @@ namespace sge
         {
             DestroyWindow(d->hWnd);
         }
+    }
+
+    HWND GLApp::getHWND() const
+    {
+        return d ? d->hWnd : NULL;
     }
 
     LRESULT GLApp::wndProc(HWND hWnd, UINT msgId, WPARAM wParam, LPARAM lParam)

@@ -73,11 +73,22 @@
 #ifndef MIN
 #   define MIN(a,b) (((a) < (b)) ? (a) : (b))
 #endif
+#ifdef FLT_EPSILON
+#undef FLT_EPSILON
+#define FLT_EPSILON     0.0000001f
+#endif // FLT_EPSILON
+#ifdef FLT_EPSILON
+#undef DBL_EPSILON
+#define DBL_EPSILON     0.0000000000000001
+#endif // FLT_EPSILON
 #ifdef max
 #   undef max
 #endif
 #ifdef min
 #   undef min
+#endif
+#ifndef MATH_TOLERANCE
+#   define MATH_TOLERANCE       2e-37f
 #endif
 
 namespace sge {
@@ -88,72 +99,80 @@ namespace sge {
     typedef unsigned int    uint;
 
     //-------------[ overload math functions ]-------------
-    namespace math
-    {
-        // Convert angle from degree to radian ,eg: 180 --> M_PI(3.14***)
-        inline float DEG2RAD(int x) { return x * ((float)M_PI / (float)180); }
-        inline float DEG2RAD(float x) { return x * ((float)M_PI / (float)180); }
-        inline double DEG2RAD(double x) { return x * ((double)M_PI / (double)180); }
 
-        // Convert angle from radian to degree ,eg: M_PI(3.14***) --> 180
-        inline float RAD2EDG(int x) { return (x) * ((float)180 / (float)M_PI); }
-        inline float RAD2EDG(float x) { return (x) * ((float)180 / (float)M_PI); }
-        inline double RAD2EDG(double x) { return (x) * ((double)180 / (double)M_PI); }
+    // Convert angle from degree to radian ,eg: 180 --> M_PI(3.14***)
+    inline float DEG2RAD(int x) { return x * ((float)M_PI / (float)180); }
+    inline float DEG2RAD(float x) { return x * ((float)M_PI / (float)180); }
+    inline double DEG2RAD(double x) { return x * ((double)M_PI / (double)180); }
 
-        // Equal test,"x==y" for integer, "fabs(x - y) < epsilon" for float
-        inline bool equal(int x, int y) { return x == y; }
-        inline bool equal(float x, float y) { return ::fabsf(x - y) < FLT_EPSILON; }
-        inline bool equal(double x, double y) { return ::fabs(x - y) < DBL_EPSILON; }
+    // Convert angle from radian to degree ,eg: M_PI(3.14***) --> 180
+    inline float RAD2EDG(int x) { return (x) * ((float)180 / (float)M_PI); }
+    inline float RAD2EDG(float x) { return (x) * ((float)180 / (float)M_PI); }
+    inline double RAD2EDG(double x) { return (x) * ((double)180 / (double)M_PI); }
 
-        // Less test, "x<y" for int,"y - x > epsilon" for float
-        inline bool less(int x, int y) { return x < y; }
-        inline bool less(float x, float y) { return y - x > FLT_EPSILON; }
-        inline bool less(double x, double y) { return y - x > DBL_EPSILON; }
+    // Equal test,"x==y" for integer, "fabs(x - y) < epsilon" for float
+    inline bool equal(int x, int y) { return x == y; }
+    inline bool equal(float x, float y) { return std::fabsf(x - y) < FLT_EPSILON; }
+    inline bool equal(double x, double y) { return std::fabs(x - y) < DBL_EPSILON; }
 
-        // sin(x),sine
-        inline float sin(float x) { return ::sinf(x); }
-        inline double sin(double x) { return ::sin(x); }
+    // Less test, "x<y" for int,"y - x > epsilon" for float
+    inline bool less(int x, int y) { return x < y; }
+    inline bool less(float x, float y) { return y - x > FLT_EPSILON; }
+    inline bool less(double x, double y) { return y - x > DBL_EPSILON; }
+    
+    // sin(x),sine
+    inline float sin(float x) { return std::sinf(x); }
+    inline double sin(double x) { return std::sin(x); }
 
-        // cos(x),cos
-        inline float cos(float x) { return ::cosf(x); }
-        inline double cos(double x) { return ::cos(x); }
+    // cos(x),cos
+    inline float cos(float x) { return std::cosf(x); }
+    inline double cos(double x) { return std::cos(x); }
 
-        // sincos(x), *_S=sin(_X),*_C=cos(_X) 
-        inline void sincos(float _X, float *_S, float *_C) { *_S = sin(_X); *_C = cos(_X); }
-        inline void sincos(double _X, double *_S, double *_C) { *_S = sin(_X); *_C = cos(_X); }
+    // sincos(x), *_S=sin(_X),*_C=cos(_X) 
+    inline void sincos(float _X, float *_S, float *_C) { *_S = sin(_X); *_C = cos(_X); }
+    inline void sincos(double _X, double *_S, double *_C) { *_S = sin(_X); *_C = cos(_X); }
 
-        // tan(x),tan
-        inline float tan(float x) { return ::tanf(x); }
-        inline double tan(double x) { return ::tan(x); }
+    // tan(x),tan
+    inline float tan(float x) { return std::tanf(x); }
+    inline double tan(double x) { return std::tan(x); }
 
-        // asin(x), arcsin
-        inline float asin(float x) { return ::asinf(x); }
-        inline double asin(double x) { return ::asin(x); }
+    // asin(x), arcsin
+    inline float asin(float x) { return std::asinf(x); }
+    inline double asin(double x) { return std::asin(x); }
 
-        // acos(x), arccos
-        inline float acos(float x) { return ::acosf(x); }
-        inline double acos(double x) { return ::acos(x); }
+    // acos(x), arccos
+    inline float acos(float x) { return std::acosf(x); }
+    inline double acos(double x) { return std::acos(x); }
 
-        // atan(x), arctan
-        inline float atan(float x) { return ::atanf(x); }
-        inline double atan(double x) { return ::atan(x); }
+    // atan(x), arctan
+    inline float atan(float x) { return std::atanf(x); }
+    inline double atan(double x) { return std::atan(x); }
 
-        // atan2(x), arctan2
-        inline float atan2(float x, float y) { return ::atan2f(x, y); }
-        inline double atan2(double x, double y) { return ::atan2(x, y); }
+    // atan2(x), arctan2
+    inline float atan2(float x, float y) { return std::atan2f(x, y); }
+    inline double atan2(double x, double y) { return std::atan2(x, y); }
 
-        // sqrt(x), square
-        inline float sqrt(int x) { return ::sqrtf((float)x); }
-        inline float sqrt(float x) { return ::sqrtf(x); }
-        inline double sqrt(double x) { return ::sqrt(x); }
+    // sqrt(x), square
+    inline float sqrt(int x) { return std::sqrtf((float)x); }
+    inline float sqrt(float x) { return std::sqrtf(x); }
+    inline double sqrt(double x) { return std::sqrt(x); }
 
-        // abs
-        inline long abs(long x) { return ::abs(x); }
-        inline long long abs(long long x) { return ::abs(x); }
-        inline int abs(int x) { return ::abs(x); }
-        inline float abs(float x) { return ::fabsf(x); }
-        inline double abs(double x) { return ::fabs(x); }
-    };
+    // abs
+    inline long abs(long x) { return std::abs(x); }
+    inline long long abs(long long x) { return std::abs(x); }
+    inline int abs(int x) { return std::abs(x); }
+    inline float abs(float x) { return std::fabsf(x); }
+    inline double abs(double x) { return std::fabs(x); }
+    
+
+    template<typename T> class Vector2;
+    template<typename T> class Vector3;
+    template<typename T> class Vector4;
+    template<typename T> class Matrix3;
+    template<typename T> class Matrix4;
+    template<typename T> class Quaternion;
+    template<typename T> class Sphere;
+    template<typename T> class Ray;
 
     /**
      * Class for two dimensional vector
@@ -430,7 +449,7 @@ namespace sge {
          */
         bool operator==(const Vector2<T>& rhs) const
         {
-            return math::equal(x, rhs.x) && math::equal(y, rhs.y);
+            return equal(x, rhs.x) && equal(y, rhs.y);
         }
 
         /**
@@ -448,7 +467,7 @@ namespace sge {
          */
         T length() const
         {
-            return (T)math::sqrt(x * x + y * y);
+            return (T)sqrt(x * x + y * y);
         }
 
         /**
@@ -538,6 +557,17 @@ namespace sge {
     };
     
     /**
+     * Get a normalized vector2
+     */
+    template<typename T>
+    Vector2<T> normalize(const Vector2<T>& v)
+    {
+        Vector2<T> ret = v;
+        ret.normalize();
+        return ret;
+    }
+
+    /**
      * Rect
      */
     template<typename T>
@@ -558,42 +588,39 @@ namespace sge {
     typedef Rect<float>     rect2f;
     typedef Rect<double>    rect2r;
 
-    namespace math
+    /**
+     * Dot product of two vectors.
+     * @param a left side vector
+     * @param b right side vector
+     */
+    template<typename T>
+    T dot(const Vector2<T>& a, const Vector2<T>& b)
     {
-        /**
-         * Dot product of two vectors.
-         * @param a left side vector
-         * @param b right side vector
-         */
-        template<typename T>
-        T dot(const Vector2<T>& a, const Vector2<T>& b)
-        {
-            return a.x * b.x + a.y * b.y;
-        }
-
-        /**
-         * Calc the lengh of vector P project on vector Q dir
-         * @param P vector
-         * @param Q vector
-         */
-        template<typename T>
-        T projLength(const Vector2<T>& p, const Vector2<T>& q)
-        {
-            return dot(p, q) / q.length();
-        }
-
-        /**
-         * Calc the vecotr of vector P project on vector Q dir
-         * @param P vector
-         * @param Q vector
-         */
-        template<typename T>
-        Vector2<T> proj(const Vector2<T>& p, const Vector2<T>& q)
-        {
-            return q * (dot(p, q) / q.lengthSq());
-        }
-
+        return a.x * b.x + a.y * b.y;
     }
+    
+    /**
+     * Calc the lengh of vector P project on vector Q dir
+     * @param P vector
+     * @param Q vector
+     */
+    template<typename T>
+    T projLength(const Vector2<T>& p, const Vector2<T>& q)
+    {
+        return dot(p, q) / q.length();
+    }
+    
+    /**
+     * Calc the vecotr of vector P project on vector Q dir
+     * @param P vector
+     * @param Q vector
+     */
+    template<typename T>
+    Vector2<T> proj(const Vector2<T>& p, const Vector2<T>& q)
+    {
+        return q * (dot(p, q) / q.lengthSq());
+    }
+    
 
     /**
      * Class for three dimensional vector
@@ -612,7 +639,7 @@ namespace sge {
             };
             Vector2<T> xy;
         };
-
+        
     public:
 
         /**
@@ -895,7 +922,7 @@ namespace sge {
          */
         bool operator==(const Vector3<T>& rhs) const
         {
-            return math::equal(x, rhs.x) && math::equal(y, rhs.y) && math::equal(z, rhs.z);
+            return equal(x, rhs.x) && equal(y, rhs.y) && equal(z, rhs.z);
         }
 
         /**
@@ -913,7 +940,7 @@ namespace sge {
          */
         T length() const
         {
-            return (T)math::sqrt(x * x + y * y + z * z);
+            return (T)sqrt(x * x + y * y + z * z);
         }
 
         /**
@@ -1011,7 +1038,7 @@ namespace sge {
         {
             Vector3<T> res(v);
             T c, s;
-            math::sincos(math::DEG2RAD(angle), &s, &c);
+            sincos(DEG2RAD(angle), &s, &c);
             res.y = v.y * c - v.z * s;
             res.z = v.y * s + v.z * c;
             return res;
@@ -1027,7 +1054,7 @@ namespace sge {
         {
             Vector3<T> res = v;
             T c, s;
-            math::sincos(math::DEG2RAD(angle), &s, &c);
+            sincos(DEG2RAD(angle), &s, &c);
             res.x = v.x * c + v.z * s;
             res.z = -v.x * s + v.z * c;
             return res;
@@ -1043,12 +1070,23 @@ namespace sge {
         {
             Vector3<T> res = v;
             T c, s;
-            math::sincos(math::DEG2RAD(angle), &s, &c);
+            sincos(DEG2RAD(angle), &s, &c);
             res.x = v.x * c - v.y * s;
             res.y = v.x * s + v.y * c;
             return res;
         }
     };
+
+    /**
+     * Get a normalized vector3
+     */
+    template<typename T>
+    Vector3<T> normalize(const Vector3<T>& v)
+    {
+        Vector3<T> ret = v;
+        ret.normalize();
+        return ret;
+    }
 
     typedef Vector3<int>    vec3i;
     typedef Vector3<int>    int3;
@@ -1057,55 +1095,52 @@ namespace sge {
     typedef Vector3<float>  float3;
     typedef Vector3<double> vec3r;
     typedef Vector3<double> real3;
-
-    namespace math
-    {
-        /**
-         * Dot product of two vectors.
-         * @param a left side vector
-         * @param b right side vector
-         */
-        template<typename T>
-        T dot(const Vector3<T>& a, const Vector3<T>& b)
-        {
-            return a.x * b.x + a.y * b.y + a.z * b.z;
-        }
-
-        /**
-         * Cross product of two vectors.
-         * @param a left side vector
-         * @param b right side vector
-         */
-        template<typename T>
-        Vector3<T> cross(const Vector3<T>& a, const Vector3<T>& b)
-        {
-            return Vector3<T>(a.y * b.z - b.y * a.z, a.z * b.x - b.z * a.x, a.x * b.y - b.x * a.y);
-        }
-
         
-        /**
-         * Calc the lengh of vector P project on vector Q dir
-         * @param P vector
-         * @param Q vector
-         */
-        template<typename T>
-        T projLength(const Vector3<T>& p, const Vector3<T>& q)
-        {
-            return dot(p, q) / q.length();
-        }
-
-        /**
-         * Calc the vecotr of vector P project on vector Q dir
-         * @param P vector
-         * @param Q vector
-         */
-        template<typename T>
-        Vector3<T> proj(const Vector3<T>& p, const Vector3<T>& q)
-        {
-            return q * (dot(p, q) / q.lengthSq());
-        }
-
+    /**
+     * Dot product of two vectors.
+     * @param a left side vector
+     * @param b right side vector
+     */
+    template<typename T>
+    T dot(const Vector3<T>& a, const Vector3<T>& b)
+    {
+        return a.x * b.x + a.y * b.y + a.z * b.z;
     }
+    
+    /**
+     * Cross product of two vectors.
+     * @param a left side vector
+     * @param b right side vector
+     */
+    template<typename T>
+    Vector3<T> cross(const Vector3<T>& a, const Vector3<T>& b)
+    {
+        return Vector3<T>(a.y * b.z - b.y * a.z, a.z * b.x - b.z * a.x, a.x * b.y - b.x * a.y);
+    }
+    
+    
+    /**
+     * Calc the lengh of vector P project on vector Q dir
+     * @param P vector
+     * @param Q vector
+     */
+    template<typename T>
+    T projLength(const Vector3<T>& p, const Vector3<T>& q)
+    {
+        return dot(p, q) / q.length();
+    }
+    
+    /**
+     * Calc the vecotr of vector P project on vector Q dir
+     * @param P vector
+     * @param Q vector
+     */
+    template<typename T>
+    Vector3<T> proj(const Vector3<T>& p, const Vector3<T>& q)
+    {
+        return q * (dot(p, q) / q.lengthSq());
+    }
+    
 
     /**
      * Class for four dimensional vector
@@ -1436,7 +1471,7 @@ namespace sge {
          */
         bool operator==(const Vector4<T>& rhs) const
         {
-            return math::equal(x, rhs.x) && math::equal(y, rhs.y) && math::equal(z, rhs.z) && math::equal(w, rhs.w);
+            return equal(x, rhs.x) && equal(y, rhs.y) && equal(z, rhs.z) && equal(w, rhs.w);
         }
 
         /**
@@ -1454,7 +1489,7 @@ namespace sge {
          */
         T length() const
         {
-            return (T)math::sqrt(x * x + y * y + z * z + w * w);
+            return (T)sqrt(x * x + y * y + z * z + w * w);
         }
 
         /**
@@ -1659,15 +1694,15 @@ namespace sge {
          */
         static Matrix3<T> createRotationAroundAxis(T xDeg, T yDeg, T zDeg)
         {
-            T xRads(math::DEG2RAD(xDeg));
-            T yRads(math::DEG2RAD(yDeg));
-            T zRads(math::DEG2RAD(zDeg));
+            T xRads(DEG2RAD(xDeg));
+            T yRads(DEG2RAD(yDeg));
+            T zRads(DEG2RAD(zDeg));
 
             Matrix3<T> ma, mb, mc;
             T ac, as, bc, bs, cc, cs;
-            math::sincos(xRads, &as, &ac);
-            math::sincos(yRads, &bs, &bc);
-            math::sincos(zRads, &cs, &cc);
+            sincos(xRads, &as, &ac);
+            sincos(yRads, &bs, &bc);
+            sincos(zRads, &cs, &cc);
 
             ma.identity();
             ma.cel[1][1] = ac;
@@ -1753,7 +1788,7 @@ namespace sge {
         {
             for (int i = 0; i < 9; i++)
             {
-                if (! math::equal(data[i], rhs.data[i]))
+                if (! equal(data[i], rhs.data[i]))
                     return false;
             }
             return true;
@@ -2092,15 +2127,15 @@ namespace sge {
          */
         void toRotationAroundAxis(T xDeg, T yDeg, T zDeg)
         {
-            T xRads(math::DEG2RAD(xDeg));
-            T yRads(math::DEG2RAD(yDeg));
-            T zRads(math::DEG2RAD(zDeg));
+            T xRads(DEG2RAD(xDeg));
+            T yRads(DEG2RAD(yDeg));
+            T zRads(DEG2RAD(zDeg));
 
             Matrix4<T> ma, mb, mc;
             T ac, as, bc, bs, cc, cs;
-            math::sincos(xRads, &as, &ac);
-            math::sincos(yRads, &bs, &bc);
-            math::sincos(zRads, &cs, &cc);
+            sincos(xRads, &as, &ac);
+            sincos(yRads, &bs, &bc);
+            sincos(zRads, &cs, &cc);
 
             ma.identity();
             ma.cel[1][1] = ac;
@@ -2124,6 +2159,63 @@ namespace sge {
         }
 
         /**
+         * Creates rotation matrix to rotation around the axis
+         * @param angle The around angle (in degrees)
+         * @param axis The axis of rotation
+         */
+        static Matrix4<T> createRotationAroundAxis(T angle, Vector3<T> axis)
+        {
+            Matrix4<T> mat;
+            mat.toRotationAroundAxis(angle, axis);
+            return mat;
+        }
+
+        /**
+         * Change matrix to rotation around the axis.
+         * @param angle The around angle (in degrees)
+         * @param axis The axis of rotation
+         */
+        void toRotationAroundAxis(T angle, Vector3<T> axis) 
+        {
+            // Make sure the input axis is normalized.
+            axis.normalize();
+
+            T c = cos(angle);
+            T s = sin(angle);
+
+            T t = T(1) - c;
+            T tx = t * axis.x;
+            T ty = t * axis.y;
+            T tz = t * axis.z;
+            T txy = tx * axis.y;
+            T txz = tx * axis.z;
+            T tyz = ty * axis.z;
+            T sx = s * axis.x;
+            T sy = s * axis.y;
+            T sz = s * axis.z;
+            
+            data[0] = c + tx * axis.x;
+            data[1] = txy + sz;
+            data[2] = txz - sy;
+            data[3] = T(0);
+
+            data[4] = txy - sz;
+            data[5] = c + ty * axis.y;
+            data[6] = tyz + sx;
+            data[7] = T(0);
+
+            data[8] = txz + sy;
+            data[9] = tyz - sx;
+            data[10] = c + tz * axis.z;
+            data[11] = T(0);
+
+            data[12] = T(0);
+            data[13] = T(0);
+            data[14] = T(0);
+            data[15] = T(1);
+        }
+
+        /**
          * Creates translation matrix.
          * @param x X-direction translation
          * @param y Y-direction translation
@@ -2135,6 +2227,18 @@ namespace sge {
             Matrix4<T> mat;
             mat.identity();
             mat.setTranslation(x, y, z, w);
+            return mat;
+        }
+
+        /**
+         * Creates translation matrix.
+         * @param v The translation Vector
+         */
+        static Matrix4<T> createTranslation(const Vector3<T>& v, T w = 1)
+        {
+            Matrix4<T> mat;
+            mat.identity();
+            mat.setTranslation(v.x, v.y, v.z, w);
             return mat;
         }
 
@@ -2189,11 +2293,11 @@ namespace sge {
             forward.normalize();
 
             // Side = forward x up
-            side = math::cross(forward, up);
+            side = cross(forward, up);
             side.normalize();
 
             // Recompute up as: up = side x forward
-            up = math::cross(side, forward);
+            up = cross(side, forward);
 
             m.identity();
 
@@ -2277,7 +2381,7 @@ namespace sge {
          */
         static Matrix4<T> createPerspective(T fovy, T aspect, T zNear, T zFar)
         {
-            T k = math::tan(math::DEG2RAD(fovy) / 2);
+            T k = tan(DEG2RAD(fovy) / 2);
             T r = zNear * k * aspect;
             T t = zNear * k;
             return createFrustum(-r, r, -t, t, zNear, zFar);
@@ -2384,7 +2488,7 @@ namespace sge {
         {
             for (int i = 0; i < 16; i++)
             {
-                if (! math::equal(data[i], rhs.data[i]))
+                if (! equal(data[i], rhs.data[i]))
                     return false;
             }
             return true;
@@ -2615,63 +2719,181 @@ namespace sge {
          */
         T det()
         {
-            return
-                + cel[3][0] * cel[2][1] * cel[1][2] * cel[0][3] - cel[2][0] * cel[3][1] * cel[1][2] * cel[0][3]
-                - cel[3][0] * cel[1][1] * cel[2][2] * cel[0][3] + cel[1][0] * cel[3][1] * cel[2][2] * cel[0][3]
-                + cel[2][0] * cel[1][1] * cel[3][2] * cel[0][3] - cel[1][0] * cel[2][1] * cel[3][2] * cel[0][3]
-                - cel[3][0] * cel[2][1] * cel[0][2] * cel[1][3] + cel[2][0] * cel[3][1] * cel[0][2] * cel[1][3]
-                + cel[3][0] * cel[0][1] * cel[2][2] * cel[1][3] - cel[0][0] * cel[3][1] * cel[2][2] * cel[1][3]
-                - cel[2][0] * cel[0][1] * cel[3][2] * cel[1][3] + cel[0][0] * cel[2][1] * cel[3][2] * cel[1][3]
-                + cel[3][0] * cel[1][1] * cel[0][2] * cel[2][3] - cel[1][0] * cel[3][1] * cel[0][2] * cel[2][3]
-                - cel[3][0] * cel[0][1] * cel[1][2] * cel[2][3] + cel[0][0] * cel[3][1] * cel[1][2] * cel[2][3]
-                + cel[1][0] * cel[0][1] * cel[3][2] * cel[2][3] - cel[0][0] * cel[1][1] * cel[3][2] * cel[2][3]
-                - cel[2][0] * cel[1][1] * cel[0][2] * cel[3][3] + cel[1][0] * cel[2][1] * cel[0][2] * cel[3][3]
-                + cel[2][0] * cel[0][1] * cel[1][2] * cel[3][3] - cel[0][0] * cel[2][1] * cel[1][2] * cel[3][3]
-                - cel[1][0] * cel[0][1] * cel[2][2] * cel[3][3] + cel[0][0] * cel[1][1] * cel[2][2] * cel[3][3];
+            float a0 = data[0] * data[5] - data[1] * data[4];
+            float a1 = data[0] * data[6] - data[2] * data[4];
+            float a2 = data[0] * data[7] - data[3] * data[4];
+            float a3 = data[1] * data[6] - data[2] * data[5];
+            float a4 = data[1] * data[7] - data[3] * data[5];
+            float a5 = data[2] * data[7] - data[3] * data[6];
+            float b0 = data[8] * data[13] - data[9] * data[12];
+            float b1 = data[8] * data[14] - data[10] * data[12];
+            float b2 = data[8] * data[15] - data[11] * data[12];
+            float b3 = data[9] * data[14] - data[10] * data[13];
+            float b4 = data[9] * data[15] - data[11] * data[13];
+            float b5 = data[10] * data[15] - data[11] * data[14];
+
+            // Calculate the determinant.
+            return (a0 * b5 - a1 * b4 + a2 * b3 + a3 * b2 - a4 * b1 + a5 * b0);
+        }
+
+        bool decompose(Vector3<T>* scale, Quaternion<T>* rotation, Vector3<T>* translation) const
+        {
+            if (translation)
+            {
+                // Extract the translation.
+                translation->x = m[12];
+                translation->y = m[13];
+                translation->z = m[14];
+            }
+
+            // Nothing left to do.
+            if (scale == NULL && rotation == NULL)
+                return true;
+
+            // Extract the scale.
+            // This is simply the length of each axis (row/column) in the matrix.
+            Vector3<T> xaxis(m[0], m[1], m[2]);
+            T scaleX = xaxis.length();
+
+            Vector3<T> yaxis(m[4], m[5], m[6]);
+            T scaleY = yaxis.length();
+
+            Vector3<T> zaxis(m[8], m[9], m[10]);
+            T scaleZ = zaxis.length();
+
+            // Determine if we have a negative scale (true if determinant is less than zero).
+            // In this case, we simply negate a single axis of the scale.
+            T det = det();
+            if (det < 0)
+                scaleZ = -scaleZ;
+
+            if (scale)
+            {
+                scale->x = scaleX;
+                scale->y = scaleY;
+                scale->z = scaleZ;
+            }
+
+            // Nothing left to do.
+            if (rotation == NULL)
+                return true;
+
+            // Scale too close to zero, can't decompose rotation.
+            if (scaleX < MATH_TOLERANCE || scaleY < MATH_TOLERANCE || abs(scaleZ) < MATH_TOLERANCE)
+                return false;
+
+            T rn;
+
+            // Factor the scale out of the matrix axes.
+            rn = (T)1 / scaleX;
+            xaxis.x *= rn;
+            xaxis.y *= rn;
+            xaxis.z *= rn;
+
+            rn = (T)1 / scaleY;
+            yaxis.x *= rn;
+            yaxis.y *= rn;
+            yaxis.z *= rn;
+
+            rn = (T)1 / scaleZ;
+            zaxis.x *= rn;
+            zaxis.y *= rn;
+            zaxis.z *= rn;
+
+            // Now calculate the rotation from the resulting matrix (axes).
+            T trace = xaxis.x + yaxis.y + zaxis.z + 1.0f;
+
+            if (trace > FLT_EPSILON)
+            {
+                T s = (T)0.5 / sqrt(trace);
+                rotation->w = (T)0.25 / s;
+                rotation->x = (yaxis.z - zaxis.y) * s;
+                rotation->y = (zaxis.x - xaxis.z) * s;
+                rotation->z = (xaxis.y - yaxis.x) * s;
+            }
+            else
+            {
+                // Note: since xaxis, yaxis, and zaxis are normalized, 
+                // we will never divide by zero in the code below.
+                if (xaxis.x > yaxis.y && xaxis.x > zaxis.z)
+                {
+                    T s = (T)0.5 / sqrt((T)1 + xaxis.x - yaxis.y - zaxis.z);
+                    rotation->w = (yaxis.z - zaxis.y) * s;
+                    rotation->x = (T)0.25 / s;
+                    rotation->y = (yaxis.x + xaxis.y) * s;
+                    rotation->z = (zaxis.x + xaxis.z) * s;
+                }
+                else if (yaxis.y > zaxis.z)
+                {
+                    T s = (T)0.5 / sqrt((T)1 + yaxis.y - xaxis.x - zaxis.z);
+                    rotation->w = (zaxis.x - xaxis.z) * s;
+                    rotation->x = (yaxis.x + xaxis.y) * s;
+                    rotation->y = (T)0.25 / s;
+                    rotation->z = (zaxis.y + yaxis.z) * s;
+                }
+                else
+                {
+                    T s = (T)0.5 / sqrt((T)1 + zaxis.z - xaxis.x - yaxis.y);
+                    rotation->w = (xaxis.y - yaxis.x) * s;
+                    rotation->x = (zaxis.x + xaxis.z) * s;
+                    rotation->y = (zaxis.y + yaxis.z) * s;
+                    rotation->z = (T)0.25 / s;
+                }
+            }
+
+            return true;
         }
 
         /**
          * Get inverse matrix
          * @return Inverse matrix of this matrix.
          */
-        Matrix4<T> inverse()
+        bool inverse()
         {
-            Matrix4<T> ret;
+            T a0 = data[0] * data[5] - data[1] * data[4];
+            T a1 = data[0] * data[6] - data[2] * data[4];
+            T a2 = data[0] * data[7] - data[3] * data[4];
+            T a3 = data[1] * data[6] - data[2] * data[5];
+            T a4 = data[1] * data[7] - data[3] * data[5];
+            T a5 = data[2] * data[7] - data[3] * data[6];
+            T b0 = data[8] * data[13] - data[9] * data[12];
+            T b1 = data[8] * data[14] - data[10] * data[12];
+            T b2 = data[8] * data[15] - data[11] * data[12];
+            T b3 = data[9] * data[14] - data[10] * data[13];
+            T b4 = data[9] * data[15] - data[11] * data[13];
+            T b5 = data[10] * data[15] - data[11] * data[14];
 
-            ret.cel[0][0] = + cel[2][1] * cel[3][2] * cel[1][3] - cel[3][1] * cel[2][2] * cel[1][3] + cel[3][1] * cel[1][2] * cel[2][3]
-                            - cel[1][1] * cel[3][2] * cel[2][3] - cel[2][1] * cel[1][2] * cel[3][3] + cel[1][1] * cel[2][2] * cel[3][3];
-            ret.cel[1][0] = + cel[3][0] * cel[2][2] * cel[1][3] - cel[2][0] * cel[3][2] * cel[1][3] - cel[3][0] * cel[1][2] * cel[2][3]
-                            + cel[1][0] * cel[3][2] * cel[2][3] + cel[2][0] * cel[1][2] * cel[3][3] - cel[1][0] * cel[2][2] * cel[3][3];
-            ret.cel[2][0] = + cel[2][0] * cel[3][1] * cel[1][3] - cel[3][0] * cel[2][1] * cel[1][3] + cel[3][0] * cel[1][1] * cel[2][3]
-                            - cel[1][0] * cel[3][1] * cel[2][3] - cel[2][0] * cel[1][1] * cel[3][3] + cel[1][0] * cel[2][1] * cel[3][3];
-            ret.cel[3][0] = + cel[3][0] * cel[2][1] * cel[1][2] - cel[2][0] * cel[3][1] * cel[1][2] - cel[3][0] * cel[1][1] * cel[2][2]
-                            + cel[1][0] * cel[3][1] * cel[2][2] + cel[2][0] * cel[1][1] * cel[3][2] - cel[1][0] * cel[2][1] * cel[3][2];
-            ret.cel[0][1] = + cel[3][1] * cel[2][2] * cel[0][3] - cel[2][1] * cel[3][2] * cel[0][3] - cel[3][1] * cel[0][2] * cel[2][3]
-                            + cel[0][1] * cel[3][2] * cel[2][3] + cel[2][1] * cel[0][2] * cel[3][3] - cel[0][1] * cel[2][2] * cel[3][3];
-            ret.cel[1][1] = + cel[2][0] * cel[3][2] * cel[0][3] - cel[3][0] * cel[2][2] * cel[0][3] + cel[3][0] * cel[0][2] * cel[2][3]
-                            - cel[0][0] * cel[3][2] * cel[2][3] - cel[2][0] * cel[0][2] * cel[3][3] + cel[0][0] * cel[2][2] * cel[3][3];
-            ret.cel[2][1] = + cel[3][0] * cel[2][1] * cel[0][3] - cel[2][0] * cel[3][1] * cel[0][3] - cel[3][0] * cel[0][1] * cel[2][3]
-                            + cel[0][0] * cel[3][1] * cel[2][3] + cel[2][0] * cel[0][1] * cel[3][3] - cel[0][0] * cel[2][1] * cel[3][3];
-            ret.cel[3][1] = + cel[2][0] * cel[3][1] * cel[0][2] - cel[3][0] * cel[2][1] * cel[0][2] + cel[3][0] * cel[0][1] * cel[2][2]
-                            - cel[0][0] * cel[3][1] * cel[2][2] - cel[2][0] * cel[0][1] * cel[3][2] + cel[0][0] * cel[2][1] * cel[3][2];
-            ret.cel[0][2] = + cel[1][1] * cel[3][2] * cel[0][3] - cel[3][1] * cel[1][2] * cel[0][3] + cel[3][1] * cel[0][2] * cel[1][3]
-                            - cel[0][1] * cel[3][2] * cel[1][3] - cel[1][1] * cel[0][2] * cel[3][3] + cel[0][1] * cel[1][2] * cel[3][3];
-            ret.cel[1][2] = + cel[3][0] * cel[1][2] * cel[0][3] - cel[1][0] * cel[3][2] * cel[0][3] - cel[3][0] * cel[0][2] * cel[1][3]
-                            + cel[0][0] * cel[3][2] * cel[1][3] + cel[1][0] * cel[0][2] * cel[3][3] - cel[0][0] * cel[1][2] * cel[3][3];
-            ret.cel[2][2] = + cel[1][0] * cel[3][1] * cel[0][3] - cel[3][0] * cel[1][1] * cel[0][3] + cel[3][0] * cel[0][1] * cel[1][3]
-                            - cel[0][0] * cel[3][1] * cel[1][3] - cel[1][0] * cel[0][1] * cel[3][3] + cel[0][0] * cel[1][1] * cel[3][3];
-            ret.cel[3][2] = + cel[3][0] * cel[1][1] * cel[0][2] - cel[1][0] * cel[3][1] * cel[0][2] - cel[3][0] * cel[0][1] * cel[1][2]
-                            + cel[0][0] * cel[3][1] * cel[1][2] + cel[1][0] * cel[0][1] * cel[3][2] - cel[0][0] * cel[1][1] * cel[3][2];
-            ret.cel[0][3] = + cel[2][1] * cel[1][2] * cel[0][3] - cel[1][1] * cel[2][2] * cel[0][3] - cel[2][1] * cel[0][2] * cel[1][3]
-                            + cel[0][1] * cel[2][2] * cel[1][3] + cel[1][1] * cel[0][2] * cel[2][3] - cel[0][1] * cel[1][2] * cel[2][3];
-            ret.cel[1][3] = + cel[1][0] * cel[2][2] * cel[0][3] - cel[2][0] * cel[1][2] * cel[0][3] + cel[2][0] * cel[0][2] * cel[1][3]
-                            - cel[0][0] * cel[2][2] * cel[1][3] - cel[1][0] * cel[0][2] * cel[2][3] + cel[0][0] * cel[1][2] * cel[2][3];
-            ret.cel[2][3] = + cel[2][0] * cel[1][1] * cel[0][3] - cel[1][0] * cel[2][1] * cel[0][3] - cel[2][0] * cel[0][1] * cel[1][3]
-                            + cel[0][0] * cel[2][1] * cel[1][3] + cel[1][0] * cel[0][1] * cel[2][3] - cel[0][0] * cel[1][1] * cel[2][3];
-            ret.cel[3][3] = + cel[1][0] * cel[2][1] * cel[0][2] - cel[2][0] * cel[1][1] * cel[0][2] + cel[2][0] * cel[0][1] * cel[1][2]
-                            - cel[0][0] * cel[2][1] * cel[1][2] - cel[1][0] * cel[0][1] * cel[2][2] + cel[0][0] * cel[1][1] * cel[2][2];
+            // Calculate the determinant.
+            T det = a0 * b5 - a1 * b4 + a2 * b3 + a3 * b2 - a4 * b1 + a5 * b0;
 
-            return ret / det();
+            // Close to zero, can't invert.
+            if (abs(det) <= MATH_TOLERANCE)
+                return false;
+
+            // Support the case where m == dst.
+            Matrix4<T> inverse;
+            inverse.data[0] = data[5] * b5 - data[6] * b4 + data[7] * b3;
+            inverse.data[1] = -data[1] * b5 + data[2] * b4 - data[3] * b3;
+            inverse.data[2] = data[13] * a5 - data[14] * a4 + data[15] * a3;
+            inverse.data[3] = -data[9] * a5 + data[10] * a4 - data[11] * a3;
+
+            inverse.data[4] = -data[4] * b5 + data[6] * b2 - data[7] * b1;
+            inverse.data[5] = data[0] * b5 - data[2] * b2 + data[3] * b1;
+            inverse.data[6] = -data[12] * a5 + data[14] * a2 - data[15] * a1;
+            inverse.data[7] = data[8] * a5 - data[10] * a2 + data[11] * a1;
+
+            inverse.data[8] = data[4] * b4 - data[5] * b2 + data[7] * b0;
+            inverse.data[9] = -data[0] * b4 + data[1] * b2 - data[3] * b0;
+            inverse.data[10] = data[12] * a4 - data[13] * a2 + data[15] * a0;
+            inverse.data[11] = -data[8] * a4 + data[9] * a2 - data[11] * a0;
+
+            inverse.data[12] = -data[4] * b3 + data[5] * b1 - data[6] * b0;
+            inverse.data[13] = data[0] * b3 - data[1] * b1 + data[2] * b0;
+            inverse.data[14] = -data[12] * a3 + data[13] * a1 - data[14] * a0;
+            inverse.data[15] = data[8] * a3 - data[9] * a1 + data[10] * a0;
+
+            *this = inverse * (1 / det);
+            return true;
         }
 
         /**
@@ -2911,8 +3133,8 @@ namespace sge {
          */
         Vector3<T> operator*(Vector3<T> v) const
         {
-            Vector3<T> uv = math::cross(this->v, v);
-            Vector3<T> uuv = math::cross(this->v, uv);
+            Vector3<T> uv = cross(this->v, v);
+            Vector3<T> uuv = cross(this->v, uv);
             uv *= (2 * w);
             uuv *= 2;
             return v + uv + uuv;
@@ -2953,7 +3175,7 @@ namespace sge {
         bool operator==(const Quaternion<T>& rhs) const
         {
             const Quaternion<T>& lhs = *this;
-            return (math::equal(lhs.w, rhs.w)) && lhs.v == rhs.v;
+            return (equal(lhs.w, rhs.w)) && lhs.v == rhs.v;
         }
 
         /**
@@ -2971,7 +3193,7 @@ namespace sge {
          */
         T length() const
         {
-            return (T)math::sqrt(lengthSq());
+            return (T)sqrt(lengthSq());
         }
 
         /**
@@ -3016,10 +3238,51 @@ namespace sge {
          */
         static Quaternion<T> fromAxisRot(Vector3<T> axis, T angleDeg)
         {
-            T angleRad = (T)math::DEG2RAD(angleDeg);
+            T angleRad = (T)DEG2RAD(angleDeg);
             T sa2, ca2;
-            math::sincos(angleRad / 2, &sa2, &ca2);
+            sincos(angleRad / 2, &sa2, &ca2);
             return Quaternion<T>(ca2, axis * sa2);
+        }
+
+        /**
+         * Get the quaternion can transform 'from' vector to 'to' vertor
+         */
+        static Quaternion<T> fromTwoVectors(const Vector3<T>& from, const Vector3<T>& to)
+        {
+            T cosTheta = dot(from, to);
+            Vector3<T>  rotationAxis;
+
+            if (cosTheta >= static_cast<T>(1) - FLT_EPSILON) {
+                // orig and dest point in the same direction
+                return Quaternion<T>();
+            }
+
+            if (cosTheta < static_cast<T>(-1) + FLT_EPSILON)
+            {
+                // special case when vectors in opposite directions :
+                // there is no "ideal" rotation axis
+                // So guess one; any will do as long as it's perpendicular to start
+                // This implementation favors a rotation around the Up axis (Y),
+                // since it's often what you want to do.
+                rotationAxis = cross(Vector3<T>(0, 0, 1), from);
+                if (rotationAxis.lengthSq() < FLT_EPSILON) // bad luck, they were parallel, try again!
+                    rotationAxis = cross(Vector3<T>(1, 0, 0), from);
+
+                rotationAxis.normalize();
+                return Quaternion<T>::fromAxisRot(rotationAxis, M_PI);
+            }
+
+            // Implementation from Stan Melax's Game Programming Gems 1 article
+            rotationAxis = cross(from, to);
+
+            T s = sqrt((T(1) + cosTheta) * static_cast<T>(2));
+            T invs = static_cast<T>(1) / s;
+
+            return Quaternion<T>(
+                s * static_cast<T>(0.5f),
+                rotationAxis.x * invs,
+                rotationAxis.y * invs,
+                rotationAxis.z * invs);
         }
 
         /**
@@ -3134,7 +3397,7 @@ namespace sge {
 
             T tr, s;
             tr = m.cel[1][1] + m.cel[2][2] + m.cel[3][3];
-            if (! math::less((T)0, tr))
+            if (! less((T)0, tr))
             {
                 s = (T)0.5 / (T)sqrt(tr + (T)1.0);
                 q.w = (T)0.25 / s;
@@ -3191,7 +3454,7 @@ namespace sge {
 
             T tr, s;
             tr = m.cel[1][1] + m.cel[2][2] + m.cel[3][3];
-            if (!math::less((T)0, tr))
+            if (!less((T)0, tr))
             {
                 s = (T)0.5 / (T)sqrt(tr + (T)1.0);
                 q.w = (T)0.25 / s;
@@ -3237,6 +3500,27 @@ namespace sge {
         }
 
         /**
+         * Get the angle
+         */
+        T angle() const
+        {
+            return acos(this->w) * static_cast<T>(2);
+        }
+
+        /**
+         * Get the rotate axis
+         */
+        Vector3<T> axis() const
+        {
+            T tmp1 = static_cast<T>(1) - w * w;
+            if (tmp1 <= static_cast<T>(0))
+                return Vector3<T>(0, 0, 1);
+            T tmp2 = static_cast<T>(1) / sqrt(tmp1);
+            return Vector3<T>(x * tmp2, y * tmp2, z * tmp2);
+        }
+
+
+        /**
          * Linear interpolation of two quaternions
          * @param fact Factor of interpolation. For translation from position
          * of this vector to quaternion rhs, values of factor goes from 0.0 to 1.0.
@@ -3260,23 +3544,23 @@ namespace sge {
         {
             Quaternion<T> ret;
             T cosTheta = q1.w * q2.w + q1.x * q2.x + q1.y * q2.y + q1.z * q2.z;
-            T theta = math::acos(cosTheta);
-            if (math::equal(theta, (T)0))
+            T theta = acos(cosTheta);
+            if (equal(theta, (T)0))
             {
                 ret = q1;
             }
             else
             {
-                T sinTheta = math::sqrt((T)1 - cosTheta * cosTheta);
-                if (math::equal(sinTheta, (T)0))
+                T sinTheta = sqrt((T)1 - cosTheta * cosTheta);
+                if (equal(sinTheta, (T)0))
                 {
                     ret.w = (T)0.5 * q1.w + (T)0.5 * q2.w;
                     ret.v = Vector3<T>::lerp(q1.v, q2.v, (T)0.5);
                 }
                 else
                 {
-                    T rA = math::sin(((T)1.0 - r) * theta) / sinTheta;
-                    T rB = math::sin(r * theta) / sinTheta;
+                    T rA = sin(((T)1.0 - r) * theta) / sinTheta;
+                    T rB = sin(r * theta) / sinTheta;
 
                     ret.w = q1.w * rA + q2.w * rB;
                     ret.x = q1.x * rA + q2.x * rB;
@@ -3842,7 +4126,7 @@ namespace sge {
         }
 
         /**
-         * Tests if other bounding-box @a box intersects (even partially) with this bouding-box.
+         * Tests if other bounding-box intersects (even partially) with this bouding-box.
          * @param box A box to be tested for intersection.
          * @return True if there's intersection between boxes, otherwise false.
          */
@@ -3857,7 +4141,50 @@ namespace sge {
         }
 
         /**
-         * Gets result of intersection of this bounding-box with @a other bounding-box.
+         * Tests if other sphere intersects (even partially) with this bouding-box.
+         * @param box A box to be tested for intersection.
+         * @return True if there's intersection between boxes, otherwise false.
+         */
+        bool intersects(const Sphere<T> &sphere) const
+        {
+            T dmin = 0;
+
+            auto center = sphere.getCenter();
+            auto bmin = getMin();
+            auto bmax = getMax();
+
+            if (center.x < bmin.x) {
+                T d = center.x - bmin.x;
+                dmin += d * d;
+            }
+            else if (center.x > bmax.x) {
+                T d = center.x - bmax.x;
+                dmin += d * d;
+            }
+
+            if (center.y < bmin.y) {
+                T d = center.y - bmin.y;
+                dmin += d * d;
+            }
+            else if (center.y > bmax.y) {
+                T d = center.y - bmax.y;
+                dmin += d * d;
+            }
+
+            if (center.z < bmin.z) {
+                T d = center.z - bmin.z;
+                dmin += d * d;
+            }
+            else if (center.z > bmax.z) {
+                T d = center.z - bmax.z;
+                dmin += d * d;
+            }
+
+            return dmin <= (sphere.getRadius() * sphere.getRadius());
+        }
+
+        /**
+         * Gets result of intersection of this bounding-box with a other bounding-box.
          * In case the boxes don't intersect, the returned bounding-box is invalid.
          * @param other Box to be tested
          * @return Result of intersection.
@@ -4057,6 +4384,316 @@ namespace sge {
     typedef Aabb3<int> aabb3i;
     typedef Aabb3<float> aabb3f;
     typedef Aabb3<double> aabb3r;
+
+    /**
+     * Class Sphera
+     */
+    template<typename T>
+    class Sphere
+    {
+    public:
+        /**
+         * Constructor without init
+         */
+        Sphere() {}
+
+        /**
+         * Constructor inti with center and radius
+         */
+        Sphere(const Vector3<T>&center, T radius)
+            : mCenter(center), mRadius(radius)
+        {}
+
+        /**
+         * Get the redius
+         */
+        T       getRadius() const { return mRadius; }
+
+        /**
+         * Set the redius
+         */
+        void    setRadius(float radius) { mRadius = radius; }
+
+        /**
+         * Get the center
+         */
+        const Vector3<T>&   getCenter() const { return mCenter; }
+
+        /**
+         * Set the center
+         */
+        void    setCenter(const Vector3<T>& center) { mCenter = center; }
+
+        /**
+         * Tests if other AxisAlignedBox intersects (even partially) with this sphere
+         */
+        bool    intersects(const Aabb3<T> &box) const { return box.intersects(*this); }
+
+        /**
+         * Returns true if the ray intersects this sphere
+         */
+        bool    intersects(const Ray<T> &ray) const
+        {
+            T   t;
+            Vector3<T>  temp = ray.getOrigin() - mCenter;
+            T   a = dot(ray.getDirection(), ray.getDirection());
+            T   b = 2.0f * dot(temp, ray.getDirection());
+            T   c = dot(temp, temp) - mRadius * mRadius;
+            T   disc = b * b - 4.0f * a * c;
+
+            if (disc < 0.0f) {
+                return false;
+            }
+            else { // this probably can be optimized
+                T e = sqrt(disc);
+                T denom = 2.0f * a;
+                t = (-b - e) / denom;    // smaller root
+
+                if (t > FLT_EPSILON) {
+                    return true;
+                }
+
+                t = (-b + e) / denom;    // larger root
+                if (t > FLT_EPSILON) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        int	    intersects(const Ray<T> &ray, T *intersection) const
+        {
+            T   t;
+            Vector3<T>  temp = ray.getOrigin() - mCenter;
+            T   a = dot(ray.getDirection(), ray.getDirection());
+            T   b = 2 * dot(temp, ray.getDirection());
+            T   c = dot(temp, temp) - mRadius * mRadius;
+            T   disc = b * b - 4 * a * c;
+
+            if (disc < (T)0) {
+                return 0;
+            }
+            else {
+                T e = sqrt(disc);
+                T denom = (T)2 * a;
+                t = (-b - e) / denom;    // smaller root
+
+                if (t > FLT_EPSILON) {
+                    *intersection = t;
+                    return 1;
+                }
+
+                t = (-b + e) / denom;    // larger root
+                if (t > FLT_EPSILON) {
+                    *intersection = t;
+                    return 1;
+                }
+            }
+
+            return 0;
+        }
+
+        /** 
+         * Get the closest point on the ray to the Sphere.
+         * If the ray intersects then returns the point of nearest intersection.
+         */
+        Vector3<T> Sphere::closestPoint(const Ray<T> &ray) const
+        {
+            T   t;
+            Vector3<T>  diff = ray.getOrigin() - mCenter;
+            T   a = dot(ray.getDirection(), ray.getDirection());
+            T   b = 2 * dot(diff, ray.getDirection());
+            T   c = dot(diff, diff) - mRadius * mRadius;
+            T   disc = b * b - 4 * a * c;
+
+            if (disc > 0) {
+                T e = sqrt(disc);
+                T denom = 2 * a;
+                t = (-b - e) / denom;    // smaller root
+
+                if (t > FLT_EPSILON)
+                    return ray.calcPosition(t);
+
+                t = (-b + e) / denom;    // larger root
+                if (t > FLT_EPSILON)
+                    return ray.calcPosition(t);
+            }
+
+            // doesn't intersect; closest point on line
+            t = dot(-diff, normalize(ray.getDirection()));
+            Vector3<T> onRay = ray.calcPosition(t);
+            return mCenter + normalize(onRay - mCenter) * mRadius;
+
+            //return ray.getDirection() * dot( ray.getDirection(), (mCenter - ray.getOrigin() ) );
+        }
+
+        void calcProjection(T focalLength, Vector2<T> *outCenter, Vector2<T> *outAxisA, Vector2<T> *outAxisB) const
+        {
+            Vector3<T> o(-mCenter.x, mCenter.y, mCenter.z);
+
+            T r2 = mRadius * mRadius;
+            T z2 = o.z * o.z;
+            T l2 = dot(o, o);
+
+            if (outCenter)
+                *outCenter = focalLength * o.z * Vector2<T>(o) / (z2 - r2);
+            if (abs(z2 - l2) > 0.00001f) {
+                if (outAxisA)
+                    *outAxisA = focalLength * sqrt(-r2 * (r2 - l2) / ((l2 - z2)*(r2 - z2)*(r2 - z2))) * Vector2<T>(o.x, o.y);
+
+                if (outAxisB)
+                    *outAxisB = focalLength * sqrt(abs(-r2 * (r2 - l2) / ((l2 - z2)*(r2 - z2)*(r2 - l2)))) * Vector2<T>(-o.y, o.x);
+            }
+            else { // approximate with circle
+                T radius = focalLength * mRadius / sqrt(z2 - r2);
+                if (outAxisA)
+                    *outAxisA = Vector2<T>(radius, 0);
+                if (outAxisB)
+                    *outAxisB = Vector2<T>(0, radius);
+            }
+        }
+
+        void calcProjection(T focalLength, Vector2<T> screenSizePixels, Vector2<T> *outCenter, Vector2<T> *outAxisA, Vector2<T> *outAxisB) const
+        {
+            auto toScreenPixels = [=](Vector2<T> v, const Vector2<T> &windowSize) {
+                vec2 result = v;
+                result.x *= 1 / (windowSize.x / windowSize.y);
+                result += Vector2<T>(0.5, 0.5);
+                result *= windowSize;
+                return result;
+            };
+
+            Vector2<T> center, axisA, axisB;
+            calcProjection(focalLength, &center, &axisA, &axisB);
+            if (outCenter)
+                *outCenter = toScreenPixels(center, screenSizePixels);
+            if (outAxisA)
+                *outAxisA = toScreenPixels(center + axisA * 0.5f, screenSizePixels) - toScreenPixels(center - axisA * 0.5f, screenSizePixels);
+            if (outAxisB)
+                *outAxisB = toScreenPixels(center + axisB * 0.5f, screenSizePixels) - toScreenPixels(center - axisB * 0.5f, screenSizePixels);
+        }
+
+    protected:
+        Vector3<T>  mCenter;
+        T           mRadius;
+    };
+
+    typedef Sphere<float>   spheref;
+    typedef Sphere<double>  sphere;
+
+    template<typename T>
+    class Ray {
+    public:
+        Ray() {}
+        Ray(const Vector3<T> &aOrigin, const Vector3<T> &aDirection) : mOrigin(aOrigin) { setDirection(aDirection); }
+
+        void                setOrigin(const Vector3<T> &aOrigin) { mOrigin = aOrigin; }
+        const Vector3<T>&   getOrigin() const { return mOrigin; }
+
+        void    setDirection(const Vector3<T> &aDirection)
+        {
+            mDirection = aDirection;
+            mInvDirection = Vector3<T>((T)1 / mDirection.x, (T)1 / mDirection.y, (T)1 / mDirection.z);
+            mSignX = (mDirection.x < (T)0) ? 1 : 0;
+            mSignY = (mDirection.y < (T)0) ? 1 : 0;
+            mSignZ = (mDirection.z < (T)0) ? 1 : 0;
+        }
+        const Vector3<T>&   getDirection() const { return mDirection; }
+        const Vector3<T>&   getInverseDirection() const { return mInvDirection; }
+
+        char    getSignX() const { return mSignX; }
+        char    getSignY() const { return mSignY; }
+        char    getSignZ() const { return mSignZ; }
+
+        void	transform(const Matrix4<T> &matrix)
+        {
+            mOrigin = Vector3<T>(matrix * Vector4<T>(mOrigin, 1));
+            setDirection(Matrix3<T>(matrix) * mDirection);
+        }
+
+        Ray<T>  transformed(const Matrix4<T> &matrix) const
+        {
+            Ray<T>  result;
+            result.mOrigin = Vector3<T>(matrix * Vector4<T>(mOrigin, 1));
+            result.setDirection(Matrix3<T>(matrix) * mDirection);
+
+            return result;
+        }
+
+        Vector3<T>  calcPosition(T t) const { return mOrigin + mDirection * t; }
+
+        bool calcTriangleIntersection(const Vector3<T> &vert0, const Vector3<T> &vert1, const Vector3<T> &vert2, T *result) const
+        {
+            Vector3<T> edge1, edge2, tvec, pvec, qvec;
+            T det;
+            T u, v;
+            const T epsilon = T(0.000001);
+
+            edge1 = vert1 - vert0;
+            edge2 = vert2 - vert0;
+
+            pvec = cross(getDirection(), edge2);
+            det = dot(edge1, pvec);
+
+#if 0 // we don't want to backface cull
+            if (det < epsilon)
+                return false;
+            tvec = getOrigin() - vert0;
+
+            u = dot(tvec, pvec);
+            if ((u < 0.0f) || (u > det))
+                return false;
+
+            qvec = cross(tvec, edge1);
+            v = dot(getDirection(), qvec);
+            if (v < 0.0f || u + v > det)
+                return false;
+
+            *result = dot(edge2, qvec) / det;
+            return true;
+#else
+            if (det > -epsilon && det < epsilon)
+                return false;
+
+            T inv_det = T(1) / det;
+            tvec = getOrigin() - vert0;
+            u = dot(tvec, pvec) * inv_det;
+            if (u < T(0) || u > T(1))
+                return false;
+
+            qvec = cross(tvec, edge1);
+
+            v = dot(getDirection(), qvec) * inv_det;
+            if (v < T(0) || u + v > T(1))
+                return 0;
+
+            *result = dot(edge2, qvec) * inv_det;
+            return true;
+#endif
+        }
+
+        bool calcPlaneIntersection(const Vector3<T> &origin, const Vector3<T> &normal, T *result) const
+        {
+            T denom = dot(planeNormal, getDirection());
+
+            if (denom != T(0)) {
+                *result = dot(planeNormal, planeOrigin - getOrigin()) / denom;
+                return true;
+            }
+            return false;
+        }
+
+    protected:
+        Vector3<T>	mOrigin;
+        Vector3<T>	mDirection;
+        // these are helpful to certain ray intersection algorithms
+        char	mSignX, mSignY, mSignZ;
+        Vector3<T>	mInvDirection;
+    };
+
+    typedef Ray<float>  rayf;
+    typedef Ray<double> ray;
 
 #pragma pack(pop)
 
