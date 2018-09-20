@@ -66,7 +66,7 @@ namespace sge
         {
             GLApp* app = reinterpret_cast<GLApp*>(plptrWin);
             assert(app);
-            return app->wndProc(hWnd, msgId, wParam, lParam);
+            return app->WndProc(hWnd, msgId, wParam, lParam);
         }
         return DefWindowProc(hWnd, msgId, wParam, lParam);
     }
@@ -92,7 +92,7 @@ namespace sge
 			strcpy_s(attr->title, DEFALUT_TITLE);
             attr->size  =   int2(DEFALUT_WIDTH, DEFALUT_HEIGHT);
             attr->pos   =   int2(CW_USEDEFAULT, CW_USEDEFAULT);
-			attr->style =   WS_OVERLAPPEDWINDOW;
+            attr->style =   WS_OVERLAPPEDWINDOW;
         }
 
         ~GLAppPrivate()
@@ -111,7 +111,7 @@ namespace sge
 
         friend class GLApp;
 
-        bool registerClass()
+        bool RegisterMyClass()
         {
             WNDCLASSEXA wnd;
             memset(&wnd, 0, sizeof(wnd));
@@ -133,12 +133,12 @@ namespace sge
             return ret;
         }
 
-        void unregisterClass()
+        void UnregisterMyClass()
         {
             UnregisterClassA(CLASS_NAME, 0);
         }
 
-        bool createWnd()
+        bool CreateWnd()
         {
             assert(hWnd == NULL);
 
@@ -160,7 +160,7 @@ namespace sge
             return ret;
         }
 
-        void destroyWnd()
+        void DestroyWnd()
         {
             if (hWnd)
             {
@@ -169,7 +169,7 @@ namespace sge
             }
         }
 
-        bool createGLContext(int format)
+        bool CreateGLContext(int format)
         {
             assert(hWnd && "Must createWnd before createGLContext");
             assert(glContext == NULL && "Already has glContext, not need create again");
@@ -181,7 +181,7 @@ namespace sge
             return glContext != NULL;
         }
 
-        void destoryGLContext()
+        void DestoryGLContext()
         {
             if (guiContext)
             {
@@ -204,7 +204,7 @@ namespace sge
     {
     }
 
-    const char * GLApp::title() const
+    const char * GLApp::Title() const
     {
         if (d->hWnd)
         {
@@ -213,7 +213,7 @@ namespace sge
         return d->attr->title;
     }
 
-    void GLApp::setTitle(const char *title)
+    void GLApp::SetTitle(const char *title)
     {
         strcpy_s(d->attr->title, WIN_NAME_MAXLEN, title);
         if (d->hWnd)
@@ -222,12 +222,12 @@ namespace sge
         }
     }
 
-    const int2& GLApp::size() const
+    const int2& GLApp::Size() const
     {
         return d->attr->size;
     }
 
-    void GLApp::setSize(int2 size)
+    void GLApp::SetSize(int2 size)
     {
         d->attr->size = size;
         if (d->hWnd)
@@ -236,12 +236,12 @@ namespace sge
         }
     }
 
-    const int2 & GLApp::pos() const
+    const int2 & GLApp::Pos() const
     {
         return d->attr->pos;
     }
 
-    void GLApp::setPos(int2 pos)
+    void GLApp::SetPos(int2 pos)
     {
         d->attr->pos = pos;
         if (d->hWnd)
@@ -250,15 +250,15 @@ namespace sge
         }
     }
 
-    int GLApp::run()
+    int GLApp::Run()
     {
-        if (! d->registerClass()) return -1;
-        if (! d->createWnd()) return -2;
-        if (! d->createGLContext(GLContext::GetFormatForMsaa(8))) return -3;
+        if (! d->RegisterMyClass()) return -1;
+        if (! d->CreateWnd()) return -2;
+        if (! d->CreateGLContext(GLContext::GetFormatForMsaa(8))) return -3;
 
         SetWindowLongPtr(d->hWnd, GWL_USERDATA, (LONG)(LONG_PTR)this);
 
-        onCreate();
+        OnCreate();
 
         UpdateWindow(d->hWnd);
         ShowWindow(d->hWnd, SW_SHOW);
@@ -266,7 +266,7 @@ namespace sge
         SetFocus(d->hWnd);
 
         Timer timer;
-        timer.elapsed();
+        timer.Elapsed();
         
         MSG     msg = { 0 };
         while (WM_QUIT != msg.message)
@@ -278,16 +278,16 @@ namespace sge
             }
             else
             {
-                float elapsed = timer.elapsed();
+                float elapsed = timer.Elapsed();
                 // Rendering Game
-                onRender(elapsed);
+                OnRender(elapsed);
                 
                 // Rendering UI
                 ImGui::SetCurrentContext(d->guiContext);
                 ImGui_ImplOpenGL3_NewFrame();
                 ImGui_ImplWin32_NewFrame();
                 ImGui::NewFrame();
-                onRenderUI(elapsed);
+                OnRenderUI(elapsed);
                 ImGui::EndFrame();
                 ImGui::Render();
                 ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -296,15 +296,15 @@ namespace sge
             }
         }
 
-        onDestory();
+        OnDestory();
 
-        d->destoryGLContext();
-        d->destroyWnd();
-        d->unregisterClass();
+        d->DestoryGLContext();
+        d->DestroyWnd();
+        d->UnregisterMyClass();
         return 0;
     }
 
-    void GLApp::setVisible(bool visibility)
+    void GLApp::SetVisible(bool visibility)
     {
         if (d->hWnd)
         {
@@ -312,48 +312,51 @@ namespace sge
         }
     }
 
-    GLContext* GLApp::getGLContext() const
+    GLContext* GLApp::GLContext() const
     {
         return d->glContext;
     }
 
-    void GLApp::destroy()
+    void GLApp::Close()
     {
         if (d->hWnd)
         {
-            DestroyWindow(d->hWnd);
+            ::PostMessage(d->hWnd, WM_CLOSE, 0, 0);
         }
     }
 
-    HWND GLApp::getHWND() const
+    HWND GLApp::GetHWND() const
     {
         return d ? d->hWnd : NULL;
     }
 
-    LRESULT GLApp::wndProc(HWND hWnd, UINT msgId, WPARAM wParam, LPARAM lParam)
+    LRESULT GLApp::WndProc(HWND hWnd, UINT msgId, WPARAM wParam, LPARAM lParam)
     {
         if (ImGui_ImplWin32_WndProcHandler(hWnd, msgId, wParam, lParam))
         {
             return S_OK;
         }
-
-        ImGuiIO& io = ImGui::GetIO();
-        if (!io.WantCaptureMouse
-            && !io.WantCaptureKeyboard 
-            && !io.WantTextInput)
-
+                
+        ImGuiIO* io = ImGui::GetCurrentContext() ? &ImGui::GetIO() : NULL;
+        
         switch (msgId)
         {
         /// key event
         case WM_KEYDOWN:
         case WM_KEYUP:
         {
+            if (io && io->WantCaptureKeyboard) break;
             KeyEvent kevt;
             kevt.type = (KeyEvent::EventType)(msgId - WM_KEYDOWN);
             kevt.keyCode = wParam;
-            if (onKeyEvent(kevt)) return 0;
+            if (OnKeyEvent(kevt)) return 0;
         } break;
         
+        case WM_INPUT:
+        {
+            if (io && io->WantTextInput) break;
+        }break;
+
         /// mouse event
         case WM_MOUSEMOVE:
         case WM_LBUTTONDOWN:
@@ -361,32 +364,34 @@ namespace sge
         case WM_LBUTTONUP:
         case WM_RBUTTONUP:
         {
+            if (io && io->WantCaptureMouse) break;
             MouseEvent mevt;
             mevt.type = (MouseEvent::EventType)(msgId - WM_MOUSEMOVE);
             mevt.pos.x = ((int)(short)LOWORD(lParam));
             mevt.pos.y = ((int)(short)HIWORD(lParam));
-            if (onMouseEvent(mevt)) return 0;
+            if (OnMouseEvent(mevt)) return 0;
         } break;
         case WM_MOUSEWHEEL:
         {
+            if (io && io->WantCaptureMouse) break;
             MouseEvent mevt;
             mevt.type = MouseEvent::MouseWheel;
             mevt.pos.x = mevt.pos.y = GET_WHEEL_DELTA_WPARAM(wParam);
-            if (onMouseEvent(mevt)) return 0;
+            if (OnMouseEvent(mevt)) return 0;
         }break;
-
+        
         /// size event
         case WM_SIZE:
         {
             d->attr->size.x = LOWORD(lParam);
             d->attr->size.y = HIWORD(lParam);
-            onSizeChanged(d->attr->size.x, d->attr->size.y);
+            OnSizeChanged(d->attr->size.x, d->attr->size.y);
         } break;
         
         /// close event
         case WM_CLOSE:
         {
-            if (!onClose()) destroy();
+            if (!OnClose()) ::PostMessage(hWnd, WM_DESTROY, 0, 0);
         } break;
         case WM_DESTROY:
         {

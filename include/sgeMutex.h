@@ -69,18 +69,18 @@ namespace sge
         /**
          * Lock the mutex, if mutex is locked it will blocking thread and wait it unlocked.
          */
-        void lock() const;
+        void Lock() const;
 
         /**
          * Unlock th mutex
          */
-        void unlock() const;
+        void Unlock() const;
 
         /**
          * Try lock the mutex
          * @return true if lock success, otherwise return false
          */
-        bool tryLock() const;
+        bool TryLock() const;
 
     protected:
         MutexPrivate* d;
@@ -102,7 +102,7 @@ namespace sge
         ScopeLock(const Mutex& mutex)
             : _mutex(mutex)
         {
-            _mutex.lock();
+            _mutex.Lock();
         }
 
         /**
@@ -110,7 +110,7 @@ namespace sge
          */
         ~ScopeLock()
         {
-            _mutex.unlock();
+            _mutex.Unlock();
         }
 
     private:

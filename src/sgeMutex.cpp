@@ -72,17 +72,17 @@ namespace sge
 		}
 	}
 
-	void Mutex::lock() const
+	void Mutex::Lock() const
 	{
 		::EnterCriticalSection(&d->cs);
 	}
 
-	void Mutex::unlock() const
+	void Mutex::Unlock() const
 	{
 		::LeaveCriticalSection(&d->cs);
 	}
 
-	bool Mutex::tryLock() const
+	bool Mutex::TryLock() const
 	{
 		return TRUE == ::TryEnterCriticalSection(&d->cs);
 	}
@@ -119,19 +119,19 @@ namespace sge
         }
     }
 
-    void Mutex::lock()
+    void Mutex::Lock()
     {
         int ret = pthread_mutex_lock(&d->_mutex);
 		assert(ret == 0);
     }
 
-    void Mutex::unlock()
+    void Mutex::Unlock()
     {
         int ret = pthread_mutex_unlock(&d->_mutex);
         assert(ret == 0);
     }
 
-    bool Mutex::tryLock()
+    bool Mutex::TryLock()
     {
         return 0 == pthread_mutex_trylock(&d->_mutex);
     }

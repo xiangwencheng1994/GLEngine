@@ -96,6 +96,7 @@ namespace sge {
 #pragma pack(push, 1)
 
     typedef unsigned char   uchar;
+    typedef unsigned short  ushort;
     typedef unsigned int    uint;
 
     //-------------[ overload math functions ]-------------
@@ -579,6 +580,8 @@ namespace sge {
 
     typedef Vector2<int>    vec2i;
     typedef Vector2<int>    int2;
+    typedef Vector2<short>  short2;
+    typedef Vector2<ushort> ushort2;
     typedef Vector2<uint>   uint2;
     typedef Vector2<float>  vec2f;
     typedef Vector2<float>  float2;
@@ -1088,8 +1091,13 @@ namespace sge {
         return ret;
     }
 
+    typedef Vector3<char>   char3;
+    typedef Vector3<uchar>  uchar3;
+    typedef Vector3<uchar>  rgb;
     typedef Vector3<int>    vec3i;
     typedef Vector3<int>    int3;
+    typedef Vector3<short>  short3;
+    typedef Vector3<ushort> ushort3;
     typedef Vector3<uint>   uint3;
     typedef Vector3<float>  vec3f;
     typedef Vector3<float>  float3;
@@ -1578,9 +1586,15 @@ namespace sge {
             return Vector4<T>(MAX(a.x, b.x), MAX(a.y, b.y), MAX(a.z, b.z), MAX(a.w, b.w));
         }
     };
-
+    
+    typedef Vector4<uchar>  char4;
+    typedef Vector4<uchar>  uchar4;
+    typedef Vector4<uchar>  rgba;
+    typedef Vector4<short>  short4;
+    typedef Vector4<ushort> ushort4;
     typedef Vector4<int>    vec4i;
     typedef Vector4<int>    int4;
+    typedef Vector4<uint>   uint4;
     typedef Vector4<float>  vec4f;
     typedef Vector4<float>  float4;
     typedef Vector4<double> vec4r;
@@ -2180,8 +2194,8 @@ namespace sge {
             // Make sure the input axis is normalized.
             axis.normalize();
 
-            T c = cos(angle);
-            T s = sin(angle);
+            T c = cos(DEG2RAD(angle));
+            T s = sin(DEG2RAD(angle));
 
             T t = T(1) - c;
             T tx = t * axis.x;
@@ -2952,11 +2966,6 @@ namespace sge {
     {
     public:
         /**
-         * Real part of quaternion.
-         */
-        T w;
-
-        /**
          * Imaginary part of quaternion.
          */
         union
@@ -2968,7 +2977,12 @@ namespace sge {
                 T z;
             };
             Vector3<T> v;
-        };
+        }; 
+        
+        /**
+         * Real part of quaternion.
+         */
+        T w;
     public:
 
         /**

@@ -6,9 +6,9 @@ if(NOT SGE_INCLUDE_DIRS OR NOT SGE_LIBS)
 	find_package(SGE REQUIRED)
 endif()
 
-include_directories(${SGE_INCLUDE_DIRS})
+include_directories(${SGE_INCLUDE_DIRS} include)
 
-aux_source_directory(. sources)
+aux_source_directory(sources sources)
 
 add_executable(App ${sources})
 target_link_libraries(App ${SGE_LIBS})

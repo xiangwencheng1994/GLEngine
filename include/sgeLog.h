@@ -95,7 +95,6 @@ namespace sge {
          * @... The Var for format string
          */
         static void error(const char* fmt, ...);
-
     };
 
 } // !namespace

@@ -60,7 +60,7 @@ namespace sge
          * @param buffer The buffer pointer for read wanted 
          * @param len The buffer length
          */
-        BufferReader(void* buffer, size_t len)
+        BufferReader(const byte* buffer, size_t len)
             : _buff(buffer), _len(len), _cur(0)
         {
             assert(buffer && "buffer can not be null");
@@ -69,7 +69,7 @@ namespace sge
         /**
          * get the current cursor of file
          */
-        size_t tell() override { return _cur; }
+        size_t Tell() override { return _cur; }
 
         /**
          * seek the cursor of buffer
@@ -77,7 +77,7 @@ namespace sge
          * @param seek Must be SEEK_SET | SEEK_CUR | SEEK_END
          * @return true if seek success
          */
-        bool seek(long offset, int seek) override
+        bool Seek(long offset, int seek) override
         {
             bool ret = true;
             long pos = 0;
@@ -100,7 +100,16 @@ namespace sge
          * get the buffer length, count of bytes
          * @return the buffer length
          */
-        size_t length() override { return _len; }
+        size_t Length() override { return _len; }
+
+        /**
+         * Check the stream is eof
+         * @return true if eof
+         */
+        bool IsEOF() override
+        {
+            return _cur >= _len;
+        }
 
         /**
          * read bytes to buff for some elements
@@ -109,7 +118,7 @@ namespace sge
          * @param elementCount The count of element wanted
          * @return The count of element has readed
          */
-        size_t read(void* buff, size_t elementSize, size_t elementCount) override
+        size_t Read(void* buff, size_t elementSize, size_t elementCount) override
         {
             assert(buff && "read buff can not be null");
             size_t readCount = (_len - _cur) / elementSize;
@@ -124,14 +133,45 @@ namespace sge
         }
 
         /**
+         * read a line to buff
+         * @param buff To output the bytes
+         * @param bufferSize The max sizeof bytes
+         * @return True if has readed success, but the max read count is bufferSize - 1
+         */            
+        bool GetLine(char* buff, size_t bufferSize) override
+        {
+            if (_cur >= _len)
+                return false;
+            
+            size_t maxCount = bufferSize - 1;
+            
+            for (size_t i = 0; i < maxCount && _cur < _len; ++i)
+            {
+                if (_buff[_cur] != '\n')
+                {
+                    buff[i] = _buff[_cur];
+                    ++_cur;
+                }
+                else
+                {
+                    ++_cur;
+                    buff[i] = '\0';
+                    return true;
+                }
+            }
+            buff[maxCount] = '\0';
+            return true;
+        }
+
+        /**
          * Get the data pointer of buffer
          */
-        byte*   data() { return _buff; }
+        const byte*   Data() { return _buff; }
 
     private:
-        byte*   _buff;
-        size_t  _cur;
-        size_t  _len;
+        const byte*     _buff;
+        size_t          _cur;
+        size_t          _len;
         DISABLE_COPY(BufferReader)
     };
 

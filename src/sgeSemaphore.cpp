@@ -59,7 +59,7 @@ namespace sge
         : d(new SemaphorePrivate())
     {
         d->hSem = ::CreateSemaphore(0, lMax, lInit, 0);
-        assert(d->hSem && "CreateSemaphore failed!");
+        ASSERT(d->hSem && "CreateSemaphore failed!");
     }
 
     Semaphore::~Semaphore()
@@ -76,7 +76,7 @@ namespace sge
         }
     }
 
-    bool Semaphore::wait(unsigned long ms)
+    bool Semaphore::Wait(unsigned long ms)
     {
         switch (::WaitForSingleObject(d->hSem, ms))
         {
@@ -91,7 +91,7 @@ namespace sge
         return false;
     }
 
-    bool Semaphore::set(long number)
+    bool Semaphore::Set(long number)
     {
         return TRUE == ::ReleaseSemaphore(d->hSem, number, 0);
     }
@@ -129,7 +129,7 @@ namespace sge
 		}
 	}
 
-	bool Semaphore::wait(unsigned long ms)
+	bool Semaphore::Wait(unsigned long ms)
 	{
 		struct timespec abstime;
 		struct timeval tv;
@@ -144,7 +144,7 @@ namespace sge
 		return 0 == sem_timedwait(&d->hSem, abstime);
 	}
 
-	bool Semaphore::set(long number)
+	bool Semaphore::Set(long number)
 	{
 		bool ret = true;
 		for (long i = 0; i < number; ++i)

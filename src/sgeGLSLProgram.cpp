@@ -53,31 +53,36 @@ namespace sge
         std::vector<GLint> shaders;
 
         GLSLProgramPrivate() : program(0) { }
-        ~GLSLProgramPrivate() { destory(); }
+        ~GLSLProgramPrivate() 
+        {
+            ASSERT(program == 0);
+        }
 
-        bool addShader(GLenum type, std::string src)
+        bool AddShader(GLenum type, std::string src)
         {
             if (src.size() == 0)
             {
-                return false;
+                return true;
             }
             //src.resize(src.size() + 1, 0);
             GLint   status = 0;
             char    compileLog[512] = { 0 };
-            GLint shader = glCreateShader(type);
-            assert(shader && "glCreateShader failed");
+            GLCall(GLint shader = glCreateShader(type));
+            ASSERT(shader && "glCreateShader failed");
             char* source = (char*)src.c_str();
-            glShaderSource(shader, 1, (const GLchar**)&source, 0);
-            glCompileShader(shader);
-            glGetShaderiv(shader, GL_COMPILE_STATUS, &status);
+            GLCall(glShaderSource(shader, 1, (const GLchar**)&source, 0));
+            GLCall(glCompileShader(shader));
+            GLCall(glGetShaderiv(shader, GL_COMPILE_STATUS, &status));
             if (status == GL_FALSE)
             {
-                glGetShaderInfoLog(shader, sizeof(compileLog), 0, compileLog);
+                GLCall(glGetShaderInfoLog(shader, sizeof(compileLog), 0, compileLog));
                 Log::error("Shader Compile faild: %s", compileLog);
-                glDeleteShader(shader);
+                GLCall(glDeleteShader(shader));
                 shader = NULL;
-#ifdef _WIN32
-                ::MessageBoxA(NULL, "Compile OpenGL Shader failed, see log for more details.", "Error", MB_OK);
+#if defined (_DEBUG) && defined(_MSC_VER)
+                DebugBreak();
+#elif defined _WIN32
+                MessageBox(NULL, "Shader Compile faild, see log for more details.", "Error", MB_OK);
 #endif
                 return false;
             }
@@ -85,10 +90,10 @@ namespace sge
             return true;
         }
 
-        bool createProgram()
+        void CreateProgram()
         {
-            program = glCreateProgram();
-            assert(program && "glCreateProgram failed!");
+            GLCall(program = glCreateProgram());
+            ASSERT(program && "glCreateProgram failed!");
 
             for (std::vector<GLint>::iterator it = shaders.begin();
                 it != shaders.end(); it++)
@@ -96,46 +101,53 @@ namespace sge
                 GLint shader = *it;
                 if (shader > 0)
                 {
-                    glAttachShader(program, shader);
+                    GLCall(glAttachShader(program, shader));
                 }
             }
+        }
 
+        bool LinkProgram()
+        {
             GLint   status = 0;
             char    compileLog[512] = { 0 };
-            glLinkProgram(program);
-            glGetProgramiv(program, GL_LINK_STATUS, &status);
+            GLCall(glLinkProgram(program));
+            GLCall(glGetProgramiv(program, GL_LINK_STATUS, &status));
             if (status == GL_FALSE)
             {
-                glGetProgramInfoLog(program, sizeof(compileLog), 0, compileLog);
+                GLCall(glGetProgramInfoLog(program, sizeof(compileLog), 0, compileLog));
                 Log::error("Link GLProgram faild: %s", compileLog);
-                glDeleteProgram(program);
+                GLCall(glDeleteProgram(program));
                 program = NULL;
 #if defined (_DEBUG) && defined(_MSC_VER)
                 DebugBreak();
-#elif // _DEBUG
-                assert(NULL, "Link GLProgram failed, see log for more details.", "Error", MB_OK);
+#elif defined _WIN32
+                MessageBox(false, "Link GLProgram failed, see log for more details.", "Error", MB_OK);
 #endif
                 return false;
             }
-            return true;
-        }
 
-        void destory()
-        {
+            // remove shaders after built program that we don't need any more
             std::vector<GLint>::iterator it = shaders.begin();
             while (it != shaders.end())
             {
                 GLint shader = *it;
                 if (shader > 0)
                 {
-                    glDeleteShader(shader);
+                    GLCall(glDeleteShader(shader));
                 }
                 it = shaders.erase(it);
             }
-            assert(shaders.size() == 0);
+            ASSERT(shaders.size() == 0);
+
+            return true;
+        }
+
+        void Destory()
+        {
+            ASSERT(shaders.size() == 0);
             if (program)
             {
-                glDeleteProgram(program);
+                GLCall(glDeleteProgram(program));
                 program = NULL;
             }
         }
@@ -151,55 +163,66 @@ namespace sge
 
     GLSLProgram::~GLSLProgram()
     {
+        Destory();
         delete d;
     }
 
-    bool GLSLProgram::create()
+    bool GLSLProgram::Create()
     {
         bool ret = true;
         if (d->program == 0)
         {
-            d->addShader(GL_VERTEX_SHADER, getVertexShaderSrc());
-            d->addShader(GL_TESS_CONTROL_SHADER, getTessControlShaderSrc());
-            d->addShader(GL_TESS_EVALUATION_SHADER, getTessEvaluationShaderSrc());
-            d->addShader(GL_GEOMETRY_SHADER, getGeometryShaderSrc());
-            d->addShader(GL_FRAGMENT_SHADER, getFragmentShaderSrc());
-
-            ret = d->createProgram();
+            ret &= d->AddShader(GL_VERTEX_SHADER, GetVertexShaderSrc());
+            ret &= d->AddShader(GL_TESS_CONTROL_SHADER, GetTessControlShaderSrc());
+            ret &= d->AddShader(GL_TESS_EVALUATION_SHADER, GetTessEvaluationShaderSrc());
+            ret &= d->AddShader(GL_GEOMETRY_SHADER, GetGeometryShaderSrc());
+            ret &= d->AddShader(GL_FRAGMENT_SHADER, GetFragmentShaderSrc());
+            
+            d->CreateProgram();
+            this->OnBeforeLink();
+            ret = d->LinkProgram();
             if (ret)
             {
-                this->onCreateAfter();
+                this->OnAfterCreate();
             }
         }
         return ret;
     }
 
-    void GLSLProgram::destory()
+    void GLSLProgram::Destory()
     {
-        d->destory();
+        d->Destory();
     }
 
-    void GLSLProgram::begin() const
+    void GLSLProgram::Begin() const
     {
-        glUseProgram(d->program);
+        GLCall(glUseProgram(d->program));
     }
 
-    void GLSLProgram::end() const
+    void GLSLProgram::End() const
     {
-        glUseProgram(0);
+        GLCall(glUseProgram(0));
     }
 
-    GLuint GLSLProgram::getProgramId() const
+    GLuint GLSLProgram::ProgramId() const
     {
         return d->program;
     }
 
-    uniform GLSLProgram::getUniformLocation(const char * name) const
+    uniform GLSLProgram::GetUniformLocation(const char * name) const
     {
         return glGetUniformLocation(d->program, name);
     }
 
-    attribute GLSLProgram::getAttribLocation(const char * name) const
+    UniformBlock GLSLProgram::GetUniformBlock(const char * name) const
+    {
+        UniformBlock ub;
+        ub.index = glGetUniformBlockIndex(d->program, name);
+        GLCall(glGetActiveUniformBlockiv(d->program, ub.index, GL_UNIFORM_BLOCK_DATA_SIZE, &ub.blockSize));
+        return ub;
+    }
+
+    attribute GLSLProgram::GetAttribLocation(const char * name) const
     {
         return glGetAttribLocation(d->program, name);
     }

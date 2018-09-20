@@ -69,7 +69,7 @@ namespace sge {
         /**
          * Get and update the elapsed times after last update time
          */
-        float elapsed();
+        float Elapsed();
 
     private:
         TimerPrivate* d;

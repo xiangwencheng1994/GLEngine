@@ -71,7 +71,7 @@ namespace sge
 		/**
 		 * Get the current thread id.
 		 */
-		static TID	currentThreadId();
+		static TID	CurrentThreadId();
 
         /**
          * Constructor
@@ -92,18 +92,18 @@ namespace sge
         /**
          * Start this thread
          */
-        bool start();
+        bool Start();
 
         /**
          * Wait for thread exit, if thread is finished it will return immediately
          * @return The run function result.
          */
-        int join();
+        int Join();
 
         /**
          * Get thread id, NULL if not started
          */
-        TID threadId() const;
+        TID ThreadId() const;
 
 #ifdef _WIN32
         typedef void * HANDLE;
@@ -111,13 +111,13 @@ namespace sge
         /**
          * Get the Thread Handle, windows only
          */
-        HANDLE handle() const;
+        HANDLE Handle() const;
 #endif
 
         /**
          * The executable of this thread
          */
-        virtual int run();
+        virtual int Run();
     protected:
         ThreadPrivate* d;
 

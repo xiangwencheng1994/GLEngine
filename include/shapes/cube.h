@@ -92,6 +92,16 @@ namespace sge
         6, 1, 2, 7, 4, 3, 0, 5
     };
 
+    class CubeFactory
+    {
+    public:
+        CubeFactory();
+        ~CubeFactory();
+
+    private:
+
+    };
+
 }
 
 #endif // !SGE_CUBE_H

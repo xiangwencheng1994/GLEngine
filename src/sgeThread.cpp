@@ -83,7 +83,7 @@ namespace sge
             Thread* pThis = (Thread*)lpParam;
             if (pThis)
             {
-                pThis->d->retCode = pThis->run();
+                pThis->d->retCode = pThis->Run();
             }
             return 0;
         }
@@ -94,7 +94,7 @@ namespace sge
         ::Sleep(ms);
     }
 
-	TID Thread::currentThreadId()
+	TID Thread::CurrentThreadId()
 	{
 		return GetCurrentThreadId();
 	}
@@ -113,17 +113,17 @@ namespace sge
     {
         if (d)
         {
-            join();
+            Join();
             delete d;
             d = NULL;
         }
     }
 
-    bool Thread::start()
+    bool Thread::Start()
     {
         if (d->tid || d->handle)
         {
-            assert("Can not start a thread again.");
+            ASSERT("Can not start a thread again.");
             return false;
         }
         
@@ -132,28 +132,28 @@ namespace sge
         return d->handle != NULL;
     }
 
-    int Thread::join()
+    int Thread::Join()
     {
         if (d->handle)
         {
-            WaitForSingleObject(d->handle, 0xFFFFFFFF);
+            ::WaitForSingleObject(d->handle, 0xFFFFFFFF);
             ::CloseHandle(d->handle);
             d->handle = NULL;
         }
         return d->retCode;
     }
 
-    TID Thread::threadId() const
+    TID Thread::ThreadId() const
     {
         return d->tid;
     }
 
-    HANDLE Thread::handle() const
+    HANDLE Thread::Handle() const
     {
         return d->handle;
     }
 
-    int Thread::run()
+    int Thread::Run()
     {
         if (d->run)
         {
@@ -215,7 +215,7 @@ namespace sge
 		usleep(1000 * (ms));
 	}
 
-	TID Thread::currentThreadId()
+	TID Thread::CurrentThreadId()
 	{
 		return pthread_self();
 	}
@@ -234,13 +234,13 @@ namespace sge
 	{
 		if (d)
 		{
-			join();
+			Join();
 			delete d;
 			d = NULL;
 		}
 	}
 
-	bool Thread::start()
+	bool Thread::Start()
 	{
 		if (d->tid)
 		{
@@ -251,7 +251,7 @@ namespace sge
 		return 0 == pthread_create(d->tid, NULL, &ThreadPrivate::ThreadEntry, this);
 	}
 
-	int Thread::join()
+	int Thread::Join()
 	{
 		if (d->tid)
 		{
@@ -266,12 +266,12 @@ namespace sge
 		return d->retCode;
 	}
 
-	TID Thread::threadId() const
+	TID Thread::ThreadId() const
 	{
 		return d->tid;
 	}
 
-	int Thread::run()
+	int Thread::Run()
 	{
 		if (d->run)
 		{

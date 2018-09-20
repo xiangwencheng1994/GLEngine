@@ -55,7 +55,7 @@ namespace sge
      * You can use like:
      *      ClassA  obj;
      *      Delegate1<int> callback;
-     *      callback.bind<ClassA>(obj, &ClassA::Fun); // or callback.bind(globalFun);
+     *      callback.Bind<ClassA>(obj, &ClassA::Fun); // or callback.Bind(globalFun);
      *      int ret = callback();
      */
     template<typename R>
@@ -109,7 +109,7 @@ namespace sge
          * @param method T target function
          */
         template<typename T>
-        void bind(T* object, R(T::*method)())
+        void Bind(T* object, R(T::*method)())
         {
             if (object && method)
             {
@@ -125,7 +125,7 @@ namespace sge
          * Bind a delegate
          * @param method T target function
          */
-        void bind(R(*method)())
+        void Bind(R(*method)())
         {
             if (method)
             {
@@ -160,7 +160,7 @@ namespace sge
      * You can use like:
      *      ClassA  obj;
      *      Delegate1<int,int> callback;
-     *      callback.bind<ClassA>(obj, &ClassA::Fun); // or callback.bind(globalFun);
+     *      callback.Bind<ClassA>(obj, &ClassA::Fun); // or callback.Bind(globalFun);
      *      int ret = callback(5);
      */
     template<typename R, typename A1>
@@ -214,7 +214,7 @@ namespace sge
          * @param method T target function
          */
         template<typename T>
-        void bind(T* object, R (T::*method)(A1))
+        void Bind(T* object, R (T::*method)(A1))
         {
             if (object && method)
             {
@@ -230,7 +230,7 @@ namespace sge
          * Bind a delegate
          * @param method T target function
          */
-        void bind(R (*method)(A1))
+        void Bind(R (*method)(A1))
         {
             if (object && method)
             {
@@ -265,7 +265,7 @@ namespace sge
      * You can use like:
      *      ClassA  obj;
      *      Delegate2<int,int,int> callback;
-     *      callback.bind<ClassA>(obj, &ClassA::Fun); // or callback.bind(globalFun);
+     *      callback.Bind<ClassA>(obj, &ClassA::Fun); // or callback.Bind(globalFun);
      *      int ret = callback(5£¬5);
      */
     template<typename R, typename A1, typename A2>
@@ -319,7 +319,7 @@ namespace sge
          * @param method T target function
          */
         template<typename T>
-        void bind(T* object, R(T::*method)(A1, A2))
+        void Bind(T* object, R(T::*method)(A1, A2))
         {
             if (object && method)
             {
@@ -335,7 +335,7 @@ namespace sge
          * Bind a delegate
          * @param method T target function
          */
-        void bind(R(*method)(A1, A2))
+        void Bind(R(*method)(A1, A2))
         {
             if (object && method)
             {
@@ -370,7 +370,7 @@ namespace sge
      * You can use like:
      *      ClassA  obj;
      *      Delegate3<int,int,int,int> callback;
-     *      callback.bind<ClassA>(obj, &ClassA::Fun); // or callback.bind(globalFun);
+     *      callback.Bind<ClassA>(obj, &ClassA::Fun); // or callback.Bind(globalFun);
      *      int ret = callback(5£¬5, 5);
      */
     template<typename R, typename A1, typename A2, typename A3>
@@ -424,7 +424,7 @@ namespace sge
          * @param method T target function
          */
         template<typename T>
-        void bind(T* object, R(T::*method)(A1, A2, A3))
+        void Bind(T* object, R(T::*method)(A1, A2, A3))
         {
             if (object && method)
             {
@@ -440,7 +440,7 @@ namespace sge
          * Bind a delegate
          * @param method T target function
          */
-        void bind(R(*method)(A1, A2, A3))
+        void Bind(R(*method)(A1, A2, A3))
         {
             if (object && method)
             {
@@ -475,7 +475,7 @@ namespace sge
      * You can use like:
      *      ClassA  obj;
      *      Delegate4<int,int,int,int,int> callback;
-     *      callback.bind<ClassA>(obj, &ClassA::Fun); // or callback.bind(globalFun);
+     *      callback.Bind<ClassA>(obj, &ClassA::Fun); // or callback.Bind(globalFun);
      *      int ret = callback(5£¬5, 5, 5);
      */
     template<typename R, typename A1, typename A2, typename A3, typename A4>
@@ -529,7 +529,7 @@ namespace sge
          * @param method T target function
          */
         template<typename T>
-        void bind(T* object, R(T::*method)(A1, A2, A3, A4))
+        void Bind(T* object, R(T::*method)(A1, A2, A3, A4))
         {
             if (object && method)
             {
@@ -545,7 +545,7 @@ namespace sge
          * Bind a delegate
          * @param method T target function
          */
-        void bind(R(*method)(A1, A2, A3, A4))
+        void Bind(R(*method)(A1, A2, A3, A4))
         {
             if (object && method)
             {

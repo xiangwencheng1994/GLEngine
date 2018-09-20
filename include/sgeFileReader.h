@@ -62,9 +62,9 @@ namespace sge
          */
         FileReader(const char* fileName, bool* ret)
         {
-            _file = fopen(fileName, "rb");
-            if (ret) *ret = (NULL != _file);
-            else assert(NULL != _file);
+            errno_t error = fopen_s(&_file, fileName, "rb");
+            if (ret) *ret = (error == 0);
+            else assert(error == 0);
         }
 
         /**
@@ -78,7 +78,7 @@ namespace sge
         /**
          * get the current cursor of file
          */
-        size_t tell() override { return ftell(_file); }
+        size_t Tell() override { return ftell(_file); }
 
         /**
          * seek the cursor of file
@@ -86,22 +86,31 @@ namespace sge
          * @param seek Must be SEEK_SET | SEEK_CUR | SEEK_END
          * @return true if seek success
          */
-        bool seek(long offset, int seek) override { return 0 == fseek(_file, offset, seek); }
+        bool Seek(long offset, int seek) override { return 0 == fseek(_file, offset, seek); }
 
         /**
          * get the file length, count of bytes
          * @return the file length, error while return = unsigned(-1)
          */
-        size_t length() override
+        size_t Length() override
         {
             size_t ret = unsigned(-1);
-            size_t cur = tell();
-            if (seek(0, SEEK_SET))
+            size_t cur = Tell();
+            if (Seek(0, SEEK_SET))
             {
-                if (seek(0, SEEK_END)) ret = tell();
-                seek(cur, SEEK_SET);
+                if (Seek(0, SEEK_END)) ret = Tell();
+                Seek(cur, SEEK_SET);
             }
             return ret;
+        }
+        
+        /**
+         * Check the stream is eof
+         * @return true if eof
+         */
+        bool IsEOF() override
+        {
+            return 0 != feof(_file);
         }
 
         /**
@@ -111,11 +120,22 @@ namespace sge
          * @param elementCount The count of element wanted
          * @return The count of element has readed, error while return > elementCount
          */
-        size_t read(void* buff, size_t elementSize, size_t elementCount)  override
+        size_t Read(void* buff, size_t elementSize, size_t elementCount)  override
         {
             return fread(buff, elementSize, elementCount, _file);
         }
         
+        /**
+         * read a line to buff
+         * @param buff To output the bytes
+         * @param bufferSize The max sizeof bytes
+         * @return True if has readed success, but the max read count is bufferSize - 1
+         */
+        bool GetLine(char* buff, size_t bufferSize) override
+        {
+            return fgets(buff, bufferSize, _file) != NULL;
+        }
+
     private:
         FILE*       _file;
         DISABLE_COPY(FileReader)

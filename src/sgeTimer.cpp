@@ -84,7 +84,7 @@ namespace sge
     }
 
 
-    float Timer::elapsed()
+    float Timer::Elapsed()
     {
         LARGE_INTEGER nowTime;
         QueryPerformanceCounter(&nowTime);

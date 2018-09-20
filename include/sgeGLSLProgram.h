@@ -54,6 +54,13 @@ namespace sge
 
     typedef GLint attribute;
     typedef GLint uniform;
+
+    struct SGE_API UniformBlock
+    {
+        GLint index;
+        GLint blockSize;
+        UniformBlock() : index(-1), blockSize(-1) {}
+    };
     
     /**
      * Class GLSLProgram, provided encapsulation of opengl shader compile and program link
@@ -75,43 +82,50 @@ namespace sge
          * Create this program.
          * @return true if all shander compile success and program link success, otherwise return false
          */
-        bool create();
+        bool Create();
 
         /**
          * Destory this program
          */
-        void destory();
+        void Destory();
 
         /**
          * Begin use this program
          */
-        virtual void begin() const;
+        virtual void Begin() const;
 
         /**
          * End this program
          * it will switch to default program (0)
          */
-        virtual void end() const;
+        virtual void End() const;
 
         /**
          * Get this program Id
          * @return 0 if it uncreated or created failed.
          */
-        GLuint getProgramId() const;
+        GLuint ProgramId() const;
 
         /**
          * Get the uniform var in program
          * @param name The uniform name
          * @return -1 if program is disable or it has no such uniform
          */
-        uniform getUniformLocation(const char* name) const;
+        uniform GetUniformLocation(const char* name) const;
+
+        /**
+         * Get the uniform block in program
+         * @param name The uniform block name
+         * @return -1 if program is disable or it has no such uniform block
+         */
+        UniformBlock GetUniformBlock(const char * name) const;
 
         /**
          * Get the attribute var in program
          * @param name The attribute name
          * @return -1 if program is disable or it has no such attribute
          */
-        attribute getAttribLocation(const char* name) const;
+        attribute GetAttribLocation(const char* name) const;
         
     protected:
 
@@ -119,37 +133,41 @@ namespace sge
          * Get the vertex shader source
          * @return NULL to use opengl default shader
          */
-        virtual std::string getVertexShaderSrc() const = 0;
+        virtual std::string GetVertexShaderSrc() const = 0;
 
         /**
          * Get the tess control shader source
          * @return NULL to use opengl default shader
          */
-        virtual std::string getTessControlShaderSrc() const { return std::string(); }
+        virtual std::string GetTessControlShaderSrc() const { return std::string(); }
         
         /**
          * Get the tess evaluation shader source
          * @return NULL to use opengl default shader
          */
-        virtual std::string getTessEvaluationShaderSrc() const { return std::string(); }
+        virtual std::string GetTessEvaluationShaderSrc() const { return std::string(); }
         
         /**
          * Get the geometry shader source
          * @return NULL to use opengl default shader
          */
-        virtual std::string getGeometryShaderSrc() const { return std::string(); }
+        virtual std::string GetGeometryShaderSrc() const { return std::string(); }
         
         /**
          * Get the fragment shader source
          * @return NULL to use opengl default shader
          */
-        virtual std::string getFragmentShaderSrc() const = 0;
+        virtual std::string GetFragmentShaderSrc() const = 0;
         
         /**
          * Callback function after program create successed
          */
-        virtual void onCreateAfter() = 0;
+        virtual void OnAfterCreate() = 0;
 
+        /**
+         * Callback function before program link
+         */
+        virtual void OnBeforeLink() {}
     private:
         GLSLProgramPrivate* d;
         DISABLE_COPY(GLSLProgram)

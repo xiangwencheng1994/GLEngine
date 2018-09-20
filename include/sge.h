@@ -44,28 +44,54 @@
 #define SGE_H
 
 #ifdef _WIN32
-#include <Windows.h>
-#if sge_EXPORTS
-#   define SGE_API _declspec(dllexport)
+    #include <Windows.h>
+    #if sge_EXPORTS
+        #define SGE_API     _declspec(dllexport)
+        #define GLEW_BUILD
+    #else
+        #define SGE_API     _declspec(dllimport)
+        #pragma comment(linker,"/subsystem:\"Windows\" /entry:\"mainCRTStartup\"")
+    #endif
 #else
-#   define SGE_API _declspec(dllimport)
-#pragma comment(linker,"/subsystem:\"Windows\" /entry:\"mainCRTStartup\"")
-#endif
-#else
-#   define SGE_API
+    #define SGE_API
 #endif
 
+#include <glew/glew.h>
 
+#ifdef _DEBUG
+    #include <assert.h>
+    #ifdef WIN32
+        #define ASSERT(x)   if (!(x)) __debugbreak()
+    #else
+        #define ASSERT(x)   assert(x)
+    #endif
+#else
+    #define ASSERT(x)   x
+#endif
+
+// from sgeGLX.h
+SGE_API bool glCheckError(const char* function, const char* file, int line);
+SGE_API void glClearError();
+
+#ifdef _DEBUG
+    // clear errors before call, check errors after call
+    #define GLCall(x)   glClearError();\
+                        x;\
+                        ASSERT(glCheckError(#x, __FILE__, __LINE__))
+#else
+    #define GLCall(x)   x
+#endif
+
+// disable copy object of this class
 #define DISABLE_COPY(Class) \
 		Class(const Class &) = delete; \
 		Class &operator=(const Class &) = delete;
 
-#include <assert.h>
-
-namespace sge
-{
-
-}
+#include <string>
+#include <memory>
+#define SharedPtr   std::shared_ptr 
+#define ScopedPtr   std::scoped_ptr 
+#define UniquePtr   std::unique_ptr 
 
 #endif
 

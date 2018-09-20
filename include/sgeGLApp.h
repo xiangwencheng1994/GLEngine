@@ -96,115 +96,115 @@ namespace sge
         /**
          * Get the window title
          */
-        const char* title() const;
+        const char* Title() const;
 
         /**
          * Set window title
          * @param title New title for window
          */
-        void setTitle(const char* title);
+        void SetTitle(const char* title);
 
         /**
          * Get window size
          */
-        const int2& size() const;
+        const int2& Size() const;
 
         /**
          * Set window size
          * @param size New size for window
          */
-        void setSize(int2 size);
+        void SetSize(int2 size);
 
         /**
          * Get window pos at screen
          */
-        const int2& pos() const;
+        const int2& Pos() const;
 
         /**
          * Set window pos
          * @param pos New pos for window
          */
-        void setPos(int2 pos);
+        void SetPos(int2 pos);
 
         /**
          * Run this app
          * first it create window and GLContext, then show window and exec message loop.
          * quit if get WM_QUIT message.
          */
-        int run();
+        int Run();
 
         /**
          * Set window visibility.
          */
-        void setVisible(bool visibility);
+        void SetVisible(bool visibility);
 
         /**
          * Get the GLContext
          * @return NULL if failed
          */
-        GLContext* getGLContext() const;
+        GLContext* GLContext() const;
 
         /**
-         * Send a destroy message to message loop.
+         * Send a Close message to message loop.
          */
-        void destroy();
+        void Close();
 
 #ifdef _WIN32
         /**
          * Get the window handle
          */
-        HWND getHWND() const;
+        HWND GetHWND() const;
         /**
          * App window message process.
          */
-        virtual LRESULT wndProc(HWND hWnd, UINT msgId, WPARAM wParam, LPARAM lParam);
+        virtual LRESULT WndProc(HWND hWnd, UINT msgId, WPARAM wParam, LPARAM lParam);
 #endif
     protected:
         
         /**
          * This function will called by 'run' after Window and GLContent created.
          */
-        virtual void onCreate() = 0;
+        virtual void OnCreate() = 0;
         
         /**
          * This function will called by 'run' in each message loop while no message.
          */
-        virtual void onRender(float elapsed) = 0;
+        virtual void OnRender(float elapsed) = 0;
 
         /**
          * This function will called after 'onRender' for GUI draws.
          */
-        virtual void onRenderUI(float elapsed) {}
+        virtual void OnRenderUI(float elapsed) {}
 
         /**
          * This function will called by 'run' after break the message loop and try destory app.
          */
-        virtual void onDestory() = 0;
+        virtual void OnDestory() = 0;
 
         /**
          * This function will called by message loop whe get window size has changed.
          * @param width The new width.
          * @param height The new height.
          */
-        virtual void onSizeChanged(int width, int height) { glViewport(0, 0, width, height); }
+        virtual void OnSizeChanged(int width, int height) { glViewport(0, 0, width, height); }
 
         /**
          * This function will called by message loop when get KeyEvent message
          * @param event The KeyEvent struct.
          */
-        virtual bool onKeyEvent(const KeyEvent& event) { return false; }
+        virtual bool OnKeyEvent(const KeyEvent& event) { return false; }
 
         /**
          * This function will called by message loop when get MouseEvent message
          * @param event The mouse event struct
          */
-        virtual bool onMouseEvent(const MouseEvent & event) { return false; }
+        virtual bool OnMouseEvent(const MouseEvent & event) { return false; }
 
         /**
          * This function will call by message loop when get WM_CLOSE message
          * @return true will prevent close, by default it return false, will close app.
          */
-        virtual bool onClose() { return false; }
+        virtual bool OnClose() { return false; }
 
     private:
         GLAppPrivate* d;
