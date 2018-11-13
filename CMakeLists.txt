@@ -1,34 +1,28 @@
 ﻿cmake_minimum_required (VERSION 2.8)
 
-project ("sge")
+project ("3D Builder++")
 
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/)
+option(USE_OPENGLES "Use OpenGLES instead of desktop OpenGL" ON)
+SET(USE_OPENGLES ON)
 
-find_package(OpenGL REQUIRED)
+if(USE_OPENGLES)
+    add_definitions(-DOPENGLES -DGL_GLEXT_PROTOTYPES)
+endif(USE_OPENGLES)
 
-include_directories(include ${OPENGL_INCLUDE_DIR})
+add_subdirectory(3rd)
 
-aux_source_directory(src SGE_SOURCES)
-aux_source_directory(src/imgui IMGUI_SOURCES)
+set(GL_INCLUDES)
+set(GL_LIBRARIES)
+if(USE_OPENGLES)
+	set(GL_LIBRARIES 		${GL_LIBRARIES} GLESv2 EGL)
+else()
+	find_package(OpenGL REQUIRED)
+	set(GL_INCLUDES	${GL_INCLUDES} ${OPENGL_INCLUDE_DIR})
+	set(GL_LIBRARIES ${GL_LIBRARIES} ${OPENGL_LIBRARIES} glew32)
+endif()
 
-add_definitions(-DUSE_SSE2)
+message("GL_INCLUDES: ${GL_INCLUDES}")
+message("GL_LIBRARIES: ${GL_LIBRARIES}")
 
-add_library(sge SHARED ${SGE_SOURCES} ${IMGUI_SOURCES})
-target_link_libraries(sge
-		${OPENGL_LIBRARIES}
-		${GLEW_LIBRARIES})
-
-install(TARGETS sge
-        RUNTIME DESTINATION bin
-        LIBRARY DESTINATION lib
-        ARCHIVE DESTINATION lib/static)
-		
-install(DIRECTORY res/ DESTINATION bin)
-
-install(DIRECTORY include/ DESTINATION include FILES_MATCHING PATTERN "*.h")
-install(FILES "FindSGE.cmake" DESTINATION .)
-
-set(SGE_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/include)
-set(SGE_LIBS sge ${OPENGL_LIBRARIES})
-
-add_subdirectory(application)
+add_subdirectory(sge)
+add_subdirectory(App)
