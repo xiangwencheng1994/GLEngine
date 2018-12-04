@@ -134,7 +134,7 @@ namespace sge
     /**
      * The native platform interface
      */
-    class SGE_API sgePlatformNative
+    class SGE_API PlatformNative
     {
     public:
         typedef Delegate1<bool, NativeMouseButtonEvent&>    OnMouseButtonEvent;
@@ -157,7 +157,7 @@ namespace sge
         OnCloseEvent            _onCloseEvent;
 
     public:
-        virtual ~sgePlatformNative() {}
+        virtual ~PlatformNative() {}
 
 #ifdef OPENGLES
         virtual EGLNativeWindowType     getWindow() = 0;
@@ -184,9 +184,9 @@ namespace sge
         virtual bool    IsClosed() = 0;
 
     protected:
-        sgePlatformNative() {}
+        PlatformNative() {}
 
-        DISABLE_COPY(sgePlatformNative)
+        DISABLE_COPY(PlatformNative)
     };
 
 }

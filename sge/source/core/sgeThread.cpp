@@ -244,7 +244,7 @@ namespace sge
 	{
 		if (d->tid)
 		{
-			assert("Can not start a thread again.");
+			ASSERT("Can not start a thread again.");
 			return false;
 		}
 
@@ -258,7 +258,7 @@ namespace sge
 			void* result = NULL;
 			if (pthread_join(d->tid, &result))
 			{
-				assert("pthread_join Can not join thread.");
+				ASSERT("pthread_join Can not join thread.");
 			}
 			pthread_detach(d->tid);
 			d->tid = NULL;

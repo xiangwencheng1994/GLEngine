@@ -54,8 +54,8 @@ namespace sge
         LONG_PTR    plptrWin = GetWindowLongPtr(hWnd, GWLP_USERDATA);
         if (plptrWin)
         {
-            sgePlatformWin32Native* native =
-                (sgePlatformWin32Native*)(plptrWin);
+            PlatformWin32Native* native =
+                (PlatformWin32Native*)(plptrWin);
             return native->wndProc(hWnd, msgId, wParam, lParam);
         }
         return DefWindowProc(hWnd, msgId, wParam, lParam);
@@ -136,7 +136,7 @@ namespace sge
         return hWnd;
     }
 
-    sgePlatformWin32Native::sgePlatformWin32Native(HWND pWnd, int width, int height)
+    PlatformWin32Native::PlatformWin32Native(HWND pWnd, int width, int height)
     {
         if (!registerWin32Class())
         {
@@ -157,9 +157,11 @@ namespace sge
 
         UpdateWindow(_hWnd);
         ShowWindow(_hWnd, SW_SHOW);
+
+        Log::info("Native window created");
     }
 
-    sgePlatformWin32Native::~sgePlatformWin32Native()
+    PlatformWin32Native::~PlatformWin32Native()
     {
         if (_hWnd)
         {
@@ -171,7 +173,7 @@ namespace sge
         UnregisterClassA(ENGINE_WIN32_WND_CLASS, 0);
     }
 
-    bool sgePlatformWin32Native::ProcessEvents()
+    bool PlatformWin32Native::ProcessEvents()
     {
         ASSERT(_hWnd);
 
@@ -187,7 +189,7 @@ namespace sge
         return false;
     }
 
-    LRESULT sgePlatformWin32Native::wndProc(HWND hWnd, UINT msgId, WPARAM wParam, LPARAM lParam)
+    LRESULT PlatformWin32Native::wndProc(HWND hWnd, UINT msgId, WPARAM wParam, LPARAM lParam)
     {
         bool ret = false;
 

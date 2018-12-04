@@ -116,7 +116,7 @@ namespace sge
 		: d(new SemaphorePrivate())
 	{
 		int ret = sem_init(&d->hSem, 0, lInit);
-		assert(ret == 0 && "sem_init failed!");
+		ASSERT(ret == 0 && "sem_init failed!");
 	}
 
 	Semaphore::~Semaphore()

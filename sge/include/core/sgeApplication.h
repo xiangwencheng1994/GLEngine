@@ -3,8 +3,8 @@
  * Simple graphic engine
  * "sge" libraiy is a simple graphics engine, named sge.
  *
- * sgePlatformNativeWin32.h
- * date: 2018/11/14
+ * Application.h
+ * date: 2018/11/23
  * author: xiang
  *
  * License
@@ -40,49 +40,67 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
-#ifndef SGE_PLATFORM_NATIVE_WIN32_H
-#define SGE_PLATFORM_NATIVE_WIN32_H
+#ifndef SGE_APP_BASE_H
+#define SGE_APP_BASE_H
 
 #include <core/sgePlatform.h>
+#include <core/sgeGLContext.h>
 #include <core/sgePlatformNative.h>
-
-#if (SGE_TARGET_PLATFORM == SGE_PLATFORM_WIN32)
 
 namespace sge
 {
+    class Scene;
 
     /**
-     * Win32 native platform interface implement
+     * Class Application, to drive the application system
      */
-    class SGE_API PlatformWin32Native : public PlatformNative
+    class SGE_API  Application
     {
     public:
-        PlatformWin32Native(HWND pWnd, int width = 800, int height = 600);
-        ~PlatformWin32Native();
+        /**
+         * Constructor
+         */
+        Application();
 
-#ifdef OPENGLES
-        virtual EGLNativeWindowType     getWindow() { return _hWnd; }
-        virtual EGLNativeDisplayType    getDisplay() { return _hDC; }
-#else
-        HWND    getHWnd() { return _hWnd; }
-#endif
+        /**
+         * Destructor
+         */
+        virtual ~Application();
 
-        void    Close() { PostMessage(_hWnd, WM_CLOSE, 0, 0); }
-        bool    IsClosed() { return _hWnd == NULL; }
-        
-        virtual bool        ProcessEvents();
+        /**
+         * Run the application util quit
+         */
+        void Run();
 
-    public:
-        virtual LRESULT     wndProc(HWND hWnd, UINT msgId, WPARAM wParam, LPARAM lParam);
-        
+        /**
+         * Load a scene instead of current scene, old scene will unloaded and deleted
+         * @param scene The new scene
+         */
+        void LoadScene(Scene* scene);
+
+        /**
+         * Send a quit message to platform
+         */
+        void Quit() { Platform()->Close(); }
+
+        /**
+         * Get the native platform interface
+         */
+        PlatformNative* Platform() { return _platform; }
+
+        /**
+         * Get the current scene
+         */
+        Scene* CurrentScene() { return _curScene; }
+
     private:
-        HWND    _hWnd;
-        HDC     _hDC;
+        Scene*              _curScene;
+        PlatformNative*     _platform;
+        GLContext           _glContext;
+
+        DISABLE_COPY(Application)
     };
 
 }
 
-#endif
-
-#endif // !SGE_PLATFORM_NATIVE_WIN32_H
+#endif // !SGE_APP_BASE_H

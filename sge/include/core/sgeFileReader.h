@@ -64,7 +64,7 @@ namespace sge
         {
             errno_t error = fopen_s(&_file, fileName, "rb");
             if (ret) *ret = (error == 0);
-            else assert(error == 0);
+            else ASSERT(error == 0);
         }
 
         /**

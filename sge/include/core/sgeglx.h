@@ -259,7 +259,7 @@ namespace sge
         template<BufferType T>
         static void UpdateBuffer(BufferDesc<T>& buffer, size_t offset, size_t dataLen, void* data)
         {
-            assert(buffer.IsValid() && offset + dataLen <= buffer.size && dataLen);
+            ASSERT(buffer.IsValid() && offset + dataLen <= buffer.size && dataLen);
             GLCall(glBindBuffer(T, buffer.id));
             GLCall(glBufferSubData(T, offset, dataLen, data));
             GLCall(glBindBuffer(T, 0));

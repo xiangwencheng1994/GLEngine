@@ -4,7 +4,7 @@
  * "sge" libraiy is a simple graphics engine, named sge.
  *
  * sgeCamera.h
- * date: 2018/6/2
+ * date: 2018/06/02
  * author: xiang
  *
  * License
@@ -375,7 +375,7 @@ namespace sge
         void updateCamera()
         {
             vec3f rightDir = cross(_frontDir, WorldUp);
-            assert(rightDir.length() > 0); // not zero
+            ASSERT(rightDir.length() > 0); // not zero
             _upDir = cross(rightDir, _frontDir);
             _upDir.normalize();
             

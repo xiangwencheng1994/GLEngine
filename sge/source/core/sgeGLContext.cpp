@@ -115,7 +115,7 @@ namespace sge
         {
             return false;
         }
-        ASSERT(numConfigs && "EGL没有找到支持的配置");
+        ASSERT(numConfigs && "EGL Can not find any config while eglChooseConfig");
 
 #ifdef ANDROID
         EGLint  format(0);
@@ -196,6 +196,10 @@ namespace sge
         ASSERT(EGL_TRUE == ret);
     }
 
+    inline void GLContext::EnableVSYNC(GLboolean enable)
+    {
+        eglSwapInterval(_display, enable ? EGL_MAX_SWAP_INTERVAL : 0);
+    }
 }
 
 
@@ -408,6 +412,11 @@ namespace sge
     }
 
     GLContext::~GLContext()
+    {
+        Shutdown();
+    }
+
+    void GLContext::Shutdown()
     {
         if (_hRC != NULL)
         {

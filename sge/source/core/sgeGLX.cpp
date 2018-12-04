@@ -64,7 +64,7 @@ namespace sge
     
     Texture2D Texture2D::FromFile(const char* file)
     {
-        assert(file);
+        ASSERT(file);
         Texture2D tex;
         int comp = 0;
         byte* data = stbi_load(file, &tex._size.x, &tex._size.y, &comp, 0);
@@ -87,7 +87,7 @@ namespace sge
 
     Texture2D Texture2D::FromSteam(byte* stream, size_t len)
     {
-        assert(stream);
+        ASSERT(stream);
         Texture2D tex;
         int comp = 0;
         byte* data = stbi_load_from_memory(stream, len, &tex._size.x, &tex._size.y, &comp, 0);

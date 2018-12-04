@@ -48,7 +48,9 @@
 #ifndef SGE_MATH_H
 #define SGE_MATH_H
 
-#pragma warning (disable: 4251)
+#pragma warning(push)
+#pragma warning(disable: 4251 4554)
+#pragma pack(push, 1)
 
 #include <cmath>
 #include <cstring>
@@ -94,9 +96,7 @@
 #endif
 
 namespace sge {
-
-#pragma pack(push, 1)
-
+    
     typedef unsigned char   uchar;
     typedef unsigned char   byte;
     typedef unsigned short  ushort;
@@ -257,7 +257,7 @@ namespace sge {
          */
         T& operator[](int n)
         {
-            assert(n >= 0 && n <= 1);
+            ASSERT(n >= 0 && n <= 1);
             if (0 == n)
                 return x;
             else
@@ -271,7 +271,7 @@ namespace sge {
         */
         const T& operator[](int n) const
         {
-            assert(n >= 0 && n <= 1);
+            ASSERT(n >= 0 && n <= 1);
             if (0 == n)
                 return x;
             else
@@ -720,7 +720,7 @@ namespace sge {
          */
         T& operator[](int n)
         {
-            assert(n >= 0 && n <= 2);
+            ASSERT(n >= 0 && n <= 2);
             if (0 == n)
                 return x;
             else if (1 == n)
@@ -736,7 +736,7 @@ namespace sge {
          */
         const T& operator[](int n) const
         {
-            assert(n >= 0 && n <= 2);
+            ASSERT(n >= 0 && n <= 2);
             if (0 == n)
                 return x;
             else if (1 == n)
@@ -1262,7 +1262,7 @@ namespace sge {
          */
         T& operator[](int n)
         {
-            assert(n >= 0 && n <= 3);
+            ASSERT(n >= 0 && n <= 3);
             if (0 == n)
                 return x;
             else if (1 == n)
@@ -1280,7 +1280,7 @@ namespace sge {
          */
         const T& operator[](int n) const
         {
-            assert(n >= 0 && n <= 3);
+            ASSERT(n >= 0 && n <= 3);
             if (0 == n)
                 return x;
             else if (1 == n)
@@ -1602,6 +1602,96 @@ namespace sge {
     typedef Vector4<float>  float4;
     typedef Vector4<double> vec4r;
     typedef Vector4<double> real4;
+
+    /**
+     * Make a int color from a rgba data
+     * @param r The red channel
+     * @param g The green channel
+     * @param b The blue channel
+     * @param a The alpha channel
+     * @return The int value
+     */
+    inline int INT_RGBA(uchar r, uchar g, uchar b, uchar a)
+    {
+        return ((int)r) << 24 + ((int)g) << 16 + ((int)b) << 8 + (int)a;
+    }
+
+    /**
+     * Make a int color from a rgb data
+     * @param r The red channel
+     * @param g The green channel
+     * @param b The blue channel
+     * @return The int value
+     */
+    inline int INT_RGB(uchar r, uchar g, uchar b)
+    {
+        return ((int)r) << 24 + ((int)g) << 16 + ((int)b) << 8;
+    }
+
+    /**
+     * Get the red channel from a int color
+     */
+    inline uchar INT_RED(int color) { return (uchar)((color & 0xFF000000) >> 24); }
+    
+    /**
+     * Get the red channel from a int color
+     */
+    inline uchar INT_GREEN(int color) { return (uchar)((color & 0x00FF0000) >> 16); }
+    
+    /**
+     * Get the blue channel from a int color
+     */
+    inline uchar INT_BLUE(int color) { return (uchar)((color & 0x0000FF00) >> 8); }
+    
+    /**
+     * Get the alpha channel from a int color
+     */
+    inline uchar INT_ALPHA(int color) { return (uchar)color & 0x000000FF; }
+
+    /**
+     * Class for rgba color
+     */
+    class Rgba : public Vector4<uchar>
+    {    
+    public:
+        Rgba(uchar r, uchar g, uchar b, uchar a = 255)
+            : Vector4(r, g, b, a)
+        {}
+        
+        Rgba(int rgba)
+            : Vector4(INT_RED(rgba),
+                INT_GREEN(rgba),
+                INT_BLUE(rgba),
+                INT_ALPHA(rgba))
+        {
+        }
+
+        Rgba(Vector4<float> color)
+            : Vector4((uchar)(color.x * 255),
+                (uchar)(color.y * 255),
+                (uchar)(color.z * 255),
+                (uchar)(color.w * 255))
+        {
+        }
+
+        Rgba(Vector3<float> color)
+            : Vector4((uchar)(color.x * 255),
+                (uchar)(color.y * 255),
+                (uchar)(color.z * 255),
+                (uchar)(255))
+        {
+        }
+
+        uchar red() { return x; }
+        uchar green() { return y; }
+        uchar blue() { return z; }
+        uchar alpha() { return w; }
+        int   value() { return operator int(); }
+
+        operator Vector4<float>() { return Vector4<float>(x / 255.0f, y / 255.0f, z / 255.0f, w / 255.0f); }
+        operator int() { return INT_RGBA(red(), green(), blue(), alpha()); }
+    };
+    
 
     /**
      * Class for matrix 3x3.
@@ -2290,6 +2380,17 @@ namespace sge {
             mat.cel[1][1] = sy;
             mat.cel[2][2] = sz;
             return mat;
+        }
+        
+        /**
+         * Create scale matrix with @a vec3
+         * being values of matrix main diagonal.
+         * @param v Scale
+         * @return Transform matrix 4x4 with scale transformation.
+         */
+        static Matrix4<T> createScale(Vector3<T> v)
+        {
+            return createScale(v.x, v.y, v.z);
         }
 
         /**
@@ -3854,7 +3955,7 @@ namespace sge {
          */
         Vector2<T> point(size_t i) const
         {
-            assert(i < 4);
+            ASSERT(i < 4);
             return Vector2<T>(i & 1 ? min.x : max.x, i & 2 ? min.y : max.y);
         }
 
@@ -4264,7 +4365,7 @@ namespace sge {
          */
         Vector3<T> point(size_t i) const
         {
-            assert(i < 8);
+            ASSERT(i < 8);
             return Vector3<T>(i & 1 ? min.x : max.x, i & 2 ? min.y : max.y, i & 4 ? min.z : max.z);
         }
 
@@ -4712,8 +4813,10 @@ namespace sge {
     typedef Ray<float>  rayf;
     typedef Ray<double> ray;
 
-#pragma pack(pop)
-
 } // !namespace sge
+
+#pragma pack(pop)
+#pragma warning(pop)
+#pragma warning(disable: 4251)
 
 #endif // SGE_MATH_H

@@ -3,8 +3,8 @@
  * Simple graphic engine
  * "sge" libraiy is a simple graphics engine, named sge.
  *
- * sgePlatformNativeWin32.h
- * date: 2018/11/14
+ * sgeScene.h
+ * date: 2018/12/04
  * author: xiang
  *
  * License
@@ -40,49 +40,44 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
-#ifndef SGE_PLATFORM_NATIVE_WIN32_H
-#define SGE_PLATFORM_NATIVE_WIN32_H
+#ifndef SGE_SCENE_H
+#define SGE_SCENE_H
 
 #include <core/sgePlatform.h>
-#include <core/sgePlatformNative.h>
-
-#if (SGE_TARGET_PLATFORM == SGE_PLATFORM_WIN32)
 
 namespace sge
 {
 
+    class Application;
+
     /**
-     * Win32 native platform interface implement
+     * Class scene, execute by Application
+     * @note must use 'new' method to create instance, it will be deleted after unload.
      */
-    class SGE_API PlatformWin32Native : public PlatformNative
+    class Scene
     {
     public:
-        PlatformWin32Native(HWND pWnd, int width = 800, int height = 600);
-        ~PlatformWin32Native();
 
-#ifdef OPENGLES
-        virtual EGLNativeWindowType     getWindow() { return _hWnd; }
-        virtual EGLNativeDisplayType    getDisplay() { return _hDC; }
-#else
-        HWND    getHWnd() { return _hWnd; }
-#endif
+        /**
+         * Call by application when need load this scene
+         * @param app The application which need load this scene
+         */
+        virtual void OnLoad(Application* app) = 0;
 
-        void    Close() { PostMessage(_hWnd, WM_CLOSE, 0, 0); }
-        bool    IsClosed() { return _hWnd == NULL; }
-        
-        virtual bool        ProcessEvents();
+        /**
+         * Call by application when need unload this scene
+         * @param app The application which need unload this scene
+         */
+        virtual void OnUnLoad(Application* app) = 0;
 
-    public:
-        virtual LRESULT     wndProc(HWND hWnd, UINT msgId, WPARAM wParam, LPARAM lParam);
-        
-    private:
-        HWND    _hWnd;
-        HDC     _hDC;
+        /**
+         * Call by application when need render this scene
+         * @param app The application which need render this scene
+         */
+        virtual void OnRender(Application* app) = 0;
+
     };
 
 }
 
-#endif
-
-#endif // !SGE_PLATFORM_NATIVE_WIN32_H
+#endif // !SGE_SCENE_H

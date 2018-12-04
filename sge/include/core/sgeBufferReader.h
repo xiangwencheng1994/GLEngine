@@ -4,7 +4,7 @@
  * "sge" libraiy is a simple graphics engine, named sge.
  *
  * sgeBufferReader.h
- * date: 2018/5/30
+ * date: 2018/05/30
  * author: xiang
  *
  * License
@@ -63,7 +63,7 @@ namespace sge
         BufferReader(const byte* buffer, size_t len)
             : _buff(buffer), _len(len), _cur(0)
         {
-            assert(buffer && "buffer can not be null");
+            ASSERT(buffer && "buffer can not be null");
         }
 
         /**
@@ -120,7 +120,7 @@ namespace sge
          */
         size_t Read(void* buff, size_t elementSize, size_t elementCount) override
         {
-            assert(buff && "read buff can not be null");
+            ASSERT(buff && "read buff can not be null");
             size_t readCount = (_len - _cur) / elementSize;
             if (readCount > elementCount) readCount = elementCount;
             if (readCount > 0)

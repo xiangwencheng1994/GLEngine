@@ -232,9 +232,9 @@ namespace sge
          * Bind a delegate
          * @param method T target function
          */
-        void Bind(R (*method)(A1))
+        void Bind(R(*method)(A1))
         {
-            if (object && method)
+            if (method)
             {
                 delegateImpl = new(dreal) Delegate1StaticImpl<R, A1>(method);
             }
@@ -339,7 +339,7 @@ namespace sge
          */
         void Bind(R(*method)(A1, A2))
         {
-            if (object && method)
+            if (method)
             {
                 delegateImpl = new(dreal) Delegate2StaticImpl<R, A1, A2>(method);
             }
@@ -444,7 +444,7 @@ namespace sge
          */
         void Bind(R(*method)(A1, A2, A3))
         {
-            if (object && method)
+            if (method)
             {
                 delegateImpl = new(dreal) Delegate3StaticImpl<R, A1, A2, A3>(method);
             }
@@ -549,7 +549,7 @@ namespace sge
          */
         void Bind(R(*method)(A1, A2, A3, A4))
         {
-            if (object && method)
+            if (method)
             {
                 delegateImpl = new(dreal) Delegate4StaticImpl<R, A1, A2, A3, A4>(method);
             }

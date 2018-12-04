@@ -122,13 +122,13 @@ namespace sge
     inline void Mutex::Lock()
     {
         int ret = pthread_mutex_lock(&d->_mutex);
-		assert(ret == 0);
+		ASSERT(ret == 0);
     }
 
     inline void Mutex::Unlock()
     {
         int ret = pthread_mutex_unlock(&d->_mutex);
-        assert(ret == 0);
+        ASSERT(ret == 0);
     }
 
     inline bool Mutex::TryLock()

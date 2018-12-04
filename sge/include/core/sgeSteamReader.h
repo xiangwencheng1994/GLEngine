@@ -127,7 +127,7 @@ namespace sge
             size_t len = Length();
             std::string data(len, 0);
             len = Read((void*)data.c_str(), len, 1);
-            assert(len == 1);
+            ASSERT(len == 1);
             return data;
         }
     };

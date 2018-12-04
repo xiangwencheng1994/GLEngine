@@ -3,8 +3,8 @@
  * Simple graphic engine
  * "sge" libraiy is a simple graphics engine, named sge.
  *
- * sgePlatformNativeWin32.h
- * date: 2018/11/14
+ * sgeApplication.cpp
+ * date: 2018/12/05
  * author: xiang
  *
  * License
@@ -40,49 +40,72 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <core/sgeApplication.h>
+#include <core/sgeScene.h>
 
-#ifndef SGE_PLATFORM_NATIVE_WIN32_H
-#define SGE_PLATFORM_NATIVE_WIN32_H
-
-#include <core/sgePlatform.h>
-#include <core/sgePlatformNative.h>
-
-#if (SGE_TARGET_PLATFORM == SGE_PLATFORM_WIN32)
+#if SGE_TARGET_PLATFORM == SGE_PLATFORM_WIN32
+#include <win32/sgePlatformNativeWin32.h>
+#endif // SGE_TARGET_PLATFORM
 
 namespace sge
 {
-
-    /**
-     * Win32 native platform interface implement
-     */
-    class SGE_API PlatformWin32Native : public PlatformNative
+    Application::Application()
+        : _curScene(NULL), _platform(NULL)
     {
-    public:
-        PlatformWin32Native(HWND pWnd, int width = 800, int height = 600);
-        ~PlatformWin32Native();
-
 #ifdef OPENGLES
-        virtual EGLNativeWindowType     getWindow() { return _hWnd; }
-        virtual EGLNativeDisplayType    getDisplay() { return _hDC; }
-#else
-        HWND    getHWnd() { return _hWnd; }
+        PlatformWin32Native* p = new PlatformWin32Native(0);
+        _platform = p;
+        _glContext.Init(p->getWindow(), p->getDisplay());
+        _glContext.EnableVSYNC(false);
+#elif SGE_TARGET_PLATFORM == SGE_PLATFORM_WIN32
+        PlatformWin32Native* p = new PlatformWin32Native(0);
+        _platform = p;
+        _glContext.Init(p->getHWnd(), GetDC(p->getHWnd()), 0);
+        _glContext.EnableVSYNC(false);
 #endif
+    }
 
-        void    Close() { PostMessage(_hWnd, WM_CLOSE, 0, 0); }
-        bool    IsClosed() { return _hWnd == NULL; }
-        
-        virtual bool        ProcessEvents();
+    Application::~Application()
+    {
+        _glContext.Shutdown();
+        if (_platform)
+        {
+            delete _platform;
+            _platform = NULL;
+        }
+    }
 
-    public:
-        virtual LRESULT     wndProc(HWND hWnd, UINT msgId, WPARAM wParam, LPARAM lParam);
-        
-    private:
-        HWND    _hWnd;
-        HDC     _hDC;
-    };
+    void Application::Run()
+    {
+        ASSERT(_platform);
+        while (!_platform->IsClosed())
+        {
+            if (!_platform->ProcessEvents())
+            {
+                if (_curScene)
+                {                   
+                    _curScene->OnRender(this);
+                    _glContext.SwapBuffer();
+                }
+            }
+        }
+    }
+
+    void Application::LoadScene(Scene* scene)
+    {
+        Scene* oldScene = _curScene;
+        if (scene)
+        {
+            scene->OnLoad(this);
+        }
+        _curScene = scene;
+
+        if (oldScene)
+        {
+            oldScene->OnUnLoad(this);
+            //TODO: check all oldScene resouces released.
+            delete oldScene;
+        }
+    }
 
 }
-
-#endif
-
-#endif // !SGE_PLATFORM_NATIVE_WIN32_H
