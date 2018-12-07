@@ -52,84 +52,60 @@ namespace sge
 {
 
     /**
-     * Mouse or keybord action type
+     * The key states masks for mouse message
      */
-    enum NativePressAction
+    typedef enum Mask_KeyState
     {
-        PressDown,
-        PressUp
-    };
+        Mask_LBUTTON  =   0x0001,
+        Mask_RBUTTON  =   0x0002,
+        Mask_SHIFT    =   0x0004,
+        Mask_CONTROL  =   0x0008,
+        Mask_MBUTTON  =   0x0010,
+        Mask_XBUTTON1 =   0x0020,
+        Mask_XBUTTON2 =   0x0040,
+    } Mask_KeyState;
 
     /**
-     * Mouse button type
+     * Mouse button down event
      */
-    enum NativeMouseButton
-    {
-        LeftButton,
-        RightButton,
-        MidleButton
-    };
-
-    /**
-     * Mouse button event
-     */
-    typedef struct NativeMouseButtonEvent
-    {
-        NativePressAction   _action;
-        NativeMouseButton   _button;
-        int2                _pos;
-    } NativeMouseButtonEvent;
-
-    /**
-     * Mouse move event
-     */
-    typedef struct NativeMouseMoveEvent
-    {
-        int2                _pos;
-    } NativeMouseMoveEvent;
-
+    typedef struct MouseButtonEvent
+    {        
+        int2    _pos;
+        byte    _masks;
+    } MouseDownEvent, MouseUpEvent, MouseMoveEvent, MouseClickEvent, MouseDBClickEvent;
+    
     /**
      * Mouse wheel event
      */
-    typedef struct NativeMouseWheelEvent
+    typedef struct MouseWheelEvent
     {
-        float               _delta;
-    } NativeMouseWhellEvent;
-
-    /**
-     * Click event
-     */
-    typedef struct NativeClickEvent
+        int     _zDelta;
+        int2    _pos;
+        byte    _masks;
+    } MouseWheelEvent;
+         
+    typedef struct KeyDownEvent
     {
-        int2                _pos;
-    } NativeClickEvent;
-
-    /**
-     * Keybord event
-     */
-    typedef struct NativeKeyEvent
-    {
-        NativePressAction   _action;
-        byte                _keyCode;  //TODO: define key map
-    } NativeKeyEvent;
+        byte    _vKeyCode;
+    } KeyDownEvent, KeyUpEvent;
 
     /**
      * Surface resized event
      */
-    typedef struct NativeResizeEvent
+    typedef struct ResizeEvent
     {
-        int2                _size;
-    } NativeResizeEvent;
+        int2    _size;
+    } ResizeEvent;
 
-    /**
-     * User defined event
-     */
-    typedef struct NativeUserEvent
-    {
-        const char*     _name;
-        void *          _data1;
-        void *          _data2;
-    } NativeUserEvent;
+    typedef Delegate1<bool, const MouseDownEvent&>  OnMouseDownEvent;
+    typedef Delegate1<bool, const MouseUpEvent&>    OnMouseUpEvent;
+    typedef Delegate1<bool, const MouseClickEvent&> OnMouseClickEvent;
+    typedef Delegate1<bool, const MouseMoveEvent&>  OnMouseMoveEvent;
+    typedef Delegate1<bool, const MouseWheelEvent&> OnMouseWheelEvent;
+    typedef Delegate1<bool, const KeyDownEvent&>    OnKeyDownEvent;
+    typedef Delegate1<bool, const KeyUpEvent&>      OnKeyUpEvent;
+    typedef Delegate1<bool, const ResizeEvent&>     OnResizeEvent;
+    typedef Delegate0<bool>                         OnCloseEvent;
 
     /**
      * The native platform interface
@@ -137,24 +113,26 @@ namespace sge
     class SGE_API PlatformNative
     {
     public:
-        typedef Delegate1<bool, NativeMouseButtonEvent&>    OnMouseButtonEvent;
-        typedef Delegate1<bool, NativeMouseMoveEvent&>      OnMouseMoveEvent;
-        typedef Delegate1<bool, NativeMouseWheelEvent&>     OnMouseWheelEvent;
-        typedef Delegate1<bool, NativeClickEvent&>          OnClickEvent;
-        typedef Delegate1<bool, NativeKeyEvent&>            OnKeyEvent;
-        typedef Delegate1<bool, NativeResizeEvent&>         OnResizeEvent;
-        typedef Delegate1<void, NativeUserEvent&>           OnUserEvent;
-        typedef Delegate0<bool>                             OnCloseEvent;
+        OnMouseDownEvent    _OnLeftButtonDownEvent;
+        OnMouseUpEvent      _OnLeftButtonUpEvent;
+        OnMouseClickEvent   _OnLeftButtonClickEvent;
 
-    public:
-        OnMouseButtonEvent      _onMouseButtonEvent;
-        OnMouseMoveEvent        _onMouseMoveEvent;
-        OnMouseWheelEvent       _onMouseWheelEvent;
-        OnClickEvent            _onClickEvent;
-        OnKeyEvent              _onKeyEvent;
-        OnResizeEvent           _onResizeEvent;
-        OnUserEvent             _onUserEvent;
-        OnCloseEvent            _onCloseEvent;
+        OnMouseDownEvent    _OnRightButtonDownEvent;
+        OnMouseUpEvent      _OnRightButtonUpEvent;
+        OnMouseClickEvent   _OnRightButtonClickEvent;
+
+        OnMouseDownEvent    _OnMiddleButtonDownEvent;
+        OnMouseUpEvent      _OnMiddleButtonUpEvent;
+        OnMouseClickEvent   _OnMiddleButtonClickEvent;
+
+        OnMouseMoveEvent    _OnMouseMoveEvent;
+        OnMouseWheelEvent   _OnMouseWheelEvent;
+
+        OnKeyDownEvent      _OnKeyDownEvent;
+        OnKeyUpEvent        _OnKeyUpEvent;
+
+        OnResizeEvent       _OnResizeEvent;
+        OnCloseEvent        _OnCloseEvent;
 
     public:
         virtual ~PlatformNative() {}

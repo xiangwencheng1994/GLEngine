@@ -3,8 +3,8 @@
  * Simple graphic engine
  * "sge" libraiy is a simple graphics engine, named sge.
  *
- * Application.h
- * date: 2018/11/23
+ * sgeTextureManager.h
+ * date: 2018/12/08
  * author: xiang
  *
  * License
@@ -40,67 +40,87 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SGE_APP_BASE_H
-#define SGE_APP_BASE_H
+#ifndef SGE_TEXTURE_MANAGER_H
+#define SGE_TEXTURE_MANAGER_H
 
 #include <core/sgePlatform.h>
-#include <core/sgeGLContext.h>
+#include <core/sgeGLX.h>
 
 namespace sge
 {
-    class IScene;
-    class PlatformNative;
-
     /**
-     * Class Application, to drive the application system
+     * The references texture2d
      */
-    class SGE_API  Application
+    class Texture2DRef : public Texture2D
     {
     public:
         /**
-         * Constructor
+         * Construtor while a null texture
          */
-        Application();
+        Texture2DRef();
 
         /**
          * Destructor
          */
-        virtual ~Application();
+        ~Texture2DRef();
 
         /**
-         * Run the application util quit
+         * Copy constructor
          */
-        void Run();
+        Texture2DRef(const Texture2DRef& rhs);
 
         /**
-         * Load a scene instead of current scene, old scene will unloaded and deleted
-         * @param scene The new scene
+         * Reset texture form rhs
          */
-        void LoadScene(IScene* scene);
+        Texture2DRef& operator=(const Texture2DRef& rhs);
 
         /**
-         * Send a quit message to platform
+         * Release object
          */
-        void Quit();
+        void    Release();
+    protected:
+        friend class TextureManager;
+        TextureManager* _mgr;
+        size_t*         _refCount;
+    };
+
+    /**
+     * Class TextureManager
+     */
+    class TextureManager
+    {        
+    public:
+        /**
+         * Constructor
+         */
+        TextureManager();
 
         /**
-         * Get the native platform interface
+         * Destructor, will release all texture
          */
-        PlatformNative* Platform() { return _platform; }
+        ~TextureManager();
 
         /**
-         * Get the current scene
+         * Load a texture form file
          */
-        IScene* CurrentScene() { return _curScene; }
+        Texture2DRef LoadTexture(const char* file);
 
+    protected:
+        friend class Texture2DRef;
+        void RemoveTex(GLuint tex); // unload tex
+        void AddRefItem(Texture2DRef* item); // add a item to manager
+        void RemoveRefItem(Texture2DRef* item); // remove item from nanager
     private:
-        IScene*             _curScene;
-        PlatformNative*     _platform;
-        GLContext           _glContext;
-
-        DISABLE_COPY(Application)
+        struct TextureDesc
+        {
+            String  file;
+            int2    size;
+            size_t  refCount;
+        };
+        Map<GLuint, TextureDesc> _tex_ref_map;
+        List<Texture2DRef*> _mItems;
     };
 
 }
 
-#endif // !SGE_APP_BASE_H
+#endif // !SGE_TEXTURE_MANAGER_H

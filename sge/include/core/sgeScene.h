@@ -44,6 +44,7 @@
 #define SGE_SCENE_H
 
 #include <core/sgePlatform.h>
+#include <core/sgePlatformNative.h>
 
 namespace sge
 {
@@ -54,9 +55,10 @@ namespace sge
      * Class scene, execute by Application
      * @note must use 'new' method to create instance, it will be deleted after unload.
      */
-    class Scene
+    class SGE_API IScene
     {
-    public:
+    protected:
+        friend class Application;
 
         /**
          * Call by application when need load this scene
@@ -76,6 +78,157 @@ namespace sge
          */
         virtual void OnRender(Application* app) = 0;
 
+        /**
+         * Release this object
+         */
+        virtual void Release() = 0;
+    };
+
+
+    namespace ui
+    {
+        class IView;
+    }
+
+    /**
+     * The base scene
+     */
+    class SGE_API Scene : public IScene
+    {
+    public:
+        /**
+         * Constructor
+         */
+        Scene();
+        
+        /**
+         * Destructor
+         */
+        virtual ~Scene();
+
+    protected:
+        
+        /**
+         * Load the base scene
+         */
+        virtual void OnLoad(Application* app) override;
+
+        /**
+         * Unload the base scene
+         */
+        virtual void OnUnLoad(Application* app) override;
+
+        /**
+         * Render the base scene
+         */
+        virtual void OnRender(Application* app) override;
+        
+        /**
+         * Callback while mouse left button down
+         * @param event The event data
+         * @return true if you has processed this event
+         */
+        virtual bool OnLeftButtonDownEvent(const MouseDownEvent& event);
+
+        /**
+         * Callback while mouse left button up
+         * @param event The event data
+         * @return true if you has processed this event
+         */
+        virtual bool OnLeftButtonUpEvent(const MouseUpEvent& event);
+
+        /**
+         * Callback while mouse left button click
+         * @param event The event data
+         * @return true if you has processed this event
+         */
+        virtual bool OnLeftButtonClickEvent(const MouseClickEvent& event);
+
+        /**
+         * Callback while mouse right button down
+         * @param event The event data
+         * @return true if you has processed this event
+         */
+        virtual bool OnRightButtonDownEvent(const MouseDownEvent& event);
+
+        /**
+         * Callback while mouse right button up
+         * @param event The event data
+         * @return true if you has processed this event
+         */
+        virtual bool OnRightButtonUpEvent(const MouseUpEvent& event);
+
+        /**
+         * Callback while mouse right button click
+         * @param event The event data
+         * @return true if you has processed this event
+         */
+        virtual bool OnRightButtonClickEvent(const MouseClickEvent& event);
+
+        /**
+         * Callback while mouse middle button down
+         * @param event The event data
+         * @return true if you has processed this event
+         */
+        virtual bool OnMiddleButtonDownEvent(const MouseDownEvent& event);
+
+        /**
+         * Callback while mouse middle button up
+         * @param event The event data
+         * @return true if you has processed this event
+         */
+        virtual bool OnMiddleButtonUpEvent(const MouseUpEvent& event);
+
+        /**
+         * Callback while mouse middle button click
+         * @param event The event data
+         * @return true if you has processed this event
+         */
+        virtual bool OnMiddleButtonClickEvent(const MouseClickEvent& event);
+
+        /**
+         * Callback while mouse move
+         * @param event The event data
+         * @return true if you has processed this event
+         */
+        virtual bool OnMouseMoveEvent(const MouseMoveEvent& event);
+
+        /**
+         * Callback while mouse wheel wheeled
+         * @param event The event data
+         * @return true if you has processed this event
+         */
+        virtual bool OnMouseWheelEvent(const MouseWheelEvent& event);
+
+        /**
+         * Callback while key down
+         * @param event The event data
+         * @return true if you has processed this event
+         */
+        virtual bool OnKeyDownEvent(const KeyDownEvent& event);
+
+        /**
+         * Callback while key up
+         * @param event The event data
+         * @return true if you has processed this event
+         */
+        virtual bool OnKeyUpEvent(const KeyUpEvent& event);
+
+        /**
+         * Callback while wanted set size
+         * @param event The event data
+         * @return true if you has processed this event
+         */
+        virtual bool OnResizeEvent(const ResizeEvent& event);
+
+        /**
+         * Callback while wanted close application
+         * @return true if you want not close.
+         */
+        virtual bool OnCloseEvent();
+
+    private:
+        ui::IView*      _gui;
     };
 
 }

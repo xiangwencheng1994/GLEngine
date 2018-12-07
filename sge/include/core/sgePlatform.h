@@ -121,4 +121,13 @@ SGE_API void glClearError();
 		Class(const Class &) = delete; \
 		Class &operator=(const Class &) = delete;
 
+#include <string>
+#include <vector>
+#include <list>
+#include <map>
+#define String  std::string
+#define Vector  std::vector
+#define List    std::list
+#define Map     std::map
+
 #endif

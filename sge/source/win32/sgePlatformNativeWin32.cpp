@@ -199,88 +199,81 @@ namespace sge
         case WM_LBUTTONDOWN:
         {
             int2 pos((short)LOWORD(lParam), (short)HIWORD(lParam));
-            NativeMouseButtonEvent event = { PressDown, LeftButton, pos };
-            ret = _onMouseButtonEvent(event);
+            MouseDownEvent event = { pos, (byte)GET_KEYSTATE_WPARAM(wParam) };
+            ret = _OnLeftButtonDownEvent(event);
         } break;
 
         case WM_LBUTTONUP:
         {
             int2 pos((short)LOWORD(lParam), (short)HIWORD(lParam));
-            NativeMouseButtonEvent event = { PressUp, LeftButton, pos };
-            ret = _onMouseButtonEvent(event);
+            MouseUpEvent event = { pos, (byte)GET_KEYSTATE_WPARAM(wParam) };
+            ret = _OnLeftButtonUpEvent(event);
         } break;
 
         case WM_RBUTTONDOWN:
         {
             int2 pos((short)LOWORD(lParam), (short)HIWORD(lParam));
-            NativeMouseButtonEvent event = { PressDown, RightButton, pos };
-            ret = _onMouseButtonEvent(event);
+            MouseDownEvent event = { pos, (byte)GET_KEYSTATE_WPARAM(wParam) };
+            ret = _OnRightButtonDownEvent(event);
         } break;
 
         case WM_RBUTTONUP:
         {
             int2 pos((short)LOWORD(lParam), (short)HIWORD(lParam));
-            NativeMouseButtonEvent event = { PressUp, RightButton, pos };
-            ret = _onMouseButtonEvent(event);
+            MouseUpEvent event = { pos, (byte)GET_KEYSTATE_WPARAM(wParam) };
+            ret = _OnRightButtonUpEvent(event);
         } break;
 
         case WM_MBUTTONDOWN:
         {
             int2 pos((short)LOWORD(lParam), (short)HIWORD(lParam));
-            NativeMouseButtonEvent event = { PressDown, MidleButton, pos };
-            ret = _onMouseButtonEvent(event);
+            MouseDownEvent event = { pos, (byte)GET_KEYSTATE_WPARAM(wParam) };
+            ret = _OnMiddleButtonDownEvent(event);
         } break;
 
         case WM_MBUTTONUP:
         {
             int2 pos((short)LOWORD(lParam), (short)HIWORD(lParam));
-            NativeMouseButtonEvent event = { PressUp, MidleButton, pos };
-            ret = _onMouseButtonEvent(event);
+            MouseUpEvent event = { pos, (byte)GET_KEYSTATE_WPARAM(wParam) };
+            ret = _OnMiddleButtonUpEvent(event);
         } break;
 
         case WM_MOUSEWHEEL:
         {
-            NativeMouseWheelEvent event = { (float)GET_WHEEL_DELTA_WPARAM(wParam) };
-            ret = _onMouseWheelEvent(event);
+            int2 pos((short)LOWORD(lParam), (short)HIWORD(lParam));
+            MouseWheelEvent event = { GET_WHEEL_DELTA_WPARAM(wParam), pos, (byte)GET_KEYSTATE_WPARAM(wParam) };
+            ret = _OnMouseWheelEvent(event);
         } break;
 
         case WM_MOUSEMOVE:
         {
             int2 pos((short)LOWORD(lParam), (short)HIWORD(lParam));
-            NativeMouseMoveEvent event = { pos };
-            ret = _onMouseMoveEvent(event);
+            MouseMoveEvent event = { pos, (byte)GET_KEYSTATE_WPARAM(wParam) };
+            ret = _OnMouseMoveEvent(event);
         } break;
 
         case WM_SIZE:
         {
             int2 size((short)LOWORD(lParam), (short)HIWORD(lParam));
-            NativeResizeEvent event = { size };
-            ret = _onResizeEvent(event);
+            ResizeEvent event = { size };
+            ret = _OnResizeEvent(event);
         } break;
 
         case WM_KEYDOWN:
         {
-            NativeKeyEvent event = { PressDown, (byte)wParam };
-            ret = _onKeyEvent(event);
+            KeyDownEvent event = { (byte)wParam };
+            ret = _OnKeyDownEvent(event);
         } break;
 
         case WM_KEYUP:
         {
-            NativeKeyEvent event = { PressUp, (byte)wParam };
-            ret = _onKeyEvent(event);
-        } break;
-
-        case WM_USER:
-        {
-            NativeUserEvent* event = (NativeUserEvent*)lParam;
-            ASSERT(event);
-            _onUserEvent(*event);
-            ret = true;
+            KeyUpEvent event = { (byte)wParam };
+            ret = _OnKeyUpEvent(event);
         } break;
 
         case WM_CLOSE:
         {
-            ret = _onCloseEvent();
+            ret = _OnCloseEvent();
         } break;
 
         case WM_DESTROY:

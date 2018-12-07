@@ -41,6 +41,7 @@
  */
 
 #include <core/sgeApplication.h>
+#include <core/sgePlatformNative.h>
 #include <core/sgeScene.h>
 
 #if SGE_TARGET_PLATFORM == SGE_PLATFORM_WIN32
@@ -56,7 +57,6 @@ namespace sge
         PlatformWin32Native* p = new PlatformWin32Native(0);
         _platform = p;
         _glContext.Init(p->getWindow(), p->getDisplay());
-        _glContext.EnableVSYNC(false);
 #elif SGE_TARGET_PLATFORM == SGE_PLATFORM_WIN32
         PlatformWin32Native* p = new PlatformWin32Native(0);
         _platform = p;
@@ -91,9 +91,9 @@ namespace sge
         }
     }
 
-    void Application::LoadScene(Scene* scene)
+    void Application::LoadScene(IScene* scene)
     {
-        Scene* oldScene = _curScene;
+        IScene* oldScene = _curScene;
         if (scene)
         {
             scene->OnLoad(this);
@@ -104,8 +104,16 @@ namespace sge
         {
             oldScene->OnUnLoad(this);
             //TODO: check all oldScene resouces released.
-            delete oldScene;
+            oldScene->Release();
         }
+    }
+
+    void Application::Quit()
+    {
+        // unload the scene
+        LoadScene(NULL);
+        // close native platform
+        Platform()->Close();
     }
 
 }

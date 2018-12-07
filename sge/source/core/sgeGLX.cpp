@@ -62,16 +62,16 @@ bool glCheckError(const char* function, const char* file, int line)
 namespace sge
 {
     
-    Texture2D Texture2D::FromFile(const char* file)
+    bool Texture2D::FromFile(const char* file)
     {
         ASSERT(file);
-        Texture2D tex;
+        bool ret = false;
         int comp = 0;
-        byte* data = stbi_load(file, &tex._size.x, &tex._size.y, &comp, 0);
+        byte* data = stbi_load(file, &_size.x, &_size.y, &comp, 0);
         if (data)
         {
-            if (comp == 3) tex = FromRGB(data, tex._size.x, tex._size.y);
-            else if (comp == 4) tex = FromRGBA(data, tex._size.x, tex._size.y);
+            if (comp == 3) ret = FromRGB(data, _size.x, _size.y);
+            else if (comp == 4) ret = FromRGBA(data, _size.x, _size.y);
             else
             {
                 Log::error("cannot create texture from comp %d", comp);
@@ -82,19 +82,19 @@ namespace sge
         {
             Log::error("stbi_load %s failed: %s", file, stbi_failure_reason());
         }
-        return tex;
+        return ret;
     }
 
-    Texture2D Texture2D::FromSteam(byte* stream, size_t len)
+    bool Texture2D::FromStream(byte* stream, size_t len)
     {
         ASSERT(stream);
-        Texture2D tex;
+        bool ret = false;
         int comp = 0;
-        byte* data = stbi_load_from_memory(stream, len, &tex._size.x, &tex._size.y, &comp, 0);
+        byte* data = stbi_load_from_memory(stream, len, &_size.x, &_size.y, &comp, 0);
         if (data)
         {
-            if (comp == 3) tex = FromRGB(data, tex._size.x, tex._size.y);
-            else if (comp == 4) tex = FromRGBA(data, tex._size.x, tex._size.y);
+            if (comp == 3) ret = FromRGB(data, _size.x, _size.y);
+            else if (comp == 4) ret = FromRGBA(data, _size.x, _size.y);
             else
             {
                 Log::error("cannot create texture from comp %d", comp);
@@ -105,45 +105,47 @@ namespace sge
         {
             Log::error("stbi_load_from_memory failed: %s", stbi_failure_reason());
         }
-        return tex;
+        return ret;
     }
 
-    Texture2D Texture2D::FromRGB(byte* data, int w, int h)
+    bool Texture2D::FromRGB(byte* data, int w, int h)
     {
-        Texture2D tex;
-        GLCall(glGenTextures(1, &tex._texId));
-        tex._size.x = w;
-        tex._size.y = h;
-        tex.Bind();
-        GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT));
-        GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT));
-        GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
-        GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
-        if (data)
+        ASSERT(data);
+        if (!IsValid())
         {
-            GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, w, h, 0, GL_RGB, GL_UNSIGNED_BYTE, data));
+            GLCall(glGenTextures(1, &_texId));
+            Bind();
+            GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT));
+            GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT));
+            GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
+            GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
         }
-        tex.Unbind();
-        return tex;
+        else Bind();
+        _size.x = w;
+        _size.y = h;
+        GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, w, h, 0, GL_RGB, GL_UNSIGNED_BYTE, data));
+        Unbind();
+        return true;
     }
 
-    Texture2D Texture2D::FromRGBA(byte* data, int w, int h)
+    bool Texture2D::FromRGBA(byte* data, int w, int h)
     {
-        Texture2D tex;
-        GLCall(glGenTextures(1, &tex._texId));
-        tex._size.x = w;
-        tex._size.y = h;
-        tex.Bind();
-        GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT));
-        GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT));
-        GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
-        GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
-        if (data)
+        ASSERT(data);
+        if (!IsValid())
         {
-            GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, data));
+            GLCall(glGenTextures(1, &_texId));
+            Bind();
+            GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT));
+            GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT));
+            GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
+            GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
         }
-        tex.Unbind();
-        return tex;
+        else Bind();
+        _size.x = w;
+        _size.y = h;
+        GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, data));
+        Unbind();
+        return true;
     }
 
 }

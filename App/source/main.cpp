@@ -7,21 +7,29 @@ using namespace sge;
 
 class MyScene : public Scene
 {
-    virtual void OnLoad(Application* app) {}
-
-    virtual void OnUnLoad(Application* app) {}
+    virtual bool OnLeftButtonUpEvent(const MouseButtonEvent& event) override
+    {
+        return Scene::OnLeftButtonUpEvent(event);
+    }
 
     virtual void OnRender(Application* app) 
     {
-        glClearColor(1, 0, 0, 1);
+        glClearColor(0.2f, 0.2f, 0.2f, 1);
         glClear(GL_COLOR_BUFFER_BIT);
+        
+        __super::OnRender(app);
+    }
+
+    virtual void Release()
+    {
     }
 };
 
 int main()
 {
     Application app;
-    app.LoadScene(new MyScene());
+    MyScene scene;
+    app.LoadScene(&scene);
     app.Run();
     return 0;
 }

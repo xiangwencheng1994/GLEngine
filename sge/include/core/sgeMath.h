@@ -95,6 +95,9 @@
 #   define MATH_TOLERANCE       2e-37f
 #endif
 
+#define HAS_FLAG(item, flag)            ((item) & (flag))
+#define SET_FLAG(item, flag, enable)    ((enable) ? ((item) |= (flag)) : ((item) &= ~(flag)))
+
 namespace sge {
     
     typedef unsigned char   uchar;

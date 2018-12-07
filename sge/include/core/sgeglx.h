@@ -67,11 +67,16 @@ namespace sge
      */
     enum BufferType
     {
+        // GL_ARRAY_BUFFER type
         VertexBuffer    = GL_ARRAY_BUFFER,
+        // GL_ELEMENT_ARRAY_BUFFER type
         ElementBuffer   = GL_ELEMENT_ARRAY_BUFFER,
+        // GL_UNIFORM_BUFFER type
         UniformBuffer   = GL_UNIFORM_BUFFER,
+        // GL_TRANSFORM_FEEDBACK_BUFFER type
         TransformBuffer = GL_TRANSFORM_FEEDBACK_BUFFER,
 #ifndef OPENGLES
+        // GL_DRAW_INDIRECT_BUFFER type
         IndirectBuffer = GL_DRAW_INDIRECT_BUFFER,
 #endif
     };
@@ -117,8 +122,11 @@ namespace sge
      */
     enum TextureType
     {
+        // GL_TEXTURE_2D type
         Tex2D       =   GL_TEXTURE_2D,
+        // GL_TEXTURE_2D_ARRAY type
         Tex2DArray  =   GL_TEXTURE_2D_ARRAY,
+        // GL_TEXTURE_3D type
         Tex3D       =   GL_TEXTURE_3D
     };
 
@@ -129,7 +137,43 @@ namespace sge
     class TextureBase
     {
     public:
-        virtual ~TextureBase()
+        /**
+         * Destructor
+         */
+        ~TextureBase()
+        {
+            Release();
+        }
+
+        /**
+         * Get the type of texture
+         */
+        TextureType GetType() const { return type; }
+        
+        /**
+         * Get the texture id in gl
+         */
+        GLuint      TexID() const { return _texId; }
+        
+        /**
+         * Bind this texture
+         */
+        void        Bind(int texUnit = 0) const { GLCall(glActiveTexture(GL_TEXTURE0 + texUnit)); GLCall(glBindTexture(type, _texId)); }
+        
+        /**
+         * Unbind this texture
+         */
+        void        Unbind() const { GLCall(glBindTexture(type, 0)); }
+        
+        /**
+         * Check this texture valid
+         */
+        bool        IsValid() const { return _texId != unsigned(-1); }
+        
+        /**
+         * Release this texture id
+         */
+        virtual void    Release() 
         {
             if (IsValid())
             {
@@ -137,18 +181,14 @@ namespace sge
                 _texId = unsigned(-1);
             }
         }
-
-        TextureType GetType() const { return type; }
-        GLuint      TexID() const { return _texId; }
-        void        Bind(int texUnit = 0) const { GLCall(glActiveTexture(GL_TEXTURE0 + texUnit)); GLCall(glBindTexture(type, _texId)); }
-        void        Unbind() const { GLCall(glBindTexture(type, 0)); }
-        bool        IsValid() const { return _texId != unsigned(-1); }
-
     protected:
-        TextureBase() : _texId(unsigned(-1)) {}
+        TextureBase(GLuint texId = unsigned(-1)) : _texId(texId) {}
         GLuint  _texId;
 
         friend class GLX;
+
+        // repeat deleted if copy when destruct
+        DISABLE_COPY(TextureBase)
     };
 
     /**
@@ -157,16 +197,48 @@ namespace sge
     class SGE_API Texture2D : public TextureBase<Tex2D>
     {
     public:
+        /**
+         * Constructor while null texture
+         */
         Texture2D() : _size(0, 0) {}
-        int2 Size() { return _size; }
-        
-        static Texture2D FromFile(const char* file);
-        static Texture2D FromSteam(byte* stream, size_t len);
-        static Texture2D FromRGB(byte* data, int w, int h);
-        static Texture2D FromRGBA(byte* data, int w, int h);
 
+        /**
+         * Get the size of this texture
+         */
+        int2 Size() { return _size; }
+
+        /**
+         * Get the width of this texture
+         */
+        int Width() { return _size.x; }
+
+        /**
+         * Get the height of this texture
+         */
+        int Height() { return _size.y; }
+        
+        /**
+         * Load/Reload texture form a image file
+         */
+        bool FromFile(const char* file);
+
+        /**
+         * Load/Reload texture form a stream
+         */
+        bool FromStream(byte* stream, size_t len);
+
+        /**
+         * Load/Reload texture form a raw dada with rgb format
+         */
+        bool FromRGB(byte* data, int w, int h);
+
+        /**
+         * Load/Reload texture form a raw dada with rgba format
+         */
+        bool FromRGBA(byte* data, int w, int h);
     private:
         int2    _size;
+        DISABLE_COPY(Texture2D);
     };
 
     /**
