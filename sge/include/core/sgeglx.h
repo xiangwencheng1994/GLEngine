@@ -9,7 +9,7 @@
  *
  * License
  *
- * Copyright (c) 2017-2018, Xiang Wencheng <xiangwencheng@outlook.com>
+ * Copyright (c) 2017-2019, Xiang Wencheng <xiangwencheng@outlook.com>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -106,7 +106,7 @@ namespace sge
         /**
          * Get the buffer is valid
          */
-        bool IsValid() const { return id != unsigned(-1); }
+        bool isValid() const { return id != unsigned(-1); }
     };
 
     typedef BufferDesc<VertexBuffer>    VBO;
@@ -142,48 +142,48 @@ namespace sge
          */
         ~TextureBase()
         {
-            Release();
+            release();
         }
 
         /**
          * Get the type of texture
          */
-        TextureType GetType() const { return type; }
+        TextureType getType() const { return type; }
         
         /**
          * Get the texture id in gl
          */
-        GLuint      TexID() const { return _texId; }
+        GLuint      getTexID() const { return mTexID; }
         
         /**
          * Bind this texture
          */
-        void        Bind(int texUnit = 0) const { GLCall(glActiveTexture(GL_TEXTURE0 + texUnit)); GLCall(glBindTexture(type, _texId)); }
+        void        bind(int texUnit = 0) const { GLCall(glActiveTexture(GL_TEXTURE0 + texUnit)); GLCall(glBindTexture(type, mTexID)); }
         
         /**
          * Unbind this texture
          */
-        void        Unbind() const { GLCall(glBindTexture(type, 0)); }
+        void        unbind() const { GLCall(glBindTexture(type, 0)); }
         
         /**
          * Check this texture valid
          */
-        bool        IsValid() const { return _texId != unsigned(-1); }
+        bool        isValid() const { return mTexID != unsigned(-1); }
         
         /**
          * Release this texture id
          */
-        virtual void    Release() 
+        virtual void    release() 
         {
-            if (IsValid())
+            if (isValid())
             {
-                GLCall(glDeleteTextures(1, &_texId));
-                _texId = unsigned(-1);
+                GLCall(glDeleteTextures(1, &mTexID));
+                mTexID = unsigned(-1);
             }
         }
     protected:
-        TextureBase(GLuint texId = unsigned(-1)) : _texId(texId) {}
-        GLuint  _texId;
+        TextureBase(GLuint texId = unsigned(-1)) : mTexID(texId) {}
+        GLuint  mTexID;
 
         friend class GLX;
 
@@ -200,44 +200,44 @@ namespace sge
         /**
          * Constructor while null texture
          */
-        Texture2D() : _size(0, 0) {}
+        Texture2D() : mSize(0, 0) {}
 
         /**
          * Get the size of this texture
          */
-        int2 Size() { return _size; }
+        int2 getSize() { return mSize; }
 
         /**
          * Get the width of this texture
          */
-        int Width() { return _size.x; }
+        int getWidth() { return mSize.x; }
 
         /**
          * Get the height of this texture
          */
-        int Height() { return _size.y; }
+        int getHeight() { return mSize.y; }
         
         /**
          * Load/Reload texture form a image file
          */
-        bool FromFile(const char* file);
+        bool loadFromFile(const char* file);
 
         /**
          * Load/Reload texture form a stream
          */
-        bool FromStream(byte* stream, size_t len);
+        bool loadFromStream(byte* stream, size_t len);
 
         /**
          * Load/Reload texture form a raw dada with rgb format
          */
-        bool FromRGB(byte* data, int w, int h);
+        bool loadFromRGB(byte* data, int w, int h);
 
         /**
          * Load/Reload texture form a raw dada with rgba format
          */
-        bool FromRGBA(byte* data, int w, int h);
+        bool loadFromRGBA(byte* data, int w, int h);
     private:
-        int2    _size;
+        int2    mSize;
         DISABLE_COPY(Texture2D);
     };
 
@@ -274,7 +274,7 @@ namespace sge
         /**
          * To log OpenGL version
          */
-        static void LogGLVersion()
+        static void logGLVersion()
         {
             const GLubyte* renderer = glGetString(GL_RENDERER);
             const GLubyte* vendor = glGetString(GL_VENDOR);
@@ -298,7 +298,7 @@ namespace sge
          * @return The buffer desc
          */
         template<BufferType T>
-        static BufferDesc<T> CreateBuffer(size_t size, const void* data = NULL, GLenum usage = GL_STATIC_DRAW)
+        static BufferDesc<T> createBuffer(size_t size, const void* data = NULL, GLenum usage = GL_STATIC_DRAW)
         {
             BufferDesc<T> buffer;
             buffer.size = size;
@@ -315,7 +315,7 @@ namespace sge
          * @param buffer The buffer we wanted bind
          */
         template<BufferType T>
-        static void BindBuffer(BufferDesc<T>* buffer)
+        static void bindBuffer(BufferDesc<T>* buffer)
         {
             GLCall(glBindBuffer(T, buffer ? buffer->id : 0));
         }
@@ -329,9 +329,9 @@ namespace sge
          * @param data The new data pointer
          */
         template<BufferType T>
-        static void UpdateBuffer(BufferDesc<T>& buffer, size_t offset, size_t dataLen, void* data)
+        static void updateBuffer(BufferDesc<T>& buffer, size_t offset, size_t dataLen, void* data)
         {
-            ASSERT(buffer.IsValid() && offset + dataLen <= buffer.size && dataLen);
+            ASSERT(buffer.isValid() && offset + dataLen <= buffer.size && dataLen);
             GLCall(glBindBuffer(T, buffer.id));
             GLCall(glBufferSubData(T, offset, dataLen, data));
             GLCall(glBindBuffer(T, 0));
@@ -343,9 +343,9 @@ namespace sge
          * @param buffer The buffer we wanted delete
          */
         template<BufferType T>
-        static void DeleteBuffer(BufferDesc<T>& buffer)
+        static void deleteBuffer(BufferDesc<T>& buffer)
         {
-            if (buffer.IsValid())
+            if (buffer.isValid())
             {
                 GLCall(glDeleteBuffers(1, &buffer.id));
                 buffer.id = unsigned(-1);
@@ -356,7 +356,7 @@ namespace sge
          * Set a float vertex input pointer for a program attribute
          * @params see alse glVertexAttribPointer
          */
-        static void VertexAttribPointer(attribute attr, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const void* pointer)
+        static void setVertexAttribPointer(attribute attr, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const void* pointer)
         {
             if (attr != unsigned(-1))
             {
@@ -369,7 +369,7 @@ namespace sge
          * Set a int vertex input pointer for a program attribute
          * @params see alse glVertexAttribIPointer
          */
-        static void VertexAttribPointerI(attribute attr, GLint size, GLenum type, GLsizei stride, const void* pointer)
+        static void setVertexAttribPointerI(attribute attr, GLint size, GLenum type, GLsizei stride, const void* pointer)
         {
             if (attr != unsigned(-1))
             {
@@ -383,7 +383,7 @@ namespace sge
          * Set a double vertex input pointer for a program attribute
          * @params see alse glVertexAttribIPointer
          */
-        static void VertexAttribPointerL(attribute attr, GLint size, GLenum type, GLsizei stride, const void* pointer)
+        static void setVertexAttribPointerL(attribute attr, GLint size, GLenum type, GLsizei stride, const void* pointer)
         {
             if (attr != unsigned(-1))
             {
@@ -396,7 +396,7 @@ namespace sge
         /**
          * Disable a vertex trribute array
          */
-        static void DisableVertexAttribArray(attribute attr)
+        static void disableVertexAttribArray(attribute attr)
         {
             if (attr != unsigned(-1))
             {
@@ -410,12 +410,12 @@ namespace sge
          * @param texture The texture we wanted delete
          */
         template<TextureType T>
-        static void DeleteTexture(TextureBase<T>& texture)
+        static void deleteTexture(TextureBase<T>& texture)
         {
-            if (texture.IsValid())
+            if (texture.isValid())
             {
-                GLCall(glDeleteTextures(1, &texture._texId));
-                texture._texId = unsigned(-1);
+                GLCall(glDeleteTextures(1, &texture.mTexID));
+                texture.mTexID = unsigned(-1);
             }
         }
 

@@ -9,7 +9,7 @@
  *
  * License
  *
- * Copyright (c) 2017-2018, Xiang Wencheng <xiangwencheng@outlook.com>
+ * Copyright (c) 2017-2019, Xiang Wencheng <xiangwencheng@outlook.com>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without 
@@ -43,9 +43,12 @@
 #ifndef SGE_LOG_H
 #define SGE_LOG_H
 
+#ifdef __cplusplus
+
 #include <core/sgePlatform.h>
 
-namespace sge {
+namespace sge 
+{
 
     /**
      * Class Log is a tool to record logs
@@ -108,5 +111,45 @@ namespace sge {
     };
 
 } // !namespace
+
+#endif // __cplusplus
+
+#ifdef __cplusplus
+extern "C" {
+#endif // __cplusplus
+
+
+    /**
+     * Output a debug log with string format
+     * @param fmt The format
+     * @... The Var for format string
+     */
+    void LogDebug(const char* fmt, ...);
+
+    /**
+     * Output a info log with string format
+     * @param fmt The format
+     * @... The Var for format string
+     */
+    void LogInfo(const char* fmt, ...);
+
+    /**
+     * Output a warn log with string format
+     * @param fmt The format
+     * @... The Var for format string
+     */
+    void LogWarn(const char* fmt, ...);
+
+    /**
+     * Output a error log with string format
+     * @param fmt The format
+     * @... The Var for format string
+     */
+    void LogError(const char* fmt, ...);
+
+
+#ifdef __cplusplus
+}
+#endif // __cplusplus
 
 #endif // !SGE_LOG_H

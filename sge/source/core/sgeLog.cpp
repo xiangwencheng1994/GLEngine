@@ -9,7 +9,7 @@
  *
  * License
  *
- * Copyright (c) 2017-2018, Xiang Wencheng <xiangwencheng@outlook.com>
+ * Copyright (c) 2017-2019, Xiang Wencheng <xiangwencheng@outlook.com>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without 
@@ -100,3 +100,53 @@ namespace sge
     }
 
 }
+
+
+
+#ifdef __cplusplus
+extern "C" {
+#endif // __cplusplus
+
+    void LogDebug(const char* fmt, ...)
+    {
+        FORMAT(strBuffer, fmt);
+        if (sge::Log::output) (*sge::Log::output)(sge::Log::Debug, strBuffer);
+    }
+
+    /**
+     * Output a info log with string format
+     * @param fmt The format
+     * @... The Var for format string
+     */
+    void LogInfo(const char* fmt, ...)
+    {
+        FORMAT(strBuffer, fmt);
+        if (sge::Log::output) (*sge::Log::output)(sge::Log::Info, strBuffer);
+    }
+
+    /**
+     * Output a warn log with string format
+     * @param fmt The format
+     * @... The Var for format string
+     */
+    void LogWarn(const char* fmt, ...)
+    {
+        FORMAT(strBuffer, fmt);
+        if (sge::Log::output) (*sge::Log::output)(sge::Log::Warn, strBuffer);
+    }
+
+    /**
+     * Output a error log with string format
+     * @param fmt The format
+     * @... The Var for format string
+     */
+    void LogError(const char* fmt, ...)
+    {
+        FORMAT(strBuffer, fmt);
+        if (sge::Log::output) (*sge::Log::output)(sge::Log::Error, strBuffer);
+    }
+
+
+#ifdef __cplusplus
+}
+#endif // __cplusplus

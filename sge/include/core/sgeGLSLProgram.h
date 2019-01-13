@@ -9,7 +9,7 @@
  *
  * License
  *
- * Copyright (c) 2017-2018, Xiang Wencheng <xiangwencheng@outlook.com>
+ * Copyright (c) 2017-2019, Xiang Wencheng <xiangwencheng@outlook.com>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without 
@@ -80,36 +80,36 @@ namespace sge
          * Create this program.
          * @return true if all shander compile success and program link success, otherwise return false
          */
-        bool Create();
+        bool create();
 
         /**
          * Destory this program
          */
-        void Destory();
+        void destory();
 
         /**
          * Begin use this program
          */
-        virtual void Begin() const;
+        virtual void begin() const;
 
         /**
          * End this program
          * it will switch to default program (0)
          */
-        virtual void End() const;
+        virtual void end() const;
 
         /**
          * Get this program Id
          * @return 0 if it uncreated or created failed.
          */
-        GLuint ProgramId() const;
+        GLuint getProgramId() const;
 
         /**
          * Get the uniform var in program
          * @param name The uniform name
          * @return -1 if program is disable or it has no such uniform
          */
-        uniform GetUniformLocation(const char* name) const;
+        uniform getUniformLocation(const char* name) const;
 
 #ifndef OPENGLES
 
@@ -118,7 +118,7 @@ namespace sge
          * @param name The uniform block name
          * @return -1 if program is disable or it has no such uniform block
          */
-        UniformBlock GetUniformBlock(const char * name) const;
+        UniformBlock getUniformBlock(const char * name) const;
 #endif
 
         /**
@@ -126,7 +126,7 @@ namespace sge
          * @param name The attribute name
          * @return -1 if program is disable or it has no such attribute
          */
-        attribute GetAttribLocation(const char* name) const;
+        attribute getAttribLocation(const char* name) const;
         
     protected:
 
@@ -134,41 +134,41 @@ namespace sge
          * Get the vertex shader source
          * @return NULL to use opengl default shader
          */
-        virtual std::string GetVertexShaderSrc() const = 0;
+        virtual std::string getVertexShaderSrc() const = 0;
 
         /**
          * Get the tess control shader source
          * @return NULL to use opengl default shader
          */
-        virtual std::string GetTessControlShaderSrc() const { return std::string(); }
+        virtual std::string getTessControlShaderSrc() const { return std::string(); }
         
         /**
          * Get the tess evaluation shader source
          * @return NULL to use opengl default shader
          */
-        virtual std::string GetTessEvaluationShaderSrc() const { return std::string(); }
+        virtual std::string getTessEvaluationShaderSrc() const { return std::string(); }
         
         /**
          * Get the geometry shader source
          * @return NULL to use opengl default shader
          */
-        virtual std::string GetGeometryShaderSrc() const { return std::string(); }
+        virtual std::string getGeometryShaderSrc() const { return std::string(); }
         
         /**
          * Get the fragment shader source
          * @return NULL to use opengl default shader
          */
-        virtual std::string GetFragmentShaderSrc() const = 0;
+        virtual std::string getFragmentShaderSrc() const = 0;
         
         /**
          * Callback function after program create successed
          */
-        virtual void OnAfterCreate() = 0;
+        virtual void onAfterCreate() = 0;
 
         /**
          * Callback function before program link
          */
-        virtual void OnBeforeLink() {}
+        virtual void onBeforeLink() {}
     private:
         GLSLProgramPrivate* d;
         DISABLE_COPY(GLSLProgram)

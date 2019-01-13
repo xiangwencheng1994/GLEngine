@@ -9,7 +9,7 @@
  *
  * License
  *
- * Copyright (c) 2017-2018, Xiang Wencheng <xiangwencheng@outlook.com>
+ * Copyright (c) 2017-2019, Xiang Wencheng <xiangwencheng@outlook.com>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -77,7 +77,7 @@ namespace sge
         /**
          * Release object
          */
-        void    Release();
+        void    release();
     protected:
         friend class TextureManager;
         TextureManager* _mgr;

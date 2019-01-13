@@ -9,7 +9,7 @@
  *
  * License
  *
- * Copyright (c) 2017-2018, Xiang Wencheng <xiangwencheng@outlook.com>
+ * Copyright (c) 2017-2019, Xiang Wencheng <xiangwencheng@outlook.com>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,17 +44,10 @@
 #define CELL_GLCONTEXT_H
 
 #include <core/sgePlatform.h>
-
-#ifdef OPENGLES
-#include <EGL/egl.h>
-#include <GLES3/gl3.h>
-#else // Desktop OpenGL
-#include <gl/glew.h>
-#endif
+#include <core/sgePlatformNative.h>
 
 namespace sge
 {
-
     /**
      * Manager OpenGL Context
      */
@@ -71,83 +64,54 @@ namespace sge
          */
         ~GLContext();
 
-#ifdef OPENGLES
         /**
          * Init OpenGLES context
-         * @param hWnd  target window
-         * @param hDC   target display
+         * @param hWnd Target window
+         * @param hDC Target display
+         * @param format Wanted format
          * @return true if init success
          */
-        bool Init(EGLNativeWindowType hWnd, EGLNativeDisplayType hDC);
+        bool initialize(WindowHandle hWnd, DisplayHandle hDC, int format = 0);
 
-        // getters
-        EGLConfig       GetConfig() { return _config; }
-        EGLSurface      GetSurface() { return _surface; }
-        EGLContext      GetContext() { return _context; }
-        EGLDisplay      GetDisplay() { return _display; }
-#else
-    #ifdef _WIN32
         /**
          * Get the pixel format by msaa
          */
-        static int  GetFormatForMsaa(int msaa);
+        static int  getFormatForMsaa(int msaa);
 
         /**
-         *  Init OpenGL context
-         * @param hWnd  target window
-         * @param hDC   target draw context
-         * @param format format
-         * @return true if init success
+         * Get the display handle
          */
-        bool Init(HWND hWnd, HDC hDC, int format);
-                
-        HDC             GetDC() { return _hDC; }
-        HWND            GetWnd() { return _hWnd; }
-    #endif
+        DisplayHandle getDisplayHandle();
 
-        HGLRC           GetHGLRC() { return _hRC; }
-#endif
-        
+        /**
+         * Get the window handle
+         */
+        WindowHandle getWindowHandle();
+
         /**
          * Shutdown this context
          */
-        void Shutdown();
+        void shutdown();
 
         /**
          * Set this context for current thread
          */
-        void MakeCurrent();
+        void makeCurrent();
 
         /**
          * Swap the back buffer and front buffer
          */
-        void SwapBuffer();
+        void swapBuffer();
 
         /**
          * Enable or disable vertical synchronization
          * @param enable, the default is enable, limit 60 fps in most
          */
-        void EnableVSYNC(GLboolean enable);
+        void setEnableVSYNC(GLboolean enable);
 
     private:
-
-#ifdef OPENGLES
-
-        EGLConfig       _config;
-        EGLSurface      _surface;
-        EGLContext      _context;
-        EGLDisplay      _display;
-#else
-
-    #if WIN32
-        HDC             _hDC;
-        HWND            _hWnd;
-    #else
-        //TODO: linux native type
-    #endif
-
-        HGLRC           _hRC;
-#endif
+        friend class GLContextPrivate;
+        GLContextPrivate* d;
         DISABLE_COPY(GLContext)
     };
 

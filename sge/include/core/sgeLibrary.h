@@ -9,7 +9,7 @@
  *
  * License
  *
- * Copyright (c) 2017-2018, Xiang Wencheng <xiangwencheng@outlook.com>
+ * Copyright (c) 2017-2019, Xiang Wencheng <xiangwencheng@outlook.com>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -73,12 +73,12 @@ namespace sge
         /**
          *  获取库文件路径
          */
-        const char* getPathName() { return _path; }
+        const char* getPathName() { return mPath; }
 
         /**
          *  获取库句柄
          */
-        HMODULE  getModule() { return _module; }
+        HMODULE  getModule() { return mModule; }
 
         /**
          *  判断库是否加载成功
@@ -100,9 +100,9 @@ namespace sge
          */
         void            release();
     private:
-        char            _path[MAX_PATH];
-        HMODULE         _module;
-        bool            _needDelete;
+        char            mPath[MAX_PATH];
+        HMODULE         mModule;
+        bool            mNeedDelete;
 
         DISABLE_COPY(sgeLibrary)
     };

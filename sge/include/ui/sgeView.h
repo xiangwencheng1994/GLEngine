@@ -9,7 +9,7 @@
  *
  * License
  *
- * Copyright (c) 2017-2018, Xiang Wencheng <xiangwencheng@outlook.com>
+ * Copyright (c) 2017-2019, Xiang Wencheng <xiangwencheng@outlook.com>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,322 +45,282 @@
 
 #include <core/sgePlatform.h>
 #include <core/sgePlatformNative.h>
+#include <core/sgeRefPtr.h>
 
 namespace sge
 {
-    class IScene;
+    class Scene;
+    class Application;
 
     namespace ui
     {
         /**
-         * Interface of GUI view
+         * Enum for measure mode
          */
-        class SGE_API IView
+        enum MeasureMode
         {
-        public:
-            enum Flags
-            {
-                FLAG_VISIBLE    =   1 << 0,
-                FLAG_ENABLE     =   1 << 1        
-            };
+            // parent unspectified, set size for you want
+            UNSPECIFIED,
+            // parent set the exactly size for you
+            EXACTLY,
+            // parent set the max size for you
+            AT_MOST,
+        };
 
+        class LayoutParams;
+        class ViewGroup;
+
+
+
+        /**
+         * Base class of GUI Contorls
+         */
+        class SGE_API View
+        {
         public:
             /**
              * Constructor
              */
-            IView() {}
+            explicit View(Application* app_not_null);
 
             /**
              * Virtual destructor
              */
-            virtual ~IView() {}
-
-            /**
-             * Get the visible
-             */
-            bool    Visible() { return HAS_FLAG(_flags, FLAG_VISIBLE); }
-
-            /**
-             * Set the visible
-             */
-            void    Visible(bool visible) { SET_FLAG(_flags, FLAG_VISIBLE, visible); }
-
-            /**
-             * Get the enable
-             */
-            bool    Enable() { return HAS_FLAG(_flags, FLAG_ENABLE); }
-
-            /**
-             * Set the enable
-             */
-            void    Enable(bool enable) { SET_FLAG(_flags, FLAG_ENABLE, enable); }
-
-            /**
-             * Set a new size for this view
-             * @param size The new size
-             * @return true if set success
-             */
-            virtual bool SetSize(const int2& size) = 0;
-
-            /**
-             * Get the size of this view
-             * @return the size of this view
-             */
-            virtual int2 Size() = 0;
-
-            /**
-             * Callback while need render
-             */
-            virtual void OnRender() = 0;
-
-            /**
-             * Callback while mouse left button down
-             * @param event The event data
-             * @return true if you has processed this event
-             */
-            virtual bool OnLeftButtonDownEvent(const MouseDownEvent& event) = 0;
-
-            /**
-             * Callback while mouse left button up
-             * @param event The event data
-             * @return true if you has processed this event
-             */
-            virtual bool OnLeftButtonUpEvent(const MouseUpEvent& event) = 0;
-
-            /**
-             * Callback while mouse left button click
-             * @param event The event data
-             * @return true if you has processed this event
-             */
-            virtual bool OnLeftButtonClickEvent(const MouseClickEvent& event) = 0;
-            
-            /**
-             * Callback while mouse right button down
-             * @param event The event data
-             * @return true if you has processed this event
-             */
-            virtual bool OnRightButtonDownEvent(const MouseDownEvent& event) = 0;
-
-            /**
-             * Callback while mouse right button up
-             * @param event The event data
-             * @return true if you has processed this event
-             */
-            virtual bool OnRightButtonUpEvent(const MouseUpEvent& event) = 0;
-
-            /**
-             * Callback while mouse right button click
-             * @param event The event data
-             * @return true if you has processed this event
-             */
-            virtual bool OnRightButtonClickEvent(const MouseClickEvent& event) = 0;
-            
-            /**
-             * Callback while mouse middle button down
-             * @param event The event data
-             * @return true if you has processed this event
-             */
-            virtual bool OnMiddleButtonDownEvent(const MouseDownEvent& event) = 0;
-
-            /**
-             * Callback while mouse middle button up
-             * @param event The event data
-             * @return true if you has processed this event
-             */
-            virtual bool OnMiddleButtonUpEvent(const MouseUpEvent& event) = 0;
-
-            /**
-             * Callback while mouse middle button click
-             * @param event The event data
-             * @return true if you has processed this event
-             */
-            virtual bool OnMiddleButtonClickEvent(const MouseClickEvent& event) = 0;
-
-            /**
-             * Callback while mouse move
-             * @param event The event data
-             * @return true if you has processed this event
-             */
-            virtual bool OnMouseMoveEvent(const MouseMoveEvent& event) = 0;
-
-            /**
-             * Callback while mouse wheel wheeled
-             * @param event The event data
-             * @return true if you has processed this event
-             */
-            virtual bool OnMouseWheelEvent(const MouseWheelEvent& event) = 0;
-            
-            /**
-             * Callback while key down
-             * @param event The event data
-             * @return true if you has processed this event
-             */
-            virtual bool OnKeyDownEvent(const KeyDownEvent& event) = 0;
-
-            /**
-             * Callback while key up
-             * @param event The event data
-             * @return true if you has processed this event
-             */
-            virtual bool OnKeyUpEvent(const KeyUpEvent& event) = 0;
-
-        protected:
-            friend class Scene;
-            /**
-             * view flags
-             */
-            int         _flags;
-
-        private:
-            DISABLE_COPY(IView)
-        };
-        
-        /**
-         * The base view
-         */
-        class SGE_API View : public IView
-        {
-        public:
-            /**
-             * Constructor
-             */
-            View();
-
-            /**
-             * Destructor
-             */
             virtual ~View();
 
             /**
-             * Set size
+             * Get the hold context of this view
              */
-            virtual bool SetSize(const int2& size) override;
+            Application* getApplication() const;
 
             /**
-             * Get size
+             * Get the measured width size of this view
+             * @return The measured width size
              */
-            int2    Size() override { return _size; }
+            int getMeasuredWidth() const;
 
             /**
-             * Set background view
+             * Get the measured height size of this view
+             * @return The measured width size
              */
-            void    BackgroundView(IView* view);
+            int getMeasuredHeight() const;
 
             /**
-             * Get background view
+             * Callback while need measure this view
+             * @param wMode The width measure mode
+             * @param wSize The width size based
+             * @param hMode The height measure mode
+             * @param hSize The height size based
+             * @return the result of measured size
              */
-            IView*  BackgroundView() { return _bgView; }
+            virtual int2 onMeasure(MeasureMode wMode, int wSize, MeasureMode hMode, int hSize);
+            
+            /**
+             * Get the layout params
+             */
+            RefPtr<LayoutParams> getLayoutParams() const;
 
             /**
-             * Take the background view
-             * @return The backgroud view need delete it by your self or add to a parent view
+             * Set the layout  params
+             * @return false if has parent view and parent view can not accpet the LayoutParams
              */
-            IView*  TakeBackgroudView() { IView* v = _bgView; _bgView = NULL; return v; }
+            bool setLayoutParams(RefPtr<LayoutParams> params);
 
-        protected:
+            /**
+             * Get parent view
+             * @return NULL if none parent set
+             */
+            ViewGroup* getParent() const;
+
+            /**
+             * Called from layout when this view should
+             * assign a size and position to each of its children.
+             *
+             * Derived classes with children should override
+             * this method and call DoLayout on each of
+             * their children.
+             * @param changed This is a new size or position for this view
+             * @param left Left position, relative to parent
+             * @param top Top position, relative to parent
+             * @param width of content
+             * @param height of content
+             */
+            virtual void onLayout(bool changed, int left, int top, int width, int height);
+
+            /**
+             * This is called during layout when the size of this view has changed. If
+             * you were just added to the view hierarchy, you're called with the old
+             * values of 0.
+             *
+             * @param w Current width of this view.
+             * @param h Current height of this view.
+             * @param oldw Old width of this view.
+             * @param oldh Old height of this view.
+             */
+            virtual void onSizeChanged(int newWidth, int newHeight, int oldWidth, int oldHeight);
+
+            /**
+             * Get frame left
+             */
+            int getLeft();
+
+            /**
+             * Get frame top
+             */
+            int getTop();
+
+            /**
+             * Get frame width
+             */
+            int getWidth();
+
+            /**
+             * Get frame height
+             */
+            int getHeight();
+
+#pragma region EventCallback
+
             /**
              * Callback while need render
              */
-            virtual void OnRender() override;
+            virtual void onDraw() = 0;
 
             /**
              * Callback while mouse left button down
              * @param event The event data
-             * @return true if the backgroud view has processed
+             * @return true if you has processed this event
              */
-            virtual bool OnLeftButtonDownEvent(const MouseDownEvent& event) override;
-            
+            virtual bool onLeftButtonDownEvent(const MouseDownEvent& event) { return false; };
+
             /**
              * Callback while mouse left button up
              * @param event The event data
-             * @return true if the backgroud view has processed
+             * @return true if you has processed this event
              */
-            virtual bool OnLeftButtonUpEvent(const MouseUpEvent& event) override;
-            
+            virtual bool onLeftButtonUpEvent(const MouseUpEvent& event) { return false; };
+
             /**
              * Callback while mouse left button click
              * @param event The event data
-             * @return true if the backgroud view has processed
+             * @return true if you has processed this event
              */
-            virtual bool OnLeftButtonClickEvent(const MouseClickEvent& event) override;
+            virtual bool onLeftButtonClickEvent(const MouseClickEvent& event) { return false; };
             
             /**
              * Callback while mouse right button down
              * @param event The event data
-             * @return true if the backgroud view has processed
+             * @return true if you has processed this event
              */
-            virtual bool OnRightButtonDownEvent(const MouseDownEvent& event) override;
-            
+            virtual bool onRightButtonDownEvent(const MouseDownEvent& event) { return false; };
+
             /**
              * Callback while mouse right button up
              * @param event The event data
-             * @return true if the backgroud view has processed
+             * @return true if you has processed this event
              */
-            virtual bool OnRightButtonUpEvent(const MouseUpEvent& event) override;
-            
+            virtual bool onRightButtonUpEvent(const MouseUpEvent& event) { return false; };
+
             /**
              * Callback while mouse right button click
              * @param event The event data
-             * @return true if the backgroud view has processed
+             * @return true if you has processed this event
              */
-            virtual bool OnRightButtonClickEvent(const MouseClickEvent& event) override;
+            virtual bool onRightButtonClickEvent(const MouseClickEvent& event) { return false; };
             
             /**
              * Callback while mouse middle button down
              * @param event The event data
-             * @return true if the backgroud view has processed
+             * @return true if you has processed this event
              */
-            virtual bool OnMiddleButtonDownEvent(const MouseDownEvent& event) override;
-            
+            virtual bool onMiddleButtonDownEvent(const MouseDownEvent& event) { return false; };
+
             /**
              * Callback while mouse middle button up
              * @param event The event data
-             * @return true if the backgroud view has processed
+             * @return true if you has processed this event
              */
-            virtual bool OnMiddleButtonUpEvent(const MouseUpEvent& event) override;
-            
+            virtual bool onMiddleButtonUpEvent(const MouseUpEvent& event) { return false; };
+
             /**
              * Callback while mouse middle button click
              * @param event The event data
-             * @return true if the backgroud view has processed
+             * @return true if you has processed this event
              */
-            virtual bool OnMiddleButtonClickEvent(const MouseClickEvent& event) override;
-            
+            virtual bool onMiddleButtonClickEvent(const MouseClickEvent& event) { return false; };
+
             /**
              * Callback while mouse move
              * @param event The event data
-             * @return true if the backgroud view has processed
+             * @return true if you has processed this event
              */
-            virtual bool OnMouseMoveEvent(const MouseMoveEvent& event) override;
-            
+            virtual bool onMouseMoveEvent(const MouseMoveEvent& event) { return false; };
+
             /**
              * Callback while mouse wheel wheeled
              * @param event The event data
-             * @return true if the backgroud view has processed
+             * @return true if you has processed this event
              */
-            virtual bool OnMouseWheelEvent(const MouseWheelEvent& event) override;
-
+            virtual bool onMouseWheelEvent(const MouseWheelEvent& event) { return false; };
+            
             /**
              * Callback while key down
              * @param event The event data
-             * @return true if the backgroud view has processed
+             * @return true if you has processed this event
              */
-            virtual bool OnKeyDownEvent(const KeyDownEvent& event) override;
+            virtual bool onKeyDownEvent(const KeyDownEvent& event) { return false; };
 
             /**
              * Callback while key up
              * @param event The event data
              * @return true if you has processed this event
              */
-            virtual bool OnKeyUpEvent(const KeyUpEvent& event) override;
+            virtual bool onKeyUpEvent(const KeyUpEvent& event) { return false; };
+
+#pragma endregion
+
+        protected:
+            friend class Scene;
+            friend class ViewGroup;
+
+            void setParent(ViewGroup* parent);
+
+            /**
+             * Add request remeasure flag for this view
+             */
+            void requestMeasure();
+
+            /**
+             * Do measure context for this view
+             */
+            void doMeasure(MeasureMode wMode, int wSize, MeasureMode hMode, int hSize);
+
+            /**
+             * Do layout frame for this view
+             */
+            void doLayout(int left, int top, int width, int height);
+
+            /**
+             * Do render context for this view
+             */
+            void doDraw();
+
+            /**
+             * Set frame for this view
+             */
+            bool setFrame(int left, int top, int width, int height);
+
+            /**
+             * Get the default size by suggest
+             */
+            static int getDefaultSize(int size, MeasureMode wMode, int wSize);
 
         private:
-            IView*      _bgView;
-            int2        _size;
-
+            friend class ViewPrivate;
+            ViewPrivate* d;
             DISABLE_COPY(View)
         };
-
+        
     }
 
 }

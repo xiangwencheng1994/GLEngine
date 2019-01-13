@@ -9,7 +9,7 @@
  *
  * License
  *
- * Copyright (c) 2017-2018, Xiang Wencheng <xiangwencheng@outlook.com>
+ * Copyright (c) 2017-2019, Xiang Wencheng <xiangwencheng@outlook.com>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -46,14 +46,14 @@ namespace sge
 {
 
     sgeLibrary::sgeLibrary(const char* file)
-        : _module(NULL), _needDelete(false)
+        : mModule(NULL), mNeedDelete(false)
     {
-        strcpy_s(_path, file);
+        strcpy_s(mPath, file);
 
 #if (CELL_PLATFORM == CELL_PLATFORM_WIN32)
-        _module =   LoadLibraryA(_path);
+        mModule =   LoadLibraryA(mPath);
 #else
-        _module =   dlopen(_path, RTLD_NOW);
+        mModule =   dlopen(mPath, RTLD_NOW);
 #endif
     }
 
@@ -65,7 +65,7 @@ namespace sge
     sgeLibrary* sgeLibrary::load(const char* file)
     {
         sgeLibrary* lib = new sgeLibrary(file);
-        lib->_needDelete = true;
+        lib->mNeedDelete = true;
         if (! lib->isLoaded())
         {
             lib->release();
@@ -77,34 +77,34 @@ namespace sge
     bool sgeLibrary::unload()
     {
         bool ret = true;
-        if (_module)
+        if (mModule)
         {            
 #if (CELL_PLATFORM == CELL_PLATFORM_WIN32)
-            ret = (TRUE == FreeLibrary(_module));
+            ret = (TRUE == FreeLibrary(mModule));
 #else
-            dlclose(_module); //TODO: check return            
+            dlclose(mModule); //TODO: check return            
 #endif
 
-            _module =   NULL;
+            mModule =   NULL;
         }
         return ret;
     }
 
     void* sgeLibrary::getFunction(const char* funName)
     {
-        if (NULL == _module)
+        if (NULL == mModule)
             return NULL;
 
 #if (CELL_PLATFORM == CELL_PLATFORM_WIN32)
-        return GetProcAddress(_module, funName);
+        return GetProcAddress(mModule, funName);
 #else
-        return dlsym(_module, funName);
+        return dlsym(mModule, funName);
 #endif
     }
 
     void sgeLibrary::release()
     {
-        if (_needDelete)
+        if (mNeedDelete)
         {
             delete this;
         }

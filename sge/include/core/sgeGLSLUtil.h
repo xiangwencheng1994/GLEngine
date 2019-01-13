@@ -9,7 +9,7 @@
  *
  * License
  *
- * Copyright (c) 2017-2018, Xiang Wencheng <xiangwencheng@outlook.com>
+ * Copyright (c) 2017-2019, Xiang Wencheng <xiangwencheng@outlook.com>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without 
@@ -66,22 +66,22 @@ namespace sge
         /**
          * The ShaderPath
          */
-        virtual const char* ShaderPath() const   =   0;
+        virtual const char* getShaderPath() const   =   0;
 
     private:
-        std::string TryGetShader(const char* type) const
+        std::string tryGetShader(const char* type) const
         {
             bool hasFile = false;
             char    path[MAX_PATH];
-            sprintf(path, "%s.%s", ShaderPath(), type);
+            sprintf(path, "%s.%s", getShaderPath(), type);
             FileReader file(path, &hasFile);
             return hasFile ? file.ReadAll() : std::string();
         }
-        std::string GetVertexShaderSrc() const override { return TryGetShader("vert"); }
-        std::string GetTessControlShaderSrc() const override { return TryGetShader("tesc"); }
-        std::string GetTessEvaluationShaderSrc() const override { return TryGetShader("tese"); }
-        std::string GetGeometryShaderSrc() const override { return TryGetShader("geom"); }
-        std::string GetFragmentShaderSrc() const override { return TryGetShader("frag"); }
+        std::string getVertexShaderSrc() const override { return tryGetShader("vert"); }
+        std::string getTessControlShaderSrc() const override { return tryGetShader("tesc"); }
+        std::string getTessEvaluationShaderSrc() const override { return tryGetShader("tese"); }
+        std::string getGeometryShaderSrc() const override { return tryGetShader("geom"); }
+        std::string getFragmentShaderSrc() const override { return tryGetShader("frag"); }
     };
 
     /**
@@ -98,7 +98,7 @@ namespace sge
         attribute   _color;
         
     private:
-        void OnAfterCreate() override
+        void onAfterCreate() override
         {
             _mvp        =   GetUniformLocation("_mvp");
             _position   =   GetAttribLocation("_position");
@@ -120,9 +120,9 @@ namespace sge
 
         uniform     _cubeTexture;
 
-        void Begin() const override
+        void begin() const override
         {
-            __super::Begin();
+            __super::begin();
             glGetIntegerv(GL_CULL_FACE_MODE, (GLint*)&OldCullFaceMode);
             glGetIntegerv(GL_DEPTH_FUNC, (GLint*)&OldDepthFuncMode);
             glCullFace(GL_FRONT);
@@ -130,19 +130,19 @@ namespace sge
             glEnableVertexAttribArray(_position);
         }
 
-        void End() const override
+        void end() const override
         {
             glCullFace(OldCullFaceMode);
             glDepthFunc(OldDepthFuncMode);
             glDisableVertexAttribArray(_position);
-            __super::End();
+            __super::end();
         }
 
     private:
         GLint OldCullFaceMode;
         GLint OldDepthFuncMode;
     private:
-        void OnAfterCreate() override
+        void onAfterCreate() override
         {
             _mvp        =   GetUniformLocation("_mvp");
             _position   =   GetAttribLocation("_position");
@@ -156,7 +156,7 @@ namespace sge
     class PROGRAM_MODEL : public PROGRAM_FILED
     {
     public:
-        const char* ShaderPath() const override { return "shader/Model"; }
+        const char* getShaderPath() const override { return "shader/Model"; }
         
     public:
         // mesh attribute
@@ -182,7 +182,7 @@ namespace sge
 
         UniformBlock    Materials;
     private:
-        void OnAfterCreate() override
+        void onAfterCreate() override
         {
             //Get uniform and attribute.
 
@@ -227,23 +227,23 @@ namespace sge
         // The meshes desc
         UniformBlock Meshes;
     public:
-        const char* ShaderPath() const override { return "shader/InstCmd"; }
+        const char* getShaderPath() const override { return "shader/InstCmd"; }
 
-        void Begin() const override
+        void begin() const override
         {
-            __super::Begin();
+            __super::begin();
             GLCall(glBeginTransformFeedback(GL_POINTS));
             GLCall(glEnable(GL_RASTERIZER_DISCARD));
         }
 
-        void End() const override
+        void end() const override
         {
             GLCall(glEndTransformFeedback());
             GLCall(glDisable(GL_RASTERIZER_DISCARD));
-            __super::End();
+            __super::end();
         }
     private:
-        void OnBeforeLink() override
+        void onBeforeLink() override
         {
             const GLchar* feedbackVaryings[] = {
                 "vertCount",
@@ -256,7 +256,7 @@ namespace sge
                 feedbackVaryings, GL_INTERLEAVED_ATTRIBS));
         }
 
-        void OnAfterCreate() override
+        void onAfterCreate() override
         {
             _meshId = GetAttribLocation("_meshId");
             _flag = GetAttribLocation("_flag");

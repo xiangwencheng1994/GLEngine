@@ -9,7 +9,7 @@
  *
  * License
  *
- * Copyright (c) 2017-2018, Xiang Wencheng <xiangwencheng@outlook.com>
+ * Copyright (c) 2017-2019, Xiang Wencheng <xiangwencheng@outlook.com>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -62,16 +62,16 @@ bool glCheckError(const char* function, const char* file, int line)
 namespace sge
 {
     
-    bool Texture2D::FromFile(const char* file)
+    bool Texture2D::loadFromFile(const char* file)
     {
         ASSERT(file);
         bool ret = false;
         int comp = 0;
-        byte* data = stbi_load(file, &_size.x, &_size.y, &comp, 0);
+        byte* data = stbi_load(file, &mSize.x, &mSize.y, &comp, 0);
         if (data)
         {
-            if (comp == 3) ret = FromRGB(data, _size.x, _size.y);
-            else if (comp == 4) ret = FromRGBA(data, _size.x, _size.y);
+            if (comp == 3) ret = loadFromRGB(data, mSize.x, mSize.y);
+            else if (comp == 4) ret = loadFromRGBA(data, mSize.x, mSize.y);
             else
             {
                 Log::error("cannot create texture from comp %d", comp);
@@ -85,16 +85,16 @@ namespace sge
         return ret;
     }
 
-    bool Texture2D::FromStream(byte* stream, size_t len)
+    bool Texture2D::loadFromStream(byte* stream, size_t len)
     {
         ASSERT(stream);
         bool ret = false;
         int comp = 0;
-        byte* data = stbi_load_from_memory(stream, len, &_size.x, &_size.y, &comp, 0);
+        byte* data = stbi_load_from_memory(stream, len, &mSize.x, &mSize.y, &comp, 0);
         if (data)
         {
-            if (comp == 3) ret = FromRGB(data, _size.x, _size.y);
-            else if (comp == 4) ret = FromRGBA(data, _size.x, _size.y);
+            if (comp == 3) ret = loadFromRGB(data, mSize.x, mSize.y);
+            else if (comp == 4) ret = loadFromRGBA(data, mSize.x, mSize.y);
             else
             {
                 Log::error("cannot create texture from comp %d", comp);
@@ -108,43 +108,43 @@ namespace sge
         return ret;
     }
 
-    bool Texture2D::FromRGB(byte* data, int w, int h)
+    bool Texture2D::loadFromRGB(byte* data, int w, int h)
     {
         ASSERT(data);
-        if (!IsValid())
+        if (!isValid())
         {
-            GLCall(glGenTextures(1, &_texId));
-            Bind();
+            GLCall(glGenTextures(1, &mTexID));
+            bind();
             GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT));
             GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT));
             GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
             GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
         }
-        else Bind();
-        _size.x = w;
-        _size.y = h;
+        else bind();
+        mSize.x = w;
+        mSize.y = h;
         GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, w, h, 0, GL_RGB, GL_UNSIGNED_BYTE, data));
-        Unbind();
+        unbind();
         return true;
     }
 
-    bool Texture2D::FromRGBA(byte* data, int w, int h)
+    bool Texture2D::loadFromRGBA(byte* data, int w, int h)
     {
         ASSERT(data);
-        if (!IsValid())
+        if (!isValid())
         {
-            GLCall(glGenTextures(1, &_texId));
-            Bind();
+            GLCall(glGenTextures(1, &mTexID));
+            bind();
             GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT));
             GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT));
             GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
             GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
         }
-        else Bind();
-        _size.x = w;
-        _size.y = h;
+        else bind();
+        mSize.x = w;
+        mSize.y = h;
         GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, data));
-        Unbind();
+        unbind();
         return true;
     }
 

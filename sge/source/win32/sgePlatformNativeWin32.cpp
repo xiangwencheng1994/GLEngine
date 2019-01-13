@@ -9,7 +9,7 @@
  *
  * License
  *
- * Copyright (c) 2017-2018, Xiang Wencheng <xiangwencheng@outlook.com>
+ * Copyright (c) 2017-2019, Xiang Wencheng <xiangwencheng@outlook.com>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -93,19 +93,23 @@ namespace sge
         }
         else
         {
+            rect = { 0, 0, width, height };
+            AdjustWindowRect(&rect, WS_OVERLAPPEDWINDOW, FALSE);
+            width = rect.right - rect.left;
+            height = rect.bottom - rect.top;
             // center the desktop
             HWND desktop = GetDesktopWindow();
-            RECT    sceen;
+            RECT sceen;
             GetClientRect(desktop, &sceen);
-            rect.left = ((sceen.right - sceen.left - width)) / 2;
-            rect.top = ((sceen.bottom - sceen.top - height)) / 2;
+            rect.left = ((sceen.right - sceen.left) - width) / 2;
+            rect.top = ((sceen.bottom - sceen.top) - height) / 2;
             rect.right = rect.left + width;
             rect.bottom = rect.top + height;
         }
 
         HWND    hWnd = CreateWindowExA(0
             , ENGINE_WIN32_WND_CLASS
-            , "wizEngineApp"
+            , "sgeEngineApp"
             , pWnd ? WS_CHILD : WS_OVERLAPPEDWINDOW
             , rect.left
             , rect.top
@@ -173,7 +177,14 @@ namespace sge
         UnregisterClassA(ENGINE_WIN32_WND_CLASS, 0);
     }
 
-    bool PlatformWin32Native::ProcessEvents()
+    inline int2 PlatformWin32Native::getWindowSize()
+    {
+        RECT rect;
+        GetClientRect(_hWnd, &rect);
+        return int2(rect.right - rect.left, rect.bottom - rect.top);
+    }
+
+    bool PlatformWin32Native::processEvents()
     {
         ASSERT(_hWnd);
 
@@ -200,80 +211,80 @@ namespace sge
         {
             int2 pos((short)LOWORD(lParam), (short)HIWORD(lParam));
             MouseDownEvent event = { pos, (byte)GET_KEYSTATE_WPARAM(wParam) };
-            ret = _OnLeftButtonDownEvent(event);
+            ret = mOnLeftButtonDownEvent(event);
         } break;
 
         case WM_LBUTTONUP:
         {
             int2 pos((short)LOWORD(lParam), (short)HIWORD(lParam));
             MouseUpEvent event = { pos, (byte)GET_KEYSTATE_WPARAM(wParam) };
-            ret = _OnLeftButtonUpEvent(event);
+            ret = mOnLeftButtonUpEvent(event);
         } break;
 
         case WM_RBUTTONDOWN:
         {
             int2 pos((short)LOWORD(lParam), (short)HIWORD(lParam));
             MouseDownEvent event = { pos, (byte)GET_KEYSTATE_WPARAM(wParam) };
-            ret = _OnRightButtonDownEvent(event);
+            ret = mOnRightButtonDownEvent(event);
         } break;
 
         case WM_RBUTTONUP:
         {
             int2 pos((short)LOWORD(lParam), (short)HIWORD(lParam));
             MouseUpEvent event = { pos, (byte)GET_KEYSTATE_WPARAM(wParam) };
-            ret = _OnRightButtonUpEvent(event);
+            ret = mOnRightButtonUpEvent(event);
         } break;
 
         case WM_MBUTTONDOWN:
         {
             int2 pos((short)LOWORD(lParam), (short)HIWORD(lParam));
             MouseDownEvent event = { pos, (byte)GET_KEYSTATE_WPARAM(wParam) };
-            ret = _OnMiddleButtonDownEvent(event);
+            ret = mOnMiddleButtonDownEvent(event);
         } break;
 
         case WM_MBUTTONUP:
         {
             int2 pos((short)LOWORD(lParam), (short)HIWORD(lParam));
             MouseUpEvent event = { pos, (byte)GET_KEYSTATE_WPARAM(wParam) };
-            ret = _OnMiddleButtonUpEvent(event);
+            ret = mOnMiddleButtonUpEvent(event);
         } break;
 
         case WM_MOUSEWHEEL:
         {
             int2 pos((short)LOWORD(lParam), (short)HIWORD(lParam));
             MouseWheelEvent event = { GET_WHEEL_DELTA_WPARAM(wParam), pos, (byte)GET_KEYSTATE_WPARAM(wParam) };
-            ret = _OnMouseWheelEvent(event);
+            ret = mOnMouseWheelEvent(event);
         } break;
 
         case WM_MOUSEMOVE:
         {
             int2 pos((short)LOWORD(lParam), (short)HIWORD(lParam));
             MouseMoveEvent event = { pos, (byte)GET_KEYSTATE_WPARAM(wParam) };
-            ret = _OnMouseMoveEvent(event);
+            ret = mOnMouseMoveEvent(event);
         } break;
 
         case WM_SIZE:
         {
             int2 size((short)LOWORD(lParam), (short)HIWORD(lParam));
             ResizeEvent event = { size };
-            ret = _OnResizeEvent(event);
+            ret = mOnResizeEvent(event);
         } break;
 
         case WM_KEYDOWN:
         {
             KeyDownEvent event = { (byte)wParam };
-            ret = _OnKeyDownEvent(event);
+            ret = mOnKeyDownEvent(event);
         } break;
 
         case WM_KEYUP:
         {
             KeyUpEvent event = { (byte)wParam };
-            ret = _OnKeyUpEvent(event);
+            ret = mOnKeyUpEvent(event);
         } break;
 
         case WM_CLOSE:
         {
-            ret = _OnCloseEvent();
+            ret = mOnCloseEvent();
         } break;
 
         case WM_DESTROY:

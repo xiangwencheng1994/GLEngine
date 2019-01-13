@@ -9,7 +9,7 @@
  *
  * License
  *
- * Copyright (c) 2017-2018, Xiang Wencheng <xiangwencheng@outlook.com>
+ * Copyright (c) 2017-2019, Xiang Wencheng <xiangwencheng@outlook.com>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without 
@@ -69,18 +69,18 @@ namespace sge
         /**
          * Lock the mutex, if mutex is locked it will blocking thread and wait it unlocked.
          */
-        void Lock() const;
+        void lock() const;
 
         /**
          * Unlock th mutex
          */
-        void Unlock() const;
+        void unlock() const;
 
         /**
          * Try lock the mutex
          * @return true if lock success, otherwise return false
          */
-        bool TryLock() const;
+        bool tryLock() const;
 
     protected:
         MutexPrivate* d;
@@ -100,9 +100,9 @@ namespace sge
          * Constructor, lock the mutex.
          */
         ScopeLock(const Mutex& mutex)
-            : _mutex(mutex)
+            : mMutex(mutex)
         {
-            _mutex.Lock();
+            mMutex.lock();
         }
 
         /**
@@ -110,11 +110,11 @@ namespace sge
          */
         ~ScopeLock()
         {
-            _mutex.Unlock();
+            mMutex.unlock();
         }
 
     private:
-        const Mutex& _mutex;
+        const Mutex& mMutex;
         DISABLE_COPY(ScopeLock)
     };
 

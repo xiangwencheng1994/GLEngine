@@ -9,7 +9,7 @@
  *
  * License
  *
- * Copyright (c) 2017-2018, Xiang Wencheng <xiangwencheng@outlook.com>
+ * Copyright (c) 2017-2019, Xiang Wencheng <xiangwencheng@outlook.com>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without 
@@ -96,9 +96,12 @@
 #endif
 
 #define HAS_FLAG(item, flag)            ((item) & (flag))
+#define ADD_FLAG(item, flag)            ((item) |= (flag))
+#define REMOVE_FLAG(item, flag)         ((item) &= ~(flag))
 #define SET_FLAG(item, flag, enable)    ((enable) ? ((item) |= (flag)) : ((item) &= ~(flag)))
 
-namespace sge {
+namespace sge
+{
     
     typedef unsigned char   uchar;
     typedef unsigned char   byte;
@@ -580,6 +583,7 @@ namespace sge {
     template<typename T>
     struct Rect
     {
+    public:
         Vector2<T>  pos;
         Vector2<T>  size;
     };

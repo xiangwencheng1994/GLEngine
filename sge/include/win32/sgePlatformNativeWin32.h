@@ -9,7 +9,7 @@
  *
  * License
  *
- * Copyright (c) 2017-2018, Xiang Wencheng <xiangwencheng@outlook.com>
+ * Copyright (c) 2017-2019, Xiang Wencheng <xiangwencheng@outlook.com>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -61,21 +61,19 @@ namespace sge
         PlatformWin32Native(HWND pWnd, int width = 800, int height = 600);
         ~PlatformWin32Native();
 
-#ifdef OPENGLES
-        virtual EGLNativeWindowType     getWindow() { return _hWnd; }
-        virtual EGLNativeDisplayType    getDisplay() { return _hDC; }
-#else
-        HWND    getHWnd() { return _hWnd; }
-#endif
+        WindowHandle getWindow() override { return _hWnd; }
+        DisplayHandle getDisplay() override { return _hDC; }
 
-        void    Close() { PostMessage(_hWnd, WM_CLOSE, 0, 0); }
-        bool    IsClosed() { return _hWnd == NULL; }
+        void close() override { PostMessage(_hWnd, WM_CLOSE, 0, 0); }
+        bool isClosed() override { return _hWnd == NULL; }
         
-        virtual bool        ProcessEvents();
+        int2 getWindowSize();
+
+        virtual bool processEvents() override;
 
     public:
         virtual LRESULT     wndProc(HWND hWnd, UINT msgId, WPARAM wParam, LPARAM lParam);
-        
+
     private:
         HWND    _hWnd;
         HDC     _hDC;

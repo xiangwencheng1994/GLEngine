@@ -9,7 +9,7 @@
  *
  * License
  *
- * Copyright (c) 2017-2018, Xiang Wencheng <xiangwencheng@outlook.com>
+ * Copyright (c) 2017-2019, Xiang Wencheng <xiangwencheng@outlook.com>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -70,66 +70,66 @@ namespace sge
         /**
          * Get the camera position
          */
-        const vec3f& Position() const { return _position; }
+        const vec3f& getPosition() const { return _position; }
 
         /**
          * Get the front direction of camera
          */
-        const vec3f& FrontDir() const { return _frontDir; }
+        const vec3f& getFrontDir() const { return _frontDir; }
 
         /**
          * Get the camera up direction
          */
-        const vec3f& UpDir() { if (_needUpdateView) updateCamera(); return _upDir; }
+        const vec3f& getUpDir() { if (_needUpdateView) updateCamera(); return _upDir; }
 
         /**
          * Set the camera position
          * @param pos New camera position
          */
-        const void SetPosition(const vec3f& pos) { _position = pos, _needUpdateView = true; }
+        const void setPosition(const vec3f& pos) { _position = pos, _needUpdateView = true; }
 
         /**
          * Set the camera view direction
          * @param dir New view direction, Must not parallel to WorldUp
          */
-        const void SetFrontDir(const vec3f& dir) { _frontDir = dir, _needUpdateView = true; }
+        const void setFrontDir(const vec3f& dir) { _frontDir = dir, _needUpdateView = true; }
 
         /**
          * Get the view matrix
          */
-        const mat4f& ViewMatrix() { if (_needUpdateView) updateCamera(); return _matView; }
+        const mat4f& getViewMatrix() { if (_needUpdateView) updateCamera(); return _matView; }
 
         /**
          * Get the projection matrix that we created by setPerpective or setOrtho.
          */
-        const mat4f& ProjectionMatrix() { return _matProjection; }
+        const mat4f& getProjectionMatrix() { return _matProjection; }
 
         /**
          * Get the world-view-projection matrix compose
          */
-        const mat4f& MatWVP() { if (_needUpdateView) updateCamera(); return _matWVP; }
+        const mat4f& getMatWVP() { if (_needUpdateView) updateCamera(); return _matWVP; }
 
         /**
          * Get the inverse martrix of MatWVP
          */
-        const mat4f& MatWVP_Inv() { if (_needUpdateView) updateCamera(); return _matWVP_Inv; }
+        const mat4f& getMatWVP_Inv() { if (_needUpdateView) updateCamera(); return _matWVP_Inv; }
 
         /**
          * Set the projection matrix by perspective
          * @params seealso mat4f::createPerspective
          */
-        void SetPerspective(float fovy, float aspectRatio, float zNear, float zFar) { _matProjection = mat4f::createPerspective(fovy, aspectRatio, zNear, zFar); _needUpdateView = true; }
+        void setPerspective(float fovy, float aspectRatio, float zNear, float zFar) { _matProjection = mat4f::createPerspective(fovy, aspectRatio, zNear, zFar); _needUpdateView = true; }
 
         /**
          * Set the projection matrix by ortho
          * @params seealso mat4f::createOrtho
          */
-        void SetOrtho(float left, float right, float bottom, float top, float zNear, float zFar) { _matProjection = mat4f::createOrtho(left, right, bottom, top, zNear, zFar); _needUpdateView = true; }
+        void setOrtho(float left, float right, float bottom, float top, float zNear, float zFar) { _matProjection = mat4f::createOrtho(left, right, bottom, top, zNear, zFar); _needUpdateView = true; }
 
         /**
          * World position to screen position
          */
-        bool    Project(const vec4f& world, vec4f& screen, const vec2i& viewSize)
+        bool    project(const vec4f& world, vec4f& screen, const vec2i& viewSize)
         {
             screen = _matWVP * world;
             if (screen.w == 0.0f)
@@ -154,7 +154,7 @@ namespace sge
         /**
          * World position to screen position
          */
-        vec2f  WorldToScreen(const vec3f& world, const vec2i& viewSize)
+        vec2f  worldToScreen(const vec3f& world, const vec2i& viewSize)
         {
             vec4f  worlds(world.x, world.y, world.z, 1);
             vec4f  screens;
@@ -165,7 +165,7 @@ namespace sge
         /**
          * Screen position to world position
          */
-        vec3f  ScreenToWorld(const vec2f& screen, const vec2i& viewSize)
+        vec3f  screenToWorld(const vec2f& screen, const vec2i& viewSize)
         {
             vec4f  screens(screen.x, screen.y, 0, 1);
             vec4f  world;
@@ -176,7 +176,7 @@ namespace sge
         /**
          * Screen position to world position
          */
-        vec3f  ScreenToWorld(float x, float y, const vec2i& viewSize)
+        vec3f  screenToWorld(float x, float y, const vec2i& viewSize)
         {
             float4  screens(x, y, 0, 1);
             float4  world;
@@ -187,7 +187,7 @@ namespace sge
         /**
          * Screen position to world position
          */
-        bool    UnProject(const vec4f& screen, vec4f& world, const vec2i& viewSize)
+        bool    unProject(const vec4f& screen, vec4f& world, const vec2i& viewSize)
         {
             vec4f v;
             v.x = screen.x;
@@ -217,7 +217,7 @@ namespace sge
         /**
          * Create ray from screen point down
          */
-        rayf CreateRayFromScreen(int x, int y, const vec2i& viewSize)
+        rayf createRayFromScreen(int x, int y, const vec2i& viewSize)
         {
             vec4f  minWorld;
             vec4f  maxWorld;
@@ -238,7 +238,7 @@ namespace sge
         /**
          * Create ray from screen point down
          */
-        rayf CreateRayFromScreen(const vec2i& pt, const vec2i& viewSize)
+        rayf createRayFromScreen(const vec2i& pt, const vec2i& viewSize)
         {
             return CreateRayFromScreen(pt.x, pt.y, viewSize);
         }

@@ -9,7 +9,7 @@
  *
  * License
  *
- * Copyright (c) 2017-2018, Xiang Wencheng <xiangwencheng@outlook.com>
+ * Copyright (c) 2017-2019, Xiang Wencheng <xiangwencheng@outlook.com>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without 
@@ -72,13 +72,13 @@ namespace sge
          * @param ms Time to wait, based on milliseconds
          * @return true if get semaphore success, return false when faild or timeout
          */
-        bool Wait(unsigned long ms = 0xFFFFFFFF);
+        bool wait(unsigned long ms = 0xFFFFFFFF);
 
         /**
          * Post semaphore
          * @param number The semaphore count.
          */
-        bool Set(long number = 1);
+        bool set(long number = 1);
 
     protected:
         SemaphorePrivate* d;

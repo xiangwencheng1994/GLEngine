@@ -9,7 +9,7 @@
  *
  * License
  *
- * Copyright (c) 2017-2018, Xiang Wencheng <xiangwencheng@outlook.com>
+ * Copyright (c) 2017-2019, Xiang Wencheng <xiangwencheng@outlook.com>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without 
@@ -49,13 +49,17 @@ namespace sge
 
     class GLSLProgramPrivate
     {
-        GLuint  program;
-        std::vector<GLint> shaders;
+    public:
+        GLuint              mProgramId;
+        std::vector<GLint>  mShaders;
 
-        GLSLProgramPrivate() : program(0) { }
+        GLSLProgramPrivate() : mProgramId(0) 
+        {
+        }
+
         ~GLSLProgramPrivate() 
         {
-            ASSERT(program == 0);
+            ASSERT(mProgramId == 0);
         }
 
         bool AddShader(GLenum type, std::string src)
@@ -86,22 +90,22 @@ namespace sge
 #endif
                 return false;
             }
-            shaders.push_back(shader);
+            mShaders.push_back(shader);
             return true;
         }
 
         void CreateProgram()
         {
-            GLCall(program = glCreateProgram());
-            ASSERT(program && "glCreateProgram failed!");
+            GLCall(mProgramId = glCreateProgram());
+            ASSERT(mProgramId && "glCreateProgram failed!");
 
-            for (std::vector<GLint>::iterator it = shaders.begin();
-                it != shaders.end(); it++)
+            for (std::vector<GLint>::iterator it = mShaders.begin();
+                it != mShaders.end(); it++)
             {
                 GLint shader = *it;
                 if (shader > 0)
                 {
-                    GLCall(glAttachShader(program, shader));
+                    GLCall(glAttachShader(mProgramId, shader));
                 }
             }
         }
@@ -110,14 +114,14 @@ namespace sge
         {
             GLint   status = 0;
             char    compileLog[512] = { 0 };
-            GLCall(glLinkProgram(program));
-            GLCall(glGetProgramiv(program, GL_LINK_STATUS, &status));
+            GLCall(glLinkProgram(mProgramId));
+            GLCall(glGetProgramiv(mProgramId, GL_LINK_STATUS, &status));
             if (status == GL_FALSE)
             {
-                GLCall(glGetProgramInfoLog(program, sizeof(compileLog), 0, compileLog));
+                GLCall(glGetProgramInfoLog(mProgramId, sizeof(compileLog), 0, compileLog));
                 Log::error("Link GLProgram faild: %s", compileLog);
-                GLCall(glDeleteProgram(program));
-                program = NULL;
+                GLCall(glDeleteProgram(mProgramId));
+                mProgramId = NULL;
 #if defined (_DEBUG) && defined(_MSC_VER)
                 DebugBreak();
 #elif defined _WIN32
@@ -127,28 +131,28 @@ namespace sge
             }
 
             // remove shaders after built program that we don't need any more
-            std::vector<GLint>::iterator it = shaders.begin();
-            while (it != shaders.end())
+            std::vector<GLint>::iterator it = mShaders.begin();
+            while (it != mShaders.end())
             {
                 GLint shader = *it;
                 if (shader > 0)
                 {
                     GLCall(glDeleteShader(shader));
                 }
-                it = shaders.erase(it);
+                it = mShaders.erase(it);
             }
-            ASSERT(shaders.size() == 0);
+            ASSERT(mShaders.size() == 0);
 
             return true;
         }
 
         void Destory()
         {
-            ASSERT(shaders.size() == 0);
-            if (program)
+            ASSERT(mShaders.size() == 0);
+            if (mProgramId)
             {
-                GLCall(glDeleteProgram(program));
-                program = NULL;
+                GLCall(glDeleteProgram(mProgramId));
+                mProgramId = NULL;
             }
         }
 
@@ -163,74 +167,74 @@ namespace sge
 
     GLSLProgram::~GLSLProgram()
     {
-        Destory();
+        destory();
         delete d;
     }
 
-    bool GLSLProgram::Create()
+    bool GLSLProgram::create()
     {
         bool ret = true;
-        if (d->program == 0)
+        if (d->mProgramId == 0)
         {
-            ret &= d->AddShader(GL_VERTEX_SHADER, GetVertexShaderSrc());
+            ret &= d->AddShader(GL_VERTEX_SHADER, getVertexShaderSrc());
 #ifndef OPENGLES
-            ret &= d->AddShader(GL_TESS_CONTROL_SHADER, GetTessControlShaderSrc());
-            ret &= d->AddShader(GL_TESS_EVALUATION_SHADER, GetTessEvaluationShaderSrc());
-            ret &= d->AddShader(GL_GEOMETRY_SHADER, GetGeometryShaderSrc());
+            ret &= d->AddShader(GL_TESS_CONTROL_SHADER, getTessControlShaderSrc());
+            ret &= d->AddShader(GL_TESS_EVALUATION_SHADER, getTessEvaluationShaderSrc());
+            ret &= d->AddShader(GL_GEOMETRY_SHADER, getGeometryShaderSrc());
 #endif // OPENGLES
-            ret &= d->AddShader(GL_FRAGMENT_SHADER, GetFragmentShaderSrc());
+            ret &= d->AddShader(GL_FRAGMENT_SHADER, getFragmentShaderSrc());
             
             d->CreateProgram();
-            this->OnBeforeLink();
+            this->onBeforeLink();
             ret = d->LinkProgram();
             if (ret)
             {
-                this->OnAfterCreate();
+                this->onAfterCreate();
             }
         }
         return ret;
     }
 
-    void GLSLProgram::Destory()
+    void GLSLProgram::destory()
     {
         d->Destory();
     }
 
-    void GLSLProgram::Begin() const
+    void GLSLProgram::begin() const
     {
-        GLCall(glUseProgram(d->program));
+        GLCall(glUseProgram(d->mProgramId));
     }
 
-    void GLSLProgram::End() const
+    void GLSLProgram::end() const
     {
         GLCall(glUseProgram(0));
     }
 
-    GLuint GLSLProgram::ProgramId() const
+    GLuint GLSLProgram::getProgramId() const
     {
-        return d->program;
+        return d->mProgramId;
     }
 
-    uniform GLSLProgram::GetUniformLocation(const char * name) const
+    uniform GLSLProgram::getUniformLocation(const char * name) const
     {
-        return glGetUniformLocation(d->program, name);
+        return glGetUniformLocation(d->mProgramId, name);
     }
 
 #ifndef OPENGLES
        
-    UniformBlock GLSLProgram::GetUniformBlock(const char * name) const
+    UniformBlock GLSLProgram::getUniformBlock(const char * name) const
     {
         UniformBlock ub;
-        ub.index = glGetUniformBlockIndex(d->program, name);
-        GLCall(glGetActiveUniformBlockiv(d->program, ub.index, GL_UNIFORM_BLOCK_DATA_SIZE, &ub.blockSize));
+        ub.index = glGetUniformBlockIndex(d->mProgramId, name);
+        GLCall(glGetActiveUniformBlockiv(d->mProgramId, ub.index, GL_UNIFORM_BLOCK_DATA_SIZE, &ub.blockSize));
         return ub;
     }
 
 #endif // !OPENGLES
 
-    attribute GLSLProgram::GetAttribLocation(const char * name) const
+    attribute GLSLProgram::getAttribLocation(const char * name) const
     {
-        return glGetAttribLocation(d->program, name);
+        return glGetAttribLocation(d->mProgramId, name);
     }
 
 }

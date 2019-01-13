@@ -9,7 +9,7 @@
  *
  * License
  *
- * Copyright (c) 2017-2018, Xiang Wencheng <xiangwencheng@outlook.com>
+ * Copyright (c) 2017-2019, Xiang Wencheng <xiangwencheng@outlook.com>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without 
@@ -83,7 +83,7 @@ namespace sge
     }
 
 
-    inline float Timer::Elapsed()
+    inline float Timer::elapsed()
     {
         LARGE_INTEGER nowTime;
         QueryPerformanceCounter(&nowTime);

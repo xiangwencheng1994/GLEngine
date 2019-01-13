@@ -9,7 +9,7 @@
  *
  * License
  *
- * Copyright (c) 2017-2018, Xiang Wencheng <xiangwencheng@outlook.com>
+ * Copyright (c) 2017-2019, Xiang Wencheng <xiangwencheng@outlook.com>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -62,9 +62,15 @@ namespace sge
          */
         FileReader(const char* fileName, bool* ret)
         {
-            errno_t error = fopen_s(&_file, fileName, "rb");
-            if (ret) *ret = (error == 0);
-            else ASSERT(error == 0);
+            errno_t error = fopen_s(&mFile, fileName, "rb");
+            if (ret)
+            {
+                *ret = (error == 0);
+            }
+            else
+            {
+                ASSERT(error == 0);
+            }
         }
 
         /**
@@ -72,13 +78,17 @@ namespace sge
          */
         ~FileReader()
         {
-            if (_file) fclose(_file);
+            if (mFile)
+            {
+                fclose(mFile);
+                mFile = NULL;
+            }
         }
 
         /**
          * get the current cursor of file
          */
-        size_t Tell() override { return ftell(_file); }
+        size_t tell() override { return ftell(mFile); }
 
         /**
          * seek the cursor of file
@@ -86,13 +96,13 @@ namespace sge
          * @param seek Must be SEEK_SET | SEEK_CUR | SEEK_END
          * @return true if seek success
          */
-        bool Seek(long offset, int seek) override { return 0 == fseek(_file, offset, seek); }
+        bool seek(long offset, int seek) override { return 0 == fseek(mFile, offset, seek); }
 
         /**
          * get the file length, count of bytes
          * @return the file length, error while return = unsigned(-1)
          */
-        size_t Length() override
+        size_t length() override
         {
             size_t ret = unsigned(-1);
             size_t cur = Tell();
@@ -108,9 +118,9 @@ namespace sge
          * Check the stream is eof
          * @return true if eof
          */
-        bool IsEOF() override
+        bool isEOF() override
         {
-            return 0 != feof(_file);
+            return 0 != feof(mFile);
         }
 
         /**
@@ -120,9 +130,9 @@ namespace sge
          * @param elementCount The count of element wanted
          * @return The count of element has readed, error while return > elementCount
          */
-        size_t Read(void* buff, size_t elementSize, size_t elementCount)  override
+        size_t read(void* buff, size_t elementSize, size_t elementCount)  override
         {
-            return fread(buff, elementSize, elementCount, _file);
+            return fread(buff, elementSize, elementCount, mFile);
         }
         
         /**
@@ -131,13 +141,13 @@ namespace sge
          * @param bufferSize The max sizeof bytes
          * @return True if has readed success, but the max read count is bufferSize - 1
          */
-        bool GetLine(char* buff, size_t bufferSize) override
+        bool getLine(char* buff, size_t bufferSize) override
         {
-            return fgets(buff, bufferSize, _file) != NULL;
+            return fgets(buff, bufferSize, mFile) != NULL;
         }
-
+                
     private:
-        FILE*       _file;
+        FILE*       mFile;
         DISABLE_COPY(FileReader)
     };
 

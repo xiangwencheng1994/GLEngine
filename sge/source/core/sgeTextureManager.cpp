@@ -9,7 +9,7 @@
  *
  * License
  *
- * Copyright (c) 2017-2018, Xiang Wencheng <xiangwencheng@outlook.com>
+ * Copyright (c) 2017-2019, Xiang Wencheng <xiangwencheng@outlook.com>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -51,7 +51,7 @@ namespace sge
 
     Texture2DRef::~Texture2DRef()
     {
-        Release();
+        release();
     }
 
     Texture2DRef::Texture2DRef(const Texture2DRef & rhs)
@@ -59,14 +59,14 @@ namespace sge
     {
         if (rhs._mgr)
         {
-            ASSERT(rhs._refCount && rhs.IsValid());
+            ASSERT(rhs._refCount && rhs.isValid());
             ++(*rhs._refCount);
             _mgr->AddRefItem(this);
-            _texId = rhs._texId;
+            mTexID = rhs.mTexID;
         }
         else
         {
-            ASSERT(rhs._texId == unsigned(-1 ) && 
+            ASSERT(rhs.mTexID == unsigned(-1 ) && 
                 "Not allowed copy Texture2DRef object without TextureManager");
         }
     }
@@ -75,15 +75,15 @@ namespace sge
     {
         if (rhs._mgr)
         {
-            ASSERT(rhs._refCount && rhs.IsValid());
+            ASSERT(rhs._refCount && rhs.isValid());
             ++(*rhs._refCount);
         }
 
-        Release();
+        release();
 
         _mgr = rhs._mgr;
         _refCount = rhs._refCount;
-        _texId = rhs._texId;
+        mTexID = rhs.mTexID;
         if (_mgr)
         {
             _mgr->AddRefItem(this);
@@ -91,16 +91,16 @@ namespace sge
         return *this;
     }
     
-    void Texture2DRef::Release()
+    void Texture2DRef::release()
     {
         if (_mgr)
         {
-            ASSERT(_refCount && IsValid());
+            ASSERT(_refCount && isValid());
             if (--(*_refCount) == 0)
             {
-                _mgr->RemoveTex(_texId);
+                _mgr->RemoveTex(mTexID);
             }
-            _texId = unsigned(-1);
+            mTexID = unsigned(-1);
             _mgr->RemoveRefItem(this);
             ASSERT(_mgr == NULL && _refCount == NULL);
         }
@@ -117,7 +117,7 @@ namespace sge
         {
             (*it)->_mgr = NULL;
             (*it)->_refCount = NULL;
-            (*it)->_texId = NULL;
+            (*it)->mTexID = NULL;
         }
         _mItems.clear();
         for (Map<GLuint, TextureDesc>::iterator it = _tex_ref_map.begin();
@@ -140,19 +140,19 @@ namespace sge
             {
                 ref._mgr = this;
                 ref._refCount = &it->second.refCount;
-                ref._texId = it->first;
+                ref.mTexID = it->first;
                 ++it->second.refCount;
                 AddRefItem(&ref);
                 return ref;
             }
         }
 
-        if (ref.FromFile(file))
+        if (ref.loadFromFile(file))
         {
-            TextureDesc desc = _tex_ref_map[ref._texId];
+            TextureDesc desc = _tex_ref_map[ref.mTexID];
             desc.file = file;
             desc.refCount = 1;
-            desc.size = ref.Size();
+            desc.size = ref.getSize();
             AddRefItem(&ref);
         }
 
@@ -169,11 +169,11 @@ namespace sge
                 jt != _mItems.end(); ++jt)
             {
                 Texture2DRef* ref = *jt;
-                if (ref->_texId == tex)
+                if (ref->mTexID == tex)
                 {
                     ref->_mgr = NULL;
                     ref->_refCount = NULL;
-                    ref->_texId = unsigned(-1);
+                    ref->mTexID = unsigned(-1);
                 }
             }
             GLCall(glDeleteTextures(1, &tex));
@@ -195,7 +195,7 @@ namespace sge
         {
             item->_mgr = NULL;
             item->_refCount = NULL;
-            item->_texId = unsigned(-1);
+            item->mTexID = unsigned(-1);
             _mItems.erase(it);
             ASSERT(_mItems.end() == std::find(_mItems.begin(), _mItems.end(), item));
         }

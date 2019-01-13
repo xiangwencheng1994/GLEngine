@@ -9,7 +9,7 @@
  *
  * License
  *
- * Copyright (c) 2017-2018, Xiang Wencheng <xiangwencheng@outlook.com>
+ * Copyright (c) 2017-2019, Xiang Wencheng <xiangwencheng@outlook.com>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without 
@@ -94,12 +94,8 @@
 
 
 // define ASSERT for debugger
-#ifdef _DEBUG
-    #include <assert.h>
-    #define ASSERT(x)   assert(x)
-#else
-    #define ASSERT(x)   x
-#endif
+#include <assert.h>
+#define ASSERT(x)   assert(x)
 
 
 // define GLCall for debugger

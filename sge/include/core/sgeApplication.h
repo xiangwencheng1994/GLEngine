@@ -9,7 +9,7 @@
  *
  * License
  *
- * Copyright (c) 2017-2018, Xiang Wencheng <xiangwencheng@outlook.com>
+ * Copyright (c) 2017-2019, Xiang Wencheng <xiangwencheng@outlook.com>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,12 +44,13 @@
 #define SGE_APP_BASE_H
 
 #include <core/sgePlatform.h>
-#include <core/sgeGLContext.h>
 
 namespace sge
 {
-    class IScene;
+    class Scene;
     class PlatformNative;
+    class Renderer;
+    class GLContext;   
 
     /**
      * Class Application, to drive the application system
@@ -57,47 +58,65 @@ namespace sge
     class SGE_API  Application
     {
     public:
+
         /**
          * Constructor
          */
         Application();
+
 
         /**
          * Destructor
          */
         virtual ~Application();
 
+
         /**
-         * Run the application util quit
+         * Get the native platform interface
          */
-        void Run();
+        PlatformNative* getPlatform();
+
+
+        /**
+         * Get the gui renderer
+         */
+        Renderer* getRenderer();
+
+        /**
+         * Get the current scene
+         */
+        Scene* getCurrentScene();
+
 
         /**
          * Load a scene instead of current scene, old scene will unloaded and deleted
          * @param scene The new scene
          */
-        void LoadScene(IScene* scene);
+        void loadScene(Scene* scene);
+
+
+        /**
+         * Run the application util quit
+         */
+        void run();
+
 
         /**
          * Send a quit message to platform
          */
-        void Quit();
+        void quit();
+
+    protected:
 
         /**
-         * Get the native platform interface
+         * Callback on get close event
+         * @return true if you dont want to close
          */
-        PlatformNative* Platform() { return _platform; }
-
-        /**
-         * Get the current scene
-         */
-        IScene* CurrentScene() { return _curScene; }
+        virtual bool onClose();
 
     private:
-        IScene*             _curScene;
-        PlatformNative*     _platform;
-        GLContext           _glContext;
-
+        friend class ApplicationPrivate;
+        ApplicationPrivate  *d;
         DISABLE_COPY(Application)
     };
 

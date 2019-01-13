@@ -9,7 +9,7 @@
  *
  * License
  *
- * Copyright (c) 2017-2018, Xiang Wencheng <xiangwencheng@outlook.com>
+ * Copyright (c) 2017-2019, Xiang Wencheng <xiangwencheng@outlook.com>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,6 +43,9 @@
 #include <core/sgeApplication.h>
 #include <core/sgePlatformNative.h>
 #include <core/sgeScene.h>
+#include <core/sgeRenderer.h>
+#include <core/sgeGLContext.h>
+#include <core/sgeLog.h>
 
 #if SGE_TARGET_PLATFORM == SGE_PLATFORM_WIN32
 #include <win32/sgePlatformNativeWin32.h>
@@ -50,70 +53,118 @@
 
 namespace sge
 {
-    Application::Application()
-        : _curScene(NULL), _platform(NULL)
+
+    class ApplicationPrivate
     {
-#ifdef OPENGLES
-        PlatformWin32Native* p = new PlatformWin32Native(0);
-        _platform = p;
-        _glContext.Init(p->getWindow(), p->getDisplay());
-#elif SGE_TARGET_PLATFORM == SGE_PLATFORM_WIN32
-        PlatformWin32Native* p = new PlatformWin32Native(0);
-        _platform = p;
-        _glContext.Init(p->getHWnd(), GetDC(p->getHWnd()), 0);
-        _glContext.EnableVSYNC(false);
-#endif
+    public:
+        Scene*              mCurScene;
+        PlatformWin32Native mPlatform;
+        GLContext           mGLContext;
+        Renderer*           mRenderer;
+
+        ApplicationPrivate()
+            : mCurScene(NULL)
+            , mPlatform(0, 800, 600)
+            , mRenderer(NULL)
+        {}
+
+        ~ApplicationPrivate()
+        {
+            ASSERT(mCurScene == NULL && "not released");
+            ASSERT(mRenderer == NULL && "not released");
+        }
+    };
+
+
+    Application::Application()
+        : d(new ApplicationPrivate())
+    {        
+        bool ret = d->mGLContext.initialize(d->mPlatform.getWindow(), 0, 0);
+        if (!ret)
+        {
+            Log::error("Application init gl context failed");
+        }
+        d->mGLContext.setEnableVSYNC(false);
+        d->mRenderer = new Renderer();
+        d->mPlatform.mOnCloseEvent.bind<Application>(this, &Application::onClose);
+        
+        // load fonts
+        d->mRenderer->loadFont("default", "fonts/YaHei.Consolas.ttf");
     }
+
 
     Application::~Application()
     {
-        _glContext.Shutdown();
-        if (_platform)
+        if (d)
         {
-            delete _platform;
-            _platform = NULL;
+            if (d->mCurScene)
+            {
+                loadScene(NULL);
+            }
+            if (d->mRenderer)
+            {
+                delete d->mRenderer;
+                d->mRenderer = NULL;
+            }
+            delete d;
+            d = NULL;
         }
     }
 
-    void Application::Run()
+
+    void Application::run()
     {
-        ASSERT(_platform);
-        while (!_platform->IsClosed())
+        while (!d->mPlatform.isClosed())
         {
-            if (!_platform->ProcessEvents())
+            if (!d->mPlatform.processEvents())
             {
-                if (_curScene)
-                {                   
-                    _curScene->OnRender(this);
-                    _glContext.SwapBuffer();
+                if (d->mCurScene)
+                {
+                    d->mCurScene->onRender();
+                    d->mGLContext.swapBuffer();
                 }
             }
         }
     }
 
-    void Application::LoadScene(IScene* scene)
-    {
-        IScene* oldScene = _curScene;
+
+    void Application::loadScene(Scene* scene)
+    {        
+        Scene* oldScene = d->mCurScene;
         if (scene)
         {
-            scene->OnLoad(this);
+            scene->onLoad();
         }
-        _curScene = scene;
+        d->mCurScene = scene;
 
         if (oldScene)
         {
-            oldScene->OnUnLoad(this);
+            oldScene->onUnLoad();
             //TODO: check all oldScene resouces released.
-            oldScene->Release();
+            oldScene->release();
         }
     }
 
-    void Application::Quit()
+
+    void Application::quit()
+    {
+        if (getPlatform()->isClosed())
+        {
+            getPlatform()->close();
+        }
+    }
+
+    inline bool Application::onClose()
     {
         // unload the scene
-        LoadScene(NULL);
-        // close native platform
-        Platform()->Close();
+        loadScene(NULL);
+        return false;
     }
+
+    inline PlatformNative * Application::getPlatform() { return &d->mPlatform; }
+    
+    inline Renderer * Application::getRenderer() { return d->mRenderer; }
+
+    inline Scene * Application::getCurrentScene() { return d->mCurScene; }
 
 }

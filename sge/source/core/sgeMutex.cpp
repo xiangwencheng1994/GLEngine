@@ -9,7 +9,7 @@
  *
  * License
  *
- * Copyright (c) 2017-2018, Xiang Wencheng <xiangwencheng@outlook.com>
+ * Copyright (c) 2017-2019, Xiang Wencheng <xiangwencheng@outlook.com>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without 
@@ -72,17 +72,17 @@ namespace sge
 		}
 	}
 
-	inline void Mutex::Lock() const
+	inline void Mutex::lock() const
 	{
 		::EnterCriticalSection(&d->cs);
 	}
 
-    inline void Mutex::Unlock() const
+    inline void Mutex::unlock() const
 	{
 		::LeaveCriticalSection(&d->cs);
 	}
 
-    inline bool Mutex::TryLock() const
+    inline bool Mutex::tryLock() const
 	{
 		return TRUE == ::TryEnterCriticalSection(&d->cs);
 	}
@@ -119,19 +119,19 @@ namespace sge
         }
     }
 
-    inline void Mutex::Lock()
+    inline void Mutex::lock()
     {
         int ret = pthread_mutex_lock(&d->_mutex);
 		ASSERT(ret == 0);
     }
 
-    inline void Mutex::Unlock()
+    inline void Mutex::unlock()
     {
         int ret = pthread_mutex_unlock(&d->_mutex);
         ASSERT(ret == 0);
     }
 
-    inline bool Mutex::TryLock()
+    inline bool Mutex::tryLock()
     {
         return 0 == pthread_mutex_trylock(&d->_mutex);
     }

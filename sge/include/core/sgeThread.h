@@ -9,7 +9,7 @@
  *
  * License
  *
- * Copyright (c) 2017-2018, Xiang Wencheng <xiangwencheng@outlook.com>
+ * Copyright (c) 2017-2019, Xiang Wencheng <xiangwencheng@outlook.com>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without 
@@ -66,12 +66,12 @@ namespace sge
          * Make current thread sleep some times.
          * @param ms Sleep time base on milliseconds
          */
-        static void Sleep(unsigned int ms);
+        static void sleep(unsigned int ms);
 
 		/**
 		 * Get the current thread id.
 		 */
-		static TID	CurrentThreadId();
+		static TID	getCurrentThreadId();
 
         /**
          * Constructor
@@ -92,18 +92,18 @@ namespace sge
         /**
          * Start this thread
          */
-        bool Start();
+        bool start();
 
         /**
          * Wait for thread exit, if thread is finished it will return immediately
          * @return The run function result.
          */
-        int Join();
+        int join();
 
         /**
          * Get thread id, NULL if not started
          */
-        TID ThreadId() const;
+        TID getThreadId() const;
 
 #ifdef _WIN32
         typedef void * HANDLE;
@@ -111,13 +111,13 @@ namespace sge
         /**
          * Get the Thread Handle, windows only
          */
-        HANDLE Handle() const;
+        HANDLE getHandle() const;
 #endif
 
         /**
          * The executable of this thread
          */
-        virtual int Run();
+        virtual int run();
     protected:
         ThreadPrivate* d;
 

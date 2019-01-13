@@ -9,7 +9,7 @@
  *
  * License
  *
- * Copyright (c) 2017-2018, Xiang Wencheng <xiangwencheng@outlook.com>
+ * Copyright (c) 2017-2019, Xiang Wencheng <xiangwencheng@outlook.com>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without 
@@ -76,7 +76,7 @@ namespace sge
         }
     }
 
-    inline bool Semaphore::Wait(unsigned long ms)
+    inline bool Semaphore::wait(unsigned long ms)
     {
         switch (::WaitForSingleObject(d->hSem, ms))
         {
@@ -91,7 +91,7 @@ namespace sge
         return false;
     }
 
-    inline bool Semaphore::Set(long number)
+    inline bool Semaphore::set(long number)
     {
         return TRUE == ::ReleaseSemaphore(d->hSem, number, 0);
     }
@@ -129,7 +129,7 @@ namespace sge
 		}
 	}
 
-    inline bool Semaphore::Wait(unsigned long ms)
+    inline bool Semaphore::wait(unsigned long ms)
 	{
 		struct timespec abstime;
 		struct timeval tv;

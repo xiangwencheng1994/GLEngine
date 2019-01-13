@@ -9,7 +9,7 @@
  *
  * License
  *
- * Copyright (c) 2017-2018, Xiang Wencheng <xiangwencheng@outlook.com>
+ * Copyright (c) 2017-2019, Xiang Wencheng <xiangwencheng@outlook.com>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,25 +44,18 @@
 #include <core/sgeLog.h>
 
 #ifdef OPENGLES
-
 #include <EGL/eglext.h>
+#else // Desktop OpenGL
+#include <map>
+#include <GL/wglew.h>
+#define COLOR_BITS  24
+#define DEPTH_BITS  24
+#endif
 
 namespace sge
 {
 
-    GLContext::GLContext()
-    {
-        _config = 0;
-        _surface = EGL_NO_SURFACE;
-        _context = EGL_NO_CONTEXT;
-        _display = EGL_NO_DISPLAY;
-    }
-
-    GLContext::~GLContext()
-    {
-        Shutdown();
-    }
-
+#ifdef OPENGLES
     static EGLint eglGetSupportedRendererType(EGLDisplay display)
     {
 #if defined(EGL_KHR_create_context)
@@ -79,143 +72,11 @@ namespace sge
 #endif
         return EGL_OPENGL_ES2_BIT;
     }
-
-    bool GLContext::Init(EGLNativeWindowType hWnd, EGLNativeDisplayType hDC)
-    {
-        ASSERT(EGL_NO_CONTEXT == _context && "Not init gl context again");
-
-        EGLDisplay  display = eglGetDisplay(hDC);
-        if (display == EGL_NO_DISPLAY)
-        {
-            Log::error("eglGetDisplay ");
-            return false;
-        }
-
-        EGLint  major, minor;
-        if (EGL_FALSE == eglInitialize(display, &major, &minor))
-        {
-            return false;
-        }
-
-        const EGLint attribs[] =
-        {
-            EGL_RENDERABLE_TYPE, eglGetSupportedRendererType(display),
-            EGL_RED_SIZE, 5,
-            EGL_GREEN_SIZE, 6,
-            EGL_BLUE_SIZE, 5,
-            EGL_ALPHA_SIZE, 8,
-            EGL_DEPTH_SIZE, 8,
-            EGL_STENCIL_SIZE, 8,
-            EGL_NONE
-        };
-
-        EGLint	numConfigs(0);
-        EGLConfig   config;
-        if (EGL_FALSE == eglChooseConfig(display, attribs, &config, 1, &numConfigs))
-        {
-            return false;
-        }
-        ASSERT(numConfigs && "EGL Can not find any config while eglChooseConfig");
-
-#ifdef ANDROID
-        EGLint  format(0);
-        if (EGL_FALSE == eglGetConfigAttrib(display, config, EGL_NATIVE_VISUAL_ID, &format))
-        {
-            return false;
-        }
-        ANativeWindow_setBuffersGeometry(hWnd, 0, 0, format);
 #endif
 
+#ifndef OPENGLES
 
-        EGLSurface  surface = eglCreateWindowSurface(display, config, hWnd, NULL);
-        if (EGL_NO_SURFACE == surface)
-        {
-            return  false;
-        }
-
-
-        EGLint  attr[] = { EGL_CONTEXT_CLIENT_VERSION,
-            attribs[1] == EGL_OPENGL_ES3_BIT_KHR ? 3 : 2
-            , EGL_NONE };
-        EGLContext  context = eglCreateContext(display, config, EGL_NO_CONTEXT, attr);
-        if (EGL_NO_CONTEXT == context)
-        {
-            EGLint ret = eglGetError();
-            ASSERT("eglCreateContext:eglGetError" && ret);
-            eglDestroySurface(display, surface);
-            eglTerminate(display);
-            return  false;
-        }
-
-        if (EGL_FALSE == eglMakeCurrent(display, surface, surface, context))
-        {
-            eglDestroySurface(display, surface);
-            eglTerminate(display);
-            return  false;
-        }
-
-        _context = context;
-        _display = display;
-        _config = config;
-        _surface = surface;
-        //eglQuerySurface(display, surface, EGL_WIDTH, &_width);
-        //eglQuerySurface(display, surface, EGL_HEIGHT, &_height);
-
-        return  true;
-    }
-
-    inline void GLContext::MakeCurrent()
-    {
-        EGLBoolean  ret = eglMakeCurrent(_display, _surface, _surface, _context);
-        ASSERT(EGL_TRUE == ret);
-    }
-
-    void GLContext::Shutdown()
-    {
-        if (EGL_NO_DISPLAY != _display)
-        {
-            eglMakeCurrent(_display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
-            if (EGL_NO_CONTEXT != _context)
-            {
-                eglDestroyContext(_display, _context);
-                _context = EGL_NO_CONTEXT;
-            }
-            if (EGL_NO_SURFACE != _surface)
-            {
-                eglDestroySurface(_display, _surface);
-                _surface = EGL_NO_SURFACE;
-            }
-            eglTerminate(_display);
-            _display = EGL_NO_DISPLAY;
-        }
-    }
-
-    inline void GLContext::SwapBuffer()
-    {
-        EGLBoolean  ret = eglSwapBuffers(_display, _surface);
-        ASSERT(EGL_TRUE == ret);
-    }
-
-    inline void GLContext::EnableVSYNC(GLboolean enable)
-    {
-        eglSwapInterval(_display, enable ? EGL_MAX_SWAP_INTERVAL : 0);
-    }
-}
-
-
-#else // Desktop OpenGL
-
-#if SGE_TARGET_PLATFORM == SGE_PLATFORM_WIN32
-
-#include <map>
-#include <GL/wglew.h>
-
-#define COLOR_BITS  24
-#define DEPTH_BITS  24
-
-namespace sge
-{
-    static bool MapSupportedMsaaFormat(std::map<int, int>& msaaFormat)
+    static bool mapSupportedMsaaFormat(std::map<int, int>& msaaFormat)
     {
         HINSTANCE hInstance = GetModuleHandle(NULL);
         bool ret = false;
@@ -331,20 +192,13 @@ namespace sge
         if (hWnd) DestroyWindow(hWnd);
         return ret;
     }
-
-    GLContext::GLContext()
-        : _hWnd(0)
-        , _hDC(0)
-        , _hRC(0)
-    {
-    }
-
-    int GLContext::GetFormatForMsaa(int msaa)
+    
+    int GLContext::getFormatForMsaa(int msaa)
     {
         static std::map<int, int> msaaFormat;
 
         if (msaaFormat.size() == 0)
-            MapSupportedMsaaFormat(msaaFormat);
+            mapSupportedMsaaFormat(msaaFormat);
         while (msaa > 0)
         {
             if (msaaFormat[msaa] > 0)
@@ -354,13 +208,144 @@ namespace sge
         return -1;
     }
 
-    bool GLContext::Init(HWND hWnd, HDC hDC /*= NULL*/, int format /*= 0*/)
+#endif
+
+    class GLContextPrivate
     {
-        HGLRC hRC = NULL;
-        if (!hDC) hDC = ::GetDC(hWnd);
-        if (!hDC)
+    public:
+        WindowHandle    mHWnd;
+        DisplayHandle   mHDC;
+#ifdef OPENGLES
+        EGLConfig       mConfig;
+        EGLSurface      mSurface;
+        EGLContext      mContext;
+        EGLDisplay      mDisplay;
+#else
+        HGLRC           mHRC;
+#endif
+        GLContextPrivate()
+            : mHWnd(NULL)
+            , mHDC(NULL)
+#ifdef OPENGLES
+            , mConfig(0)
+            , mSurface(EGL_NO_SURFACE)
+            , mContext(EGL_NO_CONTEXT)
+            , mDisplay(EGL_NO_DISPLAY)
+#else
+            , mHRC(NULL)
+#endif
+        {}
+
+        ~GLContextPrivate()
         {
-            Log::error("Get DC failed, with Error Code %d", ::GetLastError());
+            ASSERT(mHWnd == NULL);
+            ASSERT(mHDC == NULL);
+#ifdef OPENGLES
+            ASSERT(mConfig == 0);
+            ASSERT(mSurface == EGL_NO_SURFACE);
+            ASSERT(mContext == EGL_NO_CONTEXT);
+            ASSERT(mDisplay == EGL_NO_DISPLAY);
+#else
+            ASSERT(mHRC == NULL);
+#endif
+        }
+    };
+
+    GLContext::GLContext()
+        : d(new GLContextPrivate())
+    {
+    }
+
+    bool GLContext::initialize(WindowHandle hWnd, DisplayHandle hDC, int format)
+    {
+#ifdef OPENGLES
+        ASSERT(EGL_NO_CONTEXT == d->mContext && "Not init gl context again");
+
+        EGLDisplay  display = eglGetDisplay(hDC);
+        if (display == EGL_NO_DISPLAY)
+        {
+            Log::error("eglGetDisplay = EGL_NO_DISPLAY");
+            return false;
+        }
+
+        EGLint  major, minor;
+        if (EGL_FALSE == eglInitialize(display, &major, &minor))
+        {
+            Log::error("eglInitialize = EGL_FALSE");
+            return false;
+        }
+
+        const EGLint attribs[] =
+        {
+            EGL_RENDERABLE_TYPE, eglGetSupportedRendererType(display),
+            EGL_RED_SIZE, 5,
+            EGL_GREEN_SIZE, 6,
+            EGL_BLUE_SIZE, 5,
+            EGL_ALPHA_SIZE, 8,
+            EGL_DEPTH_SIZE, 8,
+            EGL_STENCIL_SIZE, 8,
+            EGL_NONE
+        };
+
+        EGLint	numConfigs(0);
+        EGLConfig   config;
+        if (EGL_FALSE == eglChooseConfig(display, attribs, &config, 1, &numConfigs))
+        {
+            Log::error("eglChooseConfig = EGL_FALSE");
+            return false;
+        }
+        ASSERT(numConfigs && "EGL Can not find any config while eglChooseConfig");
+
+#ifdef ANDROID
+        EGLint  format(0);
+        if (EGL_FALSE == eglGetConfigAttrib(display, config, EGL_NATIVE_VISUAL_ID, &format))
+        {
+            Log::error("eglGetConfigAttrib = EGL_FALSE");
+            return false;
+        }
+        ANativeWindow_setBuffersGeometry(hWnd, 0, 0, format);
+#endif
+
+        EGLSurface  surface = eglCreateWindowSurface(display, config, hWnd, NULL);
+        if (EGL_NO_SURFACE == surface)
+        {
+            Log::error("eglCreateWindowSurface = EGL_NO_SURFACE");
+            return  false;
+        }
+
+        EGLint  attr[] = { EGL_CONTEXT_CLIENT_VERSION,
+            attribs[1] == EGL_OPENGL_ES3_BIT_KHR ? 3 : 2
+            , EGL_NONE };
+        EGLContext  context = eglCreateContext(display, config, EGL_NO_CONTEXT, attr);
+        if (EGL_NO_CONTEXT == context)
+        {
+            EGLint ret = eglGetError();
+            ASSERT("eglCreateContext:eglGetError" && ret);
+            Log::error("eglCreateContext = EGL_NO_CONTEXT");
+            eglDestroySurface(display, surface);
+            eglTerminate(display);
+            return  false;
+        }
+
+        if (EGL_FALSE == eglMakeCurrent(display, surface, surface, context))
+        {
+            Log::error("eglMakeCurrent = EGL_FALSE");
+            eglDestroySurface(display, surface);
+            eglTerminate(display);
+            return  false;
+        }
+        
+        d->mConfig = config;
+        d->mContext = context;
+        d->mDisplay = display;
+        d->mSurface = surface;
+        //eglQuerySurface(display, surface, EGL_WIDTH, &_width);
+        //eglQuerySurface(display, surface, EGL_HEIGHT, &_height);
+#else
+        HGLRC hRC = NULL;
+        if (!hDC && !(hDC = GetDC(hWnd)))
+        {
+            Log::error("Get DC failed, with Error Code %d", GetLastError());
             return NULL;
         }
 
@@ -374,14 +359,9 @@ namespace sge
             24, 8, 0, PFD_MAIN_PLANE, 0, 0, 0, 0
         };
 
-        if (format <= 0)
+        if (format <= 0 && (format = ChoosePixelFormat(hDC, &pfd)) <= 0)
         {
-            format = ChoosePixelFormat(hDC, &pfd);
-        }
-
-        if (format <= 0)
-        {
-            Log::error("ChoosePixelFormat failed, with Error Code %d", ::GetLastError());
+            Log::error("ChoosePixelFormat failed, with Error Code %d", GetLastError());
             return NULL;
         }
 
@@ -398,55 +378,85 @@ namespace sge
             return NULL;
         }
 
-        _hWnd = hWnd;
-        _hDC = hDC;
-        _hRC = hRC;
-        MakeCurrent();
+        d->mHWnd = hWnd;
+        d->mHDC = hDC;
+        d->mHRC = hRC;
+        makeCurrent();
         GLenum ret = glewInit();
         if (GLEW_OK != ret)
         {
             Log::error("glewInit failed with code(%d) while CreateGLContext.", ret);
             return false;
         }
+#endif
         return true;
     }
 
     GLContext::~GLContext()
     {
-        Shutdown();
+        shutdown();
+        delete d;
     }
 
-    void GLContext::Shutdown()
+    void GLContext::shutdown()
     {
-        if (_hRC != NULL)
+#ifdef OPENGLES
+        if (EGL_NO_DISPLAY != d->mDisplay)
+        {
+            eglMakeCurrent(d->mDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+            if (EGL_NO_CONTEXT != d->mContext)
+            {
+                eglDestroyContext(d->mDisplay, d->mContext);
+                d->mContext = EGL_NO_CONTEXT;
+            }
+            if (EGL_NO_SURFACE != d->mSurface)
+            {
+                eglDestroySurface(d->mDisplay, d->mSurface);
+                d->mSurface = EGL_NO_SURFACE;
+            }
+            d->mConfig = 0;
+            eglTerminate(d->mDisplay);
+            d->mDisplay = EGL_NO_DISPLAY;
+        }
+#else
+        if (d->mHRC != NULL)
         {
             wglMakeCurrent(NULL, NULL);
-            wglDeleteContext(_hRC);
-            _hRC = NULL;
-            _hWnd = NULL;
-            _hDC = NULL;
+            wglDeleteContext(d->mHRC);
+            d->mHRC = NULL;
+            d->mHWnd = NULL;
+            d->mHDC = NULL;
         }
+#endif
     }
 
-    inline void GLContext::MakeCurrent()
+    inline void GLContext::makeCurrent()
     {
-        wglMakeCurrent(_hDC, _hRC);
+#ifdef OPENGLES
+        EGLBoolean  ret = eglMakeCurrent(d->mDisplay, d->mSurface, d->mSurface, d->mContext);
+        ASSERT(EGL_TRUE == ret);
+#else
+        wglMakeCurrent(d->mHDC, d->mHRC);
+#endif
     }
 
-    inline void GLContext::SwapBuffer()
+    inline void GLContext::swapBuffer()
     {
-        ::SwapBuffers(_hDC);
+#ifdef OPENGLES
+        EGLBoolean  ret = eglSwapBuffers(d->mDisplay, d->mSurface);
+        ASSERT(EGL_TRUE == ret);
+#else
+        SwapBuffers(d->mHDC);
+#endif
     }
 
-    inline void GLContext::EnableVSYNC(GLboolean enable)
+    inline void GLContext::setEnableVSYNC(GLboolean enable)
     {
+#ifdef OPENGLES
+        eglSwapInterval(d->mDisplay, enable ? EGL_MAX_SWAP_INTERVAL : 0);
+#else
         wglSwapIntervalEXT(enable);
+#endif
     }
 
 }
-
-#endif // SGE_TARGET_PLATFORM SGE_PLATFORM_WIN32
-
-//TODO: other platform 
-
-#endif

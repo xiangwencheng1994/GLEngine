@@ -9,7 +9,7 @@
  *
  * License
  *
- * Copyright (c) 2017-2018, Xiang Wencheng <xiangwencheng@outlook.com>
+ * Copyright (c) 2017-2019, Xiang Wencheng <xiangwencheng@outlook.com>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -46,7 +46,17 @@
 #include <core/sgeMath.h>
 #include <core/sgeDelegate.h>
 #include <core/sgePlatform.h>
-#include <core/sgeGLContext.h>
+
+#ifdef OPENGLES
+#include <EGL/egl.h>
+#include <GLES3/gl3.h>
+typedef EGLNativeWindowType     WindowHandle;
+typedef EGLNativeDisplayType    DisplayHandle;
+#else // Desktop OpenGL
+#include <gl/glew.h>
+typedef HWND    WindowHandle;
+typedef HDC     DisplayHandle;
+#endif
 
 namespace sge
 {
@@ -70,8 +80,8 @@ namespace sge
      */
     typedef struct MouseButtonEvent
     {        
-        int2    _pos;
-        byte    _masks;
+        int2    pos;
+        byte    masks;
     } MouseDownEvent, MouseUpEvent, MouseMoveEvent, MouseClickEvent, MouseDBClickEvent;
     
     /**
@@ -79,14 +89,14 @@ namespace sge
      */
     typedef struct MouseWheelEvent
     {
-        int     _zDelta;
-        int2    _pos;
-        byte    _masks;
+        int     zDelta;
+        int2    pos;
+        byte    masks;
     } MouseWheelEvent;
          
     typedef struct KeyDownEvent
     {
-        byte    _vKeyCode;
+        byte    vKeyCode;
     } KeyDownEvent, KeyUpEvent;
 
     /**
@@ -94,7 +104,7 @@ namespace sge
      */
     typedef struct ResizeEvent
     {
-        int2    _size;
+        int2    size;
     } ResizeEvent;
 
     typedef Delegate1<bool, const MouseDownEvent&>  OnMouseDownEvent;
@@ -113,57 +123,67 @@ namespace sge
     class SGE_API PlatformNative
     {
     public:
-        OnMouseDownEvent    _OnLeftButtonDownEvent;
-        OnMouseUpEvent      _OnLeftButtonUpEvent;
-        OnMouseClickEvent   _OnLeftButtonClickEvent;
+        OnMouseDownEvent    mOnLeftButtonDownEvent;
+        OnMouseUpEvent      mOnLeftButtonUpEvent;
+        OnMouseClickEvent   mOnLeftButtonClickEvent;
 
-        OnMouseDownEvent    _OnRightButtonDownEvent;
-        OnMouseUpEvent      _OnRightButtonUpEvent;
-        OnMouseClickEvent   _OnRightButtonClickEvent;
+        OnMouseDownEvent    mOnRightButtonDownEvent;
+        OnMouseUpEvent      mOnRightButtonUpEvent;
+        OnMouseClickEvent   mOnRightButtonClickEvent;
 
-        OnMouseDownEvent    _OnMiddleButtonDownEvent;
-        OnMouseUpEvent      _OnMiddleButtonUpEvent;
-        OnMouseClickEvent   _OnMiddleButtonClickEvent;
+        OnMouseDownEvent    mOnMiddleButtonDownEvent;
+        OnMouseUpEvent      mOnMiddleButtonUpEvent;
+        OnMouseClickEvent   mOnMiddleButtonClickEvent;
 
-        OnMouseMoveEvent    _OnMouseMoveEvent;
-        OnMouseWheelEvent   _OnMouseWheelEvent;
+        OnMouseMoveEvent    mOnMouseMoveEvent;
+        OnMouseWheelEvent   mOnMouseWheelEvent;
 
-        OnKeyDownEvent      _OnKeyDownEvent;
-        OnKeyUpEvent        _OnKeyUpEvent;
+        OnKeyDownEvent      mOnKeyDownEvent;
+        OnKeyUpEvent        mOnKeyUpEvent;
 
-        OnResizeEvent       _OnResizeEvent;
-        OnCloseEvent        _OnCloseEvent;
+        OnResizeEvent       mOnResizeEvent;
+        OnCloseEvent        mOnCloseEvent;
 
     public:
+        /**
+         * virtual destructor
+         */
         virtual ~PlatformNative() {}
 
-#ifdef OPENGLES
-        virtual EGLNativeWindowType     getWindow() = 0;
-        virtual EGLNativeDisplayType    getDisplay() = 0;
-#endif
+        /**
+         * Get the native window handle
+         */
+        virtual WindowHandle getWindow() = 0;
 
-        // virtual void    sendUserEvent(const char* name, void* data1, void* data2);
+        /**
+         * Get the native display handle
+         */
+        virtual DisplayHandle getDisplay() = 0;
+
+        /**
+         * Get native window size
+         */
+        virtual int2 getWindowSize() = 0;
 
         /**
          * try process a native events
          * @return false if no event processed.
          */
-        virtual bool    ProcessEvents() = 0;
+        virtual bool processEvents() = 0;
 
         /**
          * Send close message to native
          */
-        virtual void    Close() = 0;
+        virtual void close() = 0;
 
         /**
          * Check native has closed
          * @return true if closed
          */
-        virtual bool    IsClosed() = 0;
+        virtual bool isClosed() = 0;
 
     protected:
         PlatformNative() {}
-
         DISABLE_COPY(PlatformNative)
     };
 
