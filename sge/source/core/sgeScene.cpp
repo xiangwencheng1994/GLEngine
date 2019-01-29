@@ -45,6 +45,7 @@
 #include <core/sgeRenderer.h>
 #include <ui/sgeView.h>
 #include <ui/sgeViewGroup.h>
+#include <core/sgeTimer.h>
 
 namespace sge
 {
@@ -149,6 +150,7 @@ namespace sge
 
     void Scene::onRenderUI()
     {
+        Renderer* renderer = d->mApp->getRenderer();
         if (d->mDecor.get())
         {
             // do measure the gui
@@ -159,8 +161,21 @@ namespace sge
             int measuredHeight = d->mDecor->getMeasuredHeight();
             d->mDecor->doLayout(0, 0, measuredWidth, measuredHeight);
             // do draw the gui
-            d->mDecor->doDraw();
+            d->mDecor->doDraw(renderer);
         }
+
+#ifdef _DEBUG
+        static Timer timer;
+        float t = timer.elapsed();
+        char fpsStr[256];
+        sprintf(fpsStr, "FPS:%4.1f", 1.0f / t);
+        renderer->setFont("default");
+        renderer->setFontSize(24);
+        renderer->setTextAlign(Alignment::TopLeft);
+        renderer->setFillColor(0.0f, 1.0f, 0.0f, 1.0f);
+        renderer->drawText(10, 10, fpsStr, NULL);
+#endif // _DEBUG
+
     }
 
     inline void Scene::setRootView(RefPtr<ui::View> view) 
@@ -169,7 +184,7 @@ namespace sge
         {
             if (!view->getLayoutParams().get())
             {
-                RefPtr<ui::LayoutParams> param(new ui::LayoutParams(FILL_PARENT, FILL_PARENT));
+                RefPtr<ui::LayoutParams> param(new ui::LayoutParams(MATCH_PARENT, MATCH_PARENT));
                 view->setLayoutParams(param);
             }
         }
@@ -299,11 +314,18 @@ namespace sge
 
     bool Scene::onResizeEvent(const ResizeEvent & event)
     {
+        bool widthChanged = d->mSize.x != event.size.x;
+        bool heightChanged = d->mSize.y != event.size.y;
         d->mSize = event.size;
         if (d->mDecor.get())
         {
-            d->mDecor->requestMeasure();
-            d->mDecor->doLayout(0, 0, d->mSize.x, d->mSize.y);
+            RefPtr<ui::LayoutParams> params = d->mDecor->getLayoutParams();
+            if ((widthChanged && params->mWidth == MATCH_PARENT)
+                || (heightChanged && params->mHeight == MATCH_PARENT))
+            {
+                d->mDecor->requestMeasure();
+                d->mDecor->doLayout(0, 0, d->mSize.x, d->mSize.y);
+            }
         }
         return true;
     }

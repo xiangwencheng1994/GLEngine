@@ -1,4 +1,6 @@
-﻿/**
+﻿#include "..\..\include\ui\sgeLabel.h"
+#include "..\..\include\ui\sgeLabel.h"
+/**
  *
  * Simple graphic engine
  * "sge" libraiy is a simple graphics engine, named sge.
@@ -50,6 +52,7 @@ namespace sge
 
     namespace ui
     {
+
         class LabelPrivate
         {
         public:
@@ -57,16 +60,18 @@ namespace sge
             bool        mMuiltLine;
             String      mFont;
             float       mFontSize;
+            float       mLineHeight;
             float4      mFontColor;
             Alignment   mAlign;
 
             LabelPrivate()
                 : mFont("default")
-                , mFontSize(48)
+                , mFontSize(24)
                 , mFontColor(1, 1, 1, 1)
                 , mAlign(Alignment::TopLeft)
                 , mMuiltLine(false)
                 , mText("Text")
+                , mLineHeight(1)
             {
             }
         };
@@ -123,6 +128,25 @@ namespace sge
             return d->mMuiltLine;
         }
 
+        void Label::setLineHeight(float lineHeight)
+        {
+            if (lineHeight != d->mLineHeight)
+            {
+                d->mLineHeight = lineHeight;
+                RefPtr<ui::LayoutParams> params = getLayoutParams();
+                if (params.get() &&
+                    (params->mWidth == WRAP_CONTENT || params->mHeight == WRAP_CONTENT))
+                {
+                    requestMeasure();
+                }
+            }
+        }
+
+        inline float Label::getLineHeight()
+        {
+            return d->mLineHeight;
+        }
+
         void Label::setFont(const char * fontName)
         {
             if (fontName == NULL)
@@ -176,7 +200,16 @@ namespace sge
 
         inline void Label::setAlignment(Alignment align)
         {
-            d->mAlign = align;
+            if (d->mAlign != align)
+            {
+                d->mAlign = align;
+                RefPtr<ui::LayoutParams> params = getLayoutParams();
+                if (params.get() &&
+                    (params->mWidth == WRAP_CONTENT || params->mHeight == WRAP_CONTENT))
+                {
+                    requestMeasure();
+                }
+            }
         }
 
         inline Alignment Label::getAlignment()
@@ -190,17 +223,30 @@ namespace sge
             if (res.x == WRAP_CONTENT || res.y == WRAP_CONTENT)
             {
                 Renderer* renderer = getApplication()->getRenderer();
-                float bounds[4];
-                renderer->setFontSize(d->mFontSize);      
+                renderer->setFontSize(d->mFontSize);
+                renderer->setTextLineHeight(d->mLineHeight);
                 renderer->setTextAlign(Alignment::TopLeft);
+                float bounds[4];
                 if (d->mMuiltLine)
                 {
-                    renderer->measureTextBox(0, 0, (float)wSize, d->mText.c_str(),
-                        d->mText.c_str() + d->mText.size(), bounds);
+                    RendererTextRow row[64];
+                    int lineCount = renderer->getTextBoxLineCount(d->mText.c_str(), d->mText.c_str() + d->mText.size(),
+                        (float)(wSize < 0 ? INT_MAX : wSize), row, 16);
+                    float lineHeight;
+                    renderer->getTextMetrics(0, 0, &lineHeight);
+                    lineHeight *= d->mLineHeight;
+                    bounds[0] = 0.0f;
+                    bounds[1] = 0.0f;
+                    bounds[2] = 0.0f;
+                    for (int i = 0; i < lineCount; ++i)
+                    {
+                        if (bounds[2] < row[i].width) bounds[2] = row[i].width;
+                    }
+                    bounds[3] = lineHeight * lineCount;
                 }
                 else
                 {
-                    renderer->measureText(0, 0, d->mText.c_str(),
+                    renderer->measureText(0.0f, 0.0f, d->mText.c_str(),
                         d->mText.c_str() + d->mText.size(), bounds);
                 }
                 if (res.x == WRAP_CONTENT) res.x = (int)(bounds[2]/* - bounds[0]*/);
@@ -209,35 +255,53 @@ namespace sge
             return res;
         }
 
-        void Label::onDraw()
+        void Label::onDraw(Renderer* renderer)
         {
-            if (d->mText.size() > 0)
+            renderer->setFont(d->mFont.c_str());
+            renderer->setFontSize(d->mFontSize);
+
+            float width = (float)getWidth(), height = (float)getHeight();
+
+            float y;
+            if (d->mAlign & RendererAlign::VCenter) y = height / 2;
+            else if (d->mAlign & RendererAlign::Bottom) y = height;
+            else y = 0.0f;
+
+            renderer->setTextAlign(d->mAlign);
+            renderer->setFillColor(d->mFontColor);
+            if (d->mMuiltLine)
             {
-                Renderer* renderer = getApplication()->getRenderer();
-                renderer->setFont(d->mFont.c_str());
-                renderer->setFontSize(d->mFontSize);
-
-                float width = (float)getWidth(), height = (float)getHeight();
-                
-                float y;
-                if (d->mAlign & RendererAlign::VCenter) y = height / 2;
-                else if (d->mAlign & RendererAlign::Bottom) y = height;
-                else y = 0.0f;
-
-                renderer->setTextAlign(d->mAlign);
-                renderer->setFillColor(d->mFontColor);
-                if (d->mMuiltLine)
+                float lineHeight;
+                renderer->setTextLineHeight(d->mLineHeight);
+                renderer->getTextMetrics(0, 0, &lineHeight);
+                if (d->mAlign & RendererAlign::Top)
                 {
-                    renderer->drawTextBox(0.0f, y, width, d->mText.c_str(), d->mText.c_str() + d->mText.size());
+                    renderer->drawTextBox(0.0f, 0.0f, width, d->mText.c_str(), d->mText.c_str() + d->mText.size());
                 }
                 else
                 {
-                    float x;
-                    if (d->mAlign & RendererAlign::HCenter) x = width / 2;
-                    else if (d->mAlign & RendererAlign::Right) x = width;
-                    else x = 0.0f;
-                    renderer->drawText(x, y, d->mText.c_str(), d->mText.c_str() + d->mText.size());
+                    RendererTextRow row[64];
+                    int lineCount = renderer->getTextBoxLineCount(d->mText.c_str(), d->mText.c_str() + d->mText.size(), width, row, 16);
+                    float step = lineHeight;
+                    if (d->mAlign & RendererAlign::VCenter) y -= lineHeight * (lineCount - 1) / 2;
+                    else y -= lineHeight * lineCount - lineHeight;
+
+                    for (int i = 0; i < lineCount; ++i)
+                    {
+                        if (y > height)
+                            break;
+                        renderer->drawTextBox(0.0f, y, width, row[i].start, row[i].next);
+                        y += step;
+                    }
                 }
+            }
+            else
+            {
+                float x;
+                if (d->mAlign & RendererAlign::HCenter) x = width / 2;
+                else if (d->mAlign & RendererAlign::Right) x = width;
+                else x = 0.0f;
+                renderer->drawText(x, y, d->mText.c_str(), d->mText.c_str() + d->mText.size());
             }
         }
     }

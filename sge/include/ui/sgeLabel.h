@@ -93,6 +93,18 @@ namespace sge
             bool isMuiltLine();
 
             /**
+             * Set line height
+             * @notes only used for muiltLine enabled
+             * @param lineHeight The default is 1
+             */
+            void setLineHeight(float lineHeight);
+
+            /**
+             * Get the line height
+             */
+            float getLineHeight();
+
+            /**
              * Set font
              * @param text will be seted, "default" will be set if null
              */
@@ -145,7 +157,7 @@ namespace sge
             /**
              * Override draw label
              */
-            virtual void onDraw() override;
+            virtual void onDraw(Renderer* renderer) override;
 
         private:
             LabelPrivate* d;

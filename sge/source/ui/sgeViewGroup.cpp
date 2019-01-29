@@ -42,6 +42,8 @@
 
 #include <ui/sgeViewGroup.h>
 #include <ui/sgeLayoutParam.h>
+#include <core/sgeApplication.h>
+#include <core/sgeRenderer.h>
 
 namespace sge
 {
@@ -112,44 +114,44 @@ namespace sge
 
         int2 ViewGroup::onMeasure(MeasureMode wMode, int wSize, MeasureMode hMode, int hSize)
         {
-            int2 size = View::onMeasure(wMode, wSize, hMode, hSize);
+            int2 ret = View::onMeasure(wMode, wSize, hMode, hSize);
+            onMeasureChild(ret.x, ret.y);
 
-            if (size.x == FILL_PARENT || size.x == MATCH_PARENT)
-                size.x = wSize;
-            if (size.y == FILL_PARENT || size.y == MATCH_PARENT)
-                size.y = hSize;
-
-            int childWSize = getMeasuredWidth();
-            int childHSize = getMeasuredHeight();
-            if (childWSize <= 0) childWSize = wSize;
-            if (childHSize <= 0) childHSize = hSize;
-            int count = getChildCount();
-            for (int i = 0; i < count; ++i)
+            if (ret.x == WRAP_CONTENT)
             {
-                RefPtr<View> view = getChildAt(i);
-                view->doMeasure(MeasureMode::UNSPECIFIED, childWSize, MeasureMode::UNSPECIFIED, childHSize);
-            }
-            if (size.x == WRAP_CONTENT)
-            {
+                const int count = getChildCount();
                 for (int i = 0; i < count; ++i)
                 {
                     RefPtr<View> view = getChildAt(i);
                     int childWidth = view->getMeasuredWidth();
-                    size.x = MAX(size.x, childWidth);
+                    ret.x = MAX(ret.x, childWidth);
                 }
             }
-            if (size.y == WRAP_CONTENT)
+
+            if (ret.y == WRAP_CONTENT)
             {
+                const int count = getChildCount();
                 for (int i = 0; i < count; ++i)
                 {
                     RefPtr<View> view = getChildAt(i);
                     int childHeight = view->getMeasuredHeight();
-                    size.y = MAX(size.y, childHeight);
+                    ret.y = MAX(ret.y, childHeight);
                 }
             }
-            return size;
+
+            return ret;
         }
 
+        void ViewGroup::onMeasureChild(int limtsWidth, int limtsHeight)
+        {
+            const int count = getChildCount();
+            for (int i = 0; i < count; ++i)
+            {
+                RefPtr<View> view = getChildAt(i);
+                view->doMeasure(MeasureMode::AT_MOST, limtsWidth, MeasureMode::AT_MOST, limtsHeight);
+            }
+        }
+        
         void ViewGroup::onLayout(bool changed, int left, int top, int width, int height)
         {
             int count = getChildCount();
@@ -187,14 +189,28 @@ namespace sge
             return false;
         }
 
-        inline void ViewGroup::onDraw()
+        inline void ViewGroup::onDraw(Renderer* renderer)
         {
             int count = getChildCount();
+            int left = getLeft();
+            int top = getTop();
+            int right = left + getMeasuredWidth();
+            int bottom = top + getMeasuredHeight();
             for (int i = 0; i < count; i++)
             {
                 RefPtr<View> view = getChildAt(i);
-                // if (view.isVisible())
-                view->doDraw();
+                int childLeft = view->getLeft();
+                int childTop = view->getTop();
+                int childRight = childLeft + view->getMeasuredWidth();
+                int childBottom = childTop + view->getMeasuredHeight();
+                if (childLeft > right
+                    || childTop > bottom
+                    || childRight < left
+                    || childBottom < top)
+                {
+                    continue;
+                }
+                view->doDraw(renderer);
             }
         }
 

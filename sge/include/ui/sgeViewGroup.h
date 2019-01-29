@@ -52,18 +52,16 @@ namespace sge
     {
         // Content size decide by content
         #define WRAP_CONTENT    (-1)
-        // Content size decide by parent
+        // Content size try fill parent
         #define MATCH_PARENT    (-2)
-        // Content size fill parent size
-        #define FILL_PARENT     (-3)
 
         // The min layout size can seted
-        #define MIN_LAYOUT_SIZE MIN(MIN(WRAP_CONTENT, MATCH_PARENT), FILL_PARENT)
+        #define MIN_LAYOUT_SIZE     MIN(WRAP_CONTENT, MATCH_PARENT)
 
         /**
          * The layout params
          */
-        class LayoutParams
+        class SGE_API LayoutParams
         {
         public:
             /**
@@ -83,6 +81,7 @@ namespace sge
                 : mWidth(width), mHeight(height)
             {}
 
+            virtual ~LayoutParams() {}
         };
 
         /**
@@ -139,10 +138,21 @@ namespace sge
             friend class View;
 
             /**
-             * Callback on measure size and all child size
-             * @seealso ui.View.onMeasure()
+             * Callback while need measure this view
+             * @param wMode The width measure mode
+             * @param wSize The width size based
+             * @param hMode The height measure mode
+             * @param hSize The height size based
+             * @return the result of measured size
              */
             virtual int2 onMeasure(MeasureMode wMode, int wSize, MeasureMode hMode, int hSize);
+
+            /**
+             * Callback while need measure all children by onMeasure()
+             * @param limtsWidth The limted width size, will be < 0 if not limted
+             * @param limtsHeight The limted height size, will be < 0 if not limted
+             */
+            virtual void onMeasureChild(int limtsWidth, int limtsHeight);
 
             /**
              * Callback on layout content and all child content
@@ -165,7 +175,7 @@ namespace sge
             /**
              * Callback on draw content and all child content
              */
-            virtual void onDraw();
+            virtual void onDraw(Renderer* renderer);
 
         protected:
             // The child list

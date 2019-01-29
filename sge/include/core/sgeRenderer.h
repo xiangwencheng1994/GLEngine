@@ -162,6 +162,17 @@ namespace sge
     };
 
     /**
+     * The renderer text row
+     */
+    typedef struct RendererTextRow {
+        const char* start;	// Pointer to the input text where the row starts.
+        const char* end;	// Pointer to the input text where the row ends (one past the last character).
+        const char* next;	// Pointer to the beginning of the next row.
+        float width;		// Logical width of the row.
+        float minx, maxx;	// Actual bounds of the row. Logical with and bounds can differ because of kerning and some parts over extending.
+    } RendererTextRow;
+
+    /**
      * The 2D renderer for gui render
      */
     class SGE_API Renderer
@@ -548,6 +559,8 @@ namespace sge
          * Words longer than the max width are slit at nearest character (i.e. no hyphenation)
          */
         void drawTextBox(float x, float y, float breakRowWidth, const char* string, const char* end);
+
+        int getTextBoxLineCount(const char* string, const char* end, float breakRowWidth, RendererTextRow* rows, int maxRows);
 
         /**
          * Measures the specified text string. Parameter bounds should be a pointer to float[4],

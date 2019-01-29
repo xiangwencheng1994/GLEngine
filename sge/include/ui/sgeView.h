@@ -51,6 +51,7 @@ namespace sge
 {
     class Scene;
     class Application;
+    class Renderer;
 
     namespace ui
     {
@@ -178,13 +179,13 @@ namespace sge
              * Get frame height
              */
             int getHeight();
-
+            
 #pragma region EventCallback
 
             /**
              * Callback while need render
              */
-            virtual void onDraw() = 0;
+            virtual void onDraw(Renderer* renderer) = 0;
 
             /**
              * Callback while mouse left button down
@@ -279,31 +280,34 @@ namespace sge
 
 #pragma endregion
 
+            public:
+                /**
+                 * Add request remeasure flag for this view
+                 */
+                void requestMeasure();
+
+                /**
+                 * Do measure context for this view
+                 */
+                void doMeasure(MeasureMode wMode, int wSize, MeasureMode hMode, int hSize);
+
+                /**
+                 * Do layout frame for this view
+                 */
+                void doLayout(int left, int top, int width, int height);
+
+                /**
+                 * Do render context for this view
+                 */
+                void doDraw(Renderer* renderer);
+
         protected:
             friend class Scene;
             friend class ViewGroup;
 
             void setParent(ViewGroup* parent);
 
-            /**
-             * Add request remeasure flag for this view
-             */
-            void requestMeasure();
 
-            /**
-             * Do measure context for this view
-             */
-            void doMeasure(MeasureMode wMode, int wSize, MeasureMode hMode, int hSize);
-
-            /**
-             * Do layout frame for this view
-             */
-            void doLayout(int left, int top, int width, int height);
-
-            /**
-             * Do render context for this view
-             */
-            void doDraw();
 
             /**
              * Set frame for this view

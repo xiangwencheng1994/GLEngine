@@ -422,6 +422,12 @@ namespace sge
         nvgTextBox((NVGcontext*)mNativeCtx, x, y, breakRowWidth, string, end);
     }
 
+    inline int Renderer::getTextBoxLineCount(const char* string, const char* end, float breakRowWidth, RendererTextRow* rows, int maxRows)
+    {
+        return nvgTextBreakLines((NVGcontext*)mNativeCtx, string, end,
+            breakRowWidth, (NVGtextRow*)rows, maxRows);
+    }
+
     inline float Renderer::measureText(float x, float y, const char* string, const char* end, float* bounds)
     {
         return nvgTextBounds((NVGcontext*)mNativeCtx, x, y, string, end, bounds);
