@@ -48,6 +48,8 @@
 
 namespace sge
 {
+    class TextureManager;
+    
     /**
      * The references texture2d
      */

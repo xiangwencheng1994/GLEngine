@@ -56,6 +56,8 @@ namespace sge
         class View;
     }
 
+    class ScenePrivate;
+
     /**
      * Class scene, execute by Application
      * @note must use 'new' method to create instance, it will be deleted after unload.

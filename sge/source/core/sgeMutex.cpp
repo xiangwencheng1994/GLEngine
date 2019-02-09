@@ -119,19 +119,19 @@ namespace sge
         }
     }
 
-    inline void Mutex::lock()
+    inline void Mutex::lock() const
     {
         int ret = pthread_mutex_lock(&d->_mutex);
 		ASSERT(ret == 0);
     }
 
-    inline void Mutex::unlock()
+    inline void Mutex::unlock() const
     {
         int ret = pthread_mutex_unlock(&d->_mutex);
         ASSERT(ret == 0);
     }
 
-    inline bool Mutex::tryLock()
+    inline bool Mutex::tryLock() const
     {
         return 0 == pthread_mutex_trylock(&d->_mutex);
     }

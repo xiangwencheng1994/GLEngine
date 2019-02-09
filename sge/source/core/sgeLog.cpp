@@ -68,7 +68,7 @@ namespace sge
             "[E]:%s\n",
             "[U]:%s\n"
         };
-        sprintf_s(buf, fmt[lv], msg);
+        sprintf(buf, fmt[lv], msg);
 #if _WIN32 && _DEBUG
         OutputDebugStringA(buf);
 #endif

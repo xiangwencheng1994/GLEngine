@@ -130,7 +130,7 @@ namespace sge
 		int offsev = current.tv_sec - d->time.tv_sec;
 		int offusev = current.tv_usec - d->time.tv_usec;
 		float elapsed = ((offsev * 1000000) + offusev) * 0.0000001f;
-		time = current;
+		d->time = current;
 		return elapsed;
 	}
 

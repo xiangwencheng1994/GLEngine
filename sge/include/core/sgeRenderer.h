@@ -85,7 +85,7 @@ namespace sge
     /**
      * Enum for renderer alignment
      */
-    enum RendererAlign
+    typedef enum RendererAlign
     {
         Left        = 1 << 0,
         HCenter     = 1 << 1,
@@ -94,7 +94,7 @@ namespace sge
         VCenter     = 1 << 4,
         Bottom      = 1 << 5,
         BaseLine    = 1 << 6,
-    };
+    } RendererAlign;
 
     /**
      * Enum for content alignment
@@ -102,24 +102,26 @@ namespace sge
     typedef enum Alignment
     {
         // Content is vertically aligned at the top, and horizontally aligned on the left.
-        TopLeft = RendererAlign::Left | RendererAlign::Top,
+        TopLeft = Left | Top,
         // Content is vertically aligned at the top, and horizontally aligned at the center.
-        TopCenter = RendererAlign::HCenter | RendererAlign::Top,
+        TopCenter = HCenter | Top,
         // Content is vertically aligned at the top, and horizontally aligned on the right.
-        TopRight = RendererAlign::Right | RendererAlign::Top,
+        TopRight = Right | Top,
         // Content is vertically aligned in the middle, and horizontally aligned on the left.
-        MiddleLeft = RendererAlign::Left | RendererAlign::VCenter,
+        MiddleLeft = Left | VCenter,
         // Content is vertically aligned in the middle, and horizontally aligned at the center.
-        MiddleCenter = RendererAlign::HCenter | RendererAlign::VCenter,
+        MiddleCenter = HCenter | VCenter,
         // Content is vertically aligned in the middle, and horizontally aligned on the right.
-        MiddleRight = RendererAlign::Right | RendererAlign::VCenter,
+        MiddleRight = Right | VCenter,
         // Content is vertically aligned at the bottom, and horizontally aligned on the left.
-        BottomLeft = RendererAlign::Left | RendererAlign::Bottom,
+        BottomLeft = Left | Bottom,
         // Content is vertically aligned at the bottom, and horizontally aligned at the center.
-        BottomCenter = RendererAlign::HCenter | RendererAlign::Bottom,
+        BottomCenter = HCenter | Bottom,
         // Content is vertically aligned at the bottom, and horizontally aligned on the right.
-        BottomRight = RendererAlign::Right | RendererAlign::Bottom,
+        BottomRight = Right | Bottom,
     } Alignment;
+
+    class Renderer;
 
     /**
      * The renderer class

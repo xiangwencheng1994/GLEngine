@@ -52,11 +52,15 @@
 typedef void*   HMODULE;
 #endif
 
+#ifndef MAX_PATH
+#define MAX_PATH 260
+#endif
+
 namespace sge
 {
 
     /**
-     *  动态链接库
+     *  Class for load dynamic library
      */
     class SGE_API sgeLibrary
     {
@@ -65,38 +69,38 @@ namespace sge
         ~sgeLibrary();
 
         /**
-         *  加载一个动态链接库
-         * @return 失败返回NULL
+         * Load a dynamic library
+         * @return NULL if failed
          */
         static sgeLibrary* load(const char* file);
         
         /**
-         *  获取库文件路径
+         *  Get library path
          */
         const char* getPathName() { return mPath; }
 
         /**
-         *  获取库句柄
+         *  Get module handule
          */
         HMODULE  getModule() { return mModule; }
 
         /**
-         *  判断库是否加载成功
+         *  Check is loaded
          */
         bool     isLoaded() { return getModule() != 0; }
 
         /**
-         *  卸载库
+         *  Unload the module
          */
         bool            unload();
 
         /**
-         *  查找函数
+         *  find function in module
          */
         void*           getFunction(const char* funName);
 
         /**
-         *  释放自己
+         *  release module
          */
         void            release();
     private:

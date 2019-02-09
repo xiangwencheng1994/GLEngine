@@ -72,7 +72,7 @@
 #if defined(LINUX) || defined(__linux__) || defined(__linux)
     #define SGE_LINUX
     #undef  SGE_TARGET_PLATFORM
-    #define SGE_TARGET_PLATFORM CC_PLATFORM_LINUX
+    #define SGE_TARGET_PLATFORM SGE_PLATFORM_LINUX
 #endif
 
 
@@ -86,7 +86,7 @@
         #define SGE_API SGE_IMPORT
         #pragma comment(linker,"/subsystem:\"Windows\" /entry:\"mainCRTStartup\"")
     #endif
-#elif SGE_LINUX
+#elif defined(SGE_LINUX)
 #define SGE_API
 #define SGE_EXPORT
 #define SGE_IMPORT

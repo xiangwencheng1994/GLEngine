@@ -43,6 +43,7 @@
 #ifndef SGE_DELEGATE_H
 #define SGE_DELEGATE_H
 
+#include <string.h>
 #include <core/sgePlatform.h>
 #include <core/sgeDelegatePrivate.h>
 
@@ -268,7 +269,7 @@ namespace sge
      *      ClassA  obj;
      *      Delegate2<int,int,int> callback;
      *      callback.Bind<ClassA>(obj, &ClassA::Fun); // or callback.bind(globalFun);
-     *      int ret = callback(5£¬5);
+     *      int ret = callback(5ï¿½ï¿½5);
      */
     template<typename R, typename A1, typename A2>
     class Delegate2
@@ -373,7 +374,7 @@ namespace sge
      *      ClassA  obj;
      *      Delegate3<int,int,int,int> callback;
      *      callback.Bind<ClassA>(obj, &ClassA::Fun); // or callback.bind(globalFun);
-     *      int ret = callback(5£¬5, 5);
+     *      int ret = callback(5ï¿½ï¿½5, 5);
      */
     template<typename R, typename A1, typename A2, typename A3>
     class Delegate3
@@ -478,7 +479,7 @@ namespace sge
      *      ClassA  obj;
      *      Delegate4<int,int,int,int,int> callback;
      *      callback.Bind<ClassA>(obj, &ClassA::Fun); // or callback.bind(globalFun);
-     *      int ret = callback(5£¬5, 5, 5);
+     *      int ret = callback(5ï¿½ï¿½5, 5, 5);
      */
     template<typename R, typename A1, typename A2, typename A3, typename A4>
     class Delegate4

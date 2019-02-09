@@ -95,7 +95,7 @@ namespace sge
         /**
          * Set form other RefPtr object
          */
-        RefPtr<T>& RefPtr<T>::operator=(const RefPtr<T> &rhs)
+        RefPtr<T>& operator=(const RefPtr<T> &rhs)
         {
             if (rhs.mRefCount) ++(*rhs.mRefCount);
             if (mRefCount && --(*mRefCount) == 0)
@@ -117,7 +117,7 @@ namespace sge
             T* myPtr = mPtr;
             size_t* myRefCount = mRefCount;
             mPtr = rhs.mPtr;
-            refCount = rhs.mRefCount;
+            mRefCount = rhs.mRefCount;
             rhs.mPtr = myPtr;
             rhs.mRefCount = myRefCount;
         }
@@ -140,7 +140,7 @@ namespace sge
          * @param rhs The right hand side object
          * @return true if same with rhs
          */
-        bool RefPtr<T>::operator==(const RefPtr<T> &rhs) const { return mPtr == rhs.mPtr; }
+        bool operator==(const RefPtr<T> &rhs) const { return mPtr == rhs.mPtr; }
     private:
         T*      mPtr;
         size_t* mRefCount;

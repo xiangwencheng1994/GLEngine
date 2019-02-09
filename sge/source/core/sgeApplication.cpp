@@ -49,7 +49,6 @@
 
 #if SGE_TARGET_PLATFORM == SGE_PLATFORM_WIN32
 #include <win32/sgePlatformNativeWin32.h>
-#endif // SGE_TARGET_PLATFORM
 
 namespace sge
 {
@@ -168,3 +167,6 @@ namespace sge
     inline Scene * Application::getCurrentScene() { return d->mCurScene; }
 
 }
+
+
+#endif // SGE_TARGET_PLATFORM

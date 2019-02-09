@@ -48,6 +48,8 @@
 
 namespace sge
 {
+    class GLContextPrivate;
+    
     /**
      * Manager OpenGL Context
      */

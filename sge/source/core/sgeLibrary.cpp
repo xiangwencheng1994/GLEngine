@@ -41,6 +41,7 @@
  */
 
 #include <core/sgeLibrary.h>
+#include <string.h>
 
 namespace sge
 {
@@ -48,9 +49,9 @@ namespace sge
     sgeLibrary::sgeLibrary(const char* file)
         : mModule(NULL), mNeedDelete(false)
     {
-        strcpy_s(mPath, file);
+        strcpy(mPath, file);
 
-#if (CELL_PLATFORM == CELL_PLATFORM_WIN32)
+#if (SGE_PLATFORM == SGE_PLATFORM_WIN32)
         mModule =   LoadLibraryA(mPath);
 #else
         mModule =   dlopen(mPath, RTLD_NOW);
@@ -79,7 +80,7 @@ namespace sge
         bool ret = true;
         if (mModule)
         {            
-#if (CELL_PLATFORM == CELL_PLATFORM_WIN32)
+#if (SGE_PLATFORM == SGE_PLATFORM_WIN32)
             ret = (TRUE == FreeLibrary(mModule));
 #else
             dlclose(mModule); //TODO: check return            
@@ -95,7 +96,7 @@ namespace sge
         if (NULL == mModule)
             return NULL;
 
-#if (CELL_PLATFORM == CELL_PLATFORM_WIN32)
+#if (SGE_PLATFORM == SGE_PLATFORM_WIN32)
         return GetProcAddress(mModule, funName);
 #else
         return dlsym(mModule, funName);

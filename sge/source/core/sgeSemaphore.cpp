@@ -102,6 +102,7 @@ namespace sge
 
 #include <semaphore.h>
 #include <time.h>
+#include <sys/time.h>
 
 namespace sge
 {
@@ -123,7 +124,7 @@ namespace sge
 	{
 		if (d)
 		{
-			sem_destroy(d->hSem);
+			sem_destroy(&d->hSem);
 			delete d;
 			d = NULL;
 		}
@@ -141,10 +142,10 @@ namespace sge
 			abstime.tv_nsec -= 10000000000;
 			abstime.tv_sec++;
 		}
-		return 0 == sem_timedwait(&d->hSem, abstime);
+		return 0 == sem_timedwait(&d->hSem, &abstime);
 	}
 
-    inline bool Semaphore::Set(long number)
+    inline bool Semaphore::set(long number)
 	{
 		bool ret = true;
 		for (long i = 0; i < number; ++i)

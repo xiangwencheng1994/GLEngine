@@ -79,12 +79,12 @@
 #endif
 #ifdef FLT_EPSILON
 #undef FLT_EPSILON
-#define FLT_EPSILON     0.0000001f
 #endif // FLT_EPSILON
+#define FLT_EPSILON     0.0000001f
 #ifdef FLT_EPSILON
 #undef DBL_EPSILON
-#define DBL_EPSILON     0.0000000000000001
 #endif // FLT_EPSILON
+#define DBL_EPSILON     0.0000000000000001
 #ifdef max
 #   undef max
 #endif
@@ -122,7 +122,7 @@ namespace sge
 
     // Equal test,"x==y" for integer, "fabs(x - y) < epsilon" for float
     inline bool equal(int x, int y) { return x == y; }
-    inline bool equal(float x, float y) { return std::fabsf(x - y) < FLT_EPSILON; }
+    inline bool equal(float x, float y) { return fabsf(x - y) < FLT_EPSILON; }
     inline bool equal(double x, double y) { return std::fabs(x - y) < DBL_EPSILON; }
 
     // Less test, "x<y" for int,"y - x > epsilon" for float
@@ -131,11 +131,11 @@ namespace sge
     inline bool less(double x, double y) { return y - x > DBL_EPSILON; }
     
     // sin(x),sine
-    inline float sin(float x) { return std::sinf(x); }
+    inline float sin(float x) { return sinf(x); }
     inline double sin(double x) { return std::sin(x); }
 
     // cos(x),cos
-    inline float cos(float x) { return std::cosf(x); }
+    inline float cos(float x) { return cosf(x); }
     inline double cos(double x) { return std::cos(x); }
 
     // sincos(x), *_S=sin(_X),*_C=cos(_X) 
@@ -143,35 +143,35 @@ namespace sge
     inline void sincos(double _X, double *_S, double *_C) { *_S = sin(_X); *_C = cos(_X); }
 
     // tan(x),tan
-    inline float tan(float x) { return std::tanf(x); }
+    inline float tan(float x) { return tanf(x); }
     inline double tan(double x) { return std::tan(x); }
 
     // asin(x), arcsin
-    inline float asin(float x) { return std::asinf(x); }
+    inline float asin(float x) { return asinf(x); }
     inline double asin(double x) { return std::asin(x); }
 
     // acos(x), arccos
-    inline float acos(float x) { return std::acosf(x); }
+    inline float acos(float x) { return acosf(x); }
     inline double acos(double x) { return std::acos(x); }
 
     // atan(x), arctan
-    inline float atan(float x) { return std::atanf(x); }
+    inline float atan(float x) { return atanf(x); }
     inline double atan(double x) { return std::atan(x); }
 
     // atan2(x), arctan2
-    inline float atan2(float x, float y) { return std::atan2f(x, y); }
+    inline float atan2(float x, float y) { return atan2f(x, y); }
     inline double atan2(double x, double y) { return std::atan2(x, y); }
 
     // sqrt(x), square
-    inline float sqrt(int x) { return std::sqrtf((float)x); }
-    inline float sqrt(float x) { return std::sqrtf(x); }
+    inline float sqrt(int x) { return sqrtf((float)x); }
+    inline float sqrt(float x) { return sqrtf(x); }
     inline double sqrt(double x) { return std::sqrt(x); }
 
     // abs
     inline long abs(long x) { return std::abs(x); }
     inline long long abs(long long x) { return std::abs(x); }
     inline int abs(int x) { return std::abs(x); }
-    inline float abs(float x) { return std::fabsf(x); }
+    inline float abs(float x) { return fabsf(x); }
     inline double abs(double x) { return std::fabs(x); }
     
 
@@ -642,16 +642,16 @@ namespace sge
     class Vector3
     {
     public:
-        union
-        {
-            struct
-            {
+        //union
+        //{
+        //    struct
+        //    {
                 T x;
                 T y;
                 T z;
-            };
-            Vector2<T> xy;
-        };
+        //    };
+        //    Vector2<T> xy;
+        //};
         
     public:
 
@@ -1168,17 +1168,17 @@ namespace sge
     {
     public:
 
-        union
-        {
-            struct
-            {
+        //union
+        //{
+        //    struct
+        //    {
                 T   x;
                 T   y;
                 T   z;
                 T   w;
-            };
-            Vector3<T>  xyz;
-        };
+        //    };
+        //    Vector3<T>  xyz;
+        //};
 
 
     public:
@@ -2865,10 +2865,10 @@ namespace sge
         {
             if (translation)
             {
-                // Extract the translation.
-                translation->x = m[12];
-                translation->y = m[13];
-                translation->z = m[14];
+                // Extract the translation.                
+                translation->x = data[12];
+                translation->y = data[13];
+                translation->z = data[14];
             }
 
             // Nothing left to do.
@@ -2877,13 +2877,13 @@ namespace sge
 
             // Extract the scale.
             // This is simply the length of each axis (row/column) in the matrix.
-            Vector3<T> xaxis(m[0], m[1], m[2]);
+            Vector3<T> xaxis(data[0], data[1], data[2]);
             T scaleX = xaxis.length();
 
-            Vector3<T> yaxis(m[4], m[5], m[6]);
+            Vector3<T> yaxis(data[4], data[5], data[6]);
             T scaleY = yaxis.length();
 
-            Vector3<T> zaxis(m[8], m[9], m[10]);
+            Vector3<T> zaxis(data[8], data[9], data[10]);
             T scaleZ = zaxis.length();
 
             // Determine if we have a negative scale (true if determinant is less than zero).
@@ -4274,9 +4274,9 @@ namespace sge
         {
             T dmin = 0;
 
-            auto center = sphere.getCenter();
-            auto bmin = getMin();
-            auto bmax = getMax();
+            Vector3<T> center = sphere.getCenter();
+            Vector3<T> bmin = min;
+            Vector3<T> bmax = max;
 
             if (center.x < bmin.x) {
                 T d = center.x - bmin.x;
@@ -4623,7 +4623,7 @@ namespace sge
          * Get the closest point on the ray to the Sphere.
          * If the ray intersects then returns the point of nearest intersection.
          */
-        Vector3<T> Sphere::closestPoint(const Ray<T> &ray) const
+        Vector3<T> closestPoint(const Ray<T> &ray) const
         {
             T   t;
             Vector3<T>  diff = ray.getOrigin() - mCenter;
@@ -4681,8 +4681,8 @@ namespace sge
 
         void calcProjection(T focalLength, Vector2<T> screenSizePixels, Vector2<T> *outCenter, Vector2<T> *outAxisA, Vector2<T> *outAxisB) const
         {
-            auto toScreenPixels = [=](Vector2<T> v, const Vector2<T> &windowSize) {
-                vec2 result = v;
+            Vector2<T> toScreenPixels = [=](Vector2<T> v, const Vector2<T> &windowSize) {
+                Vector2<T> result = v;
                 result.x *= 1 / (windowSize.x / windowSize.y);
                 result += Vector2<T>(0.5, 0.5);
                 result *= windowSize;
@@ -4800,10 +4800,10 @@ namespace sge
 
         bool calcPlaneIntersection(const Vector3<T> &origin, const Vector3<T> &normal, T *result) const
         {
-            T denom = dot(planeNormal, getDirection());
+            T denom = dot(normal, getDirection());
 
             if (denom != T(0)) {
-                *result = dot(planeNormal, planeOrigin - getOrigin()) / denom;
+                *result = dot(normal, origin - getOrigin()) / denom;
                 return true;
             }
             return false;

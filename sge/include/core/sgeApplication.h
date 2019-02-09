@@ -50,7 +50,9 @@ namespace sge
     class Scene;
     class PlatformNative;
     class Renderer;
-    class GLContext;   
+    class GLContext;
+    
+    class ApplicationPrivate;
 
     /**
      * Class Application, to drive the application system

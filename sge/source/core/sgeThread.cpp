@@ -200,13 +200,14 @@ namespace sge
 
 		friend class Thread;
 
-		static void ThreadEntry(void* lpParam)
+		static void* ThreadEntry(void* lpParam)
 		{
 			Thread* pThis = (Thread*)lpParam;
 			if (pThis)
 			{
 				pThis->d->retCode = pThis->run();
 			}
+			return NULL;
 		}
 	};
 
@@ -248,7 +249,7 @@ namespace sge
 			return false;
 		}
 
-		return 0 == pthread_create(d->tid, NULL, &ThreadPrivate::ThreadEntry, this);
+		return 0 == pthread_create(&d->tid, NULL, &ThreadPrivate::ThreadEntry, this);
 	}
 
 	int Thread::join()
