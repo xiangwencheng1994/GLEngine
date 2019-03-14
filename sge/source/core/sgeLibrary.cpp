@@ -51,7 +51,7 @@ namespace sge
     {
         strcpy(mPath, file);
 
-#if (SGE_PLATFORM == SGE_PLATFORM_WIN32)
+#if (SGE_TARGET_PLATFORM == SGE_PLATFORM_WIN32)
         mModule =   LoadLibraryA(mPath);
 #else
         mModule =   dlopen(mPath, RTLD_NOW);
@@ -80,7 +80,7 @@ namespace sge
         bool ret = true;
         if (mModule)
         {            
-#if (SGE_PLATFORM == SGE_PLATFORM_WIN32)
+#if (SGE_TARGET_PLATFORM == SGE_PLATFORM_WIN32)
             ret = (TRUE == FreeLibrary(mModule));
 #else
             dlclose(mModule); //TODO: check return            
@@ -96,7 +96,7 @@ namespace sge
         if (NULL == mModule)
             return NULL;
 
-#if (SGE_PLATFORM == SGE_PLATFORM_WIN32)
+#if (SGE_TARGET_PLATFORM == SGE_PLATFORM_WIN32)
         return GetProcAddress(mModule, funName);
 #else
         return dlsym(mModule, funName);
