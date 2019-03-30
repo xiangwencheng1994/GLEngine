@@ -47,8 +47,9 @@
 #define SGE_PLATFORM_WIN32      1
 #define SGE_PLATFORM_ANDROID    2
 #define SGE_PLATFORM_LINUX      3
+#define SGE_PLATFORM_MAC_IOS    4
 
-#define SGE_TARGET_PLATFORM SGE_PLATFORM_UNKNOWN
+#define SGE_TARGET_PLATFORM     SGE_PLATFORM_UNKNOWN
 
 // android
 #if defined(ANDROID)
@@ -101,8 +102,8 @@
 // define GLCall for debugger
 #ifdef _DEBUG
 // from core/sgeGLX.h
-SGE_API bool glCheckError(const char*, const char*, int);
-SGE_API void glClearError();
+SGE_API bool    glCheckError(const char*, const char*, int);
+SGE_API void    glClearError();
 // clear errors before call, check errors after call
 #define GLCall(x)   glClearError();\
                     x;\
@@ -117,6 +118,12 @@ SGE_API void glClearError();
 		Class(const Class &) = delete; \
 		Class &operator=(const Class &) = delete;
 
+// include glew gl glfw
+#include <GL/glew.h>
+#include <GL/GL.h>
+#include <GLFW/glfw3.h>
+
+//now: Use std string, vector, list, map
 #include <string>
 #include <vector>
 #include <list>
@@ -125,5 +132,10 @@ SGE_API void glClearError();
 #define Vector  std::vector
 #define List    std::list
 #define Map     std::map
+
+#define HAS_FLAG(item, flag)            ((item) & (flag))
+#define ADD_FLAG(item, flag)            ((item) |= (flag))
+#define REMOVE_FLAG(item, flag)         ((item) &= ~(flag))
+#define SET_FLAG(item, flag, enable)    ((enable) ? ((item) |= (flag)) : ((item) &= ~(flag)))
 
 #endif

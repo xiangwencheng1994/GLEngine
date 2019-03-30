@@ -1,18 +1,6 @@
-cmake_minimum_required (VERSION 2.8)
+﻿cmake_minimum_required (VERSION 3.8)
 
-project(sge)
+file(GLOB_RECURSE SRC_FILES "src/*.c" "src/*.cpp" "src/*.cxx")
 
-add_definitions(-DUSE_SSE2)
-
-include_directories(${GL_LIBRARIES} include)
-
-file(GLOB SRC_FILES "source/*.c" "source/*.cpp"
-					"source/*/*.c" "source/*/*.cpp" 
-					"source/*/*/*.c" "source/*/*/*.cpp"
-					"source/*/*/*/*.c" "source/*/*/*/*.cpp")
-					
-add_library(${PROJECT_NAME} SHARED ${SRC_FILES})
-target_link_libraries(${PROJECT_NAME} ${GL_LIBRARIES})
-
-install(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION .)
-install(DIRECTORY fonts/ DESTINATION fonts/)
+add_library(sge SHARED ${SRC_FILES})
+target_link_libraries(sge ${GLFW3_LIBRARY})

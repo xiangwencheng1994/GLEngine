@@ -77,12 +77,12 @@ namespace sge
         /**
          *  Get library path
          */
-        const char* getPathName() { return mPath; }
+        const char* getPathName() { return _path.c_str(); }
 
         /**
          *  Get module handule
          */
-        HMODULE  getModule() { return mModule; }
+        HMODULE  getModule() { return _module; }
 
         /**
          *  Check is loaded
@@ -104,9 +104,9 @@ namespace sge
          */
         void            release();
     private:
-        char            mPath[MAX_PATH];
-        HMODULE         mModule;
-        bool            mNeedDelete;
+        String          _path;
+        HMODULE         _module;
+        bool            _needDelete;
 
         DISABLE_COPY(sgeLibrary)
     };

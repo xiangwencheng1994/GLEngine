@@ -45,14 +45,15 @@
 
 #include <core/sgePlatform.h>
 
-namespace sge {
+namespace sge
+{
 
-    class TimerPrivate;
+    class   TimerPrivate;
 
     /**
      * Class Timer for get elapsed times
      */
-    class SGE_API Timer
+    class SGE_API   Timer
     {
     public:
 
@@ -69,10 +70,10 @@ namespace sge {
         /**
          * Get and update the elapsed times after last update time
          */
-        float elapsed();
+        double  elapsed();
 
     private:
-        TimerPrivate* d;
+        TimerPrivate*   d;
         DISABLE_COPY(Timer)
     };
 

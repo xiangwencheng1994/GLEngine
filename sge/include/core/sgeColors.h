@@ -43,15 +43,87 @@
 #ifndef SGE_COLOR_H
 #define SGE_COLOR_H
 
-#include <core/sgeMath.h>
+#include <core/sgePlatform.h>
 
 namespace sge
 {
-    
+    /**
+     * Make a int color from a rgba data
+     */
+    inline int  INT_RGBA(byte r, byte g, byte b, byte a) { return ((int)r) << 24 + ((int)g) << 16 + ((int)b) << 8 + (int)a; }
+
+    /**
+     * Make a int color from a rgb data
+     */
+    inline int  INT_RGB(byte r, byte g, byte b) { return INT_RGBA(r, g, b, 255); }
+
+    /**
+     * Get the red channel from a int color
+     */
+    inline byte GET_RED(int color) { return (byte)((color & 0xFF000000) >> 24); }
+
+    /**
+     * Get the red channel from a int color
+     */
+    inline byte GET_GREEN(int color) { return (byte)((color & 0x00FF0000) >> 16); }
+
+    /**
+     * Get the blue channel from a int color
+     */
+    inline byte GET_BLUE(int color) { return (byte)((color & 0x0000FF00) >> 8); }
+
+    /**
+     * Get the alpha channel from a int color
+     */
+    inline byte GET_ALPHA(int color) { return (byte)color & 0x000000FF; }
+
+
+    /**
+     * Class for rgba color
+     */
+    class Rgba : public Vector4<uchar>
+    {
+    public:
+        Rgba(uchar r, uchar g, uchar b, uchar a = 255)
+            : Vector4(r, g, b, a)
+        {}
+
+        Rgba(int rgba)
+            : Vector4(INT_RED(rgba),
+                INT_GREEN(rgba),
+                INT_BLUE(rgba),
+                INT_ALPHA(rgba))
+        {}
+
+        Rgba(Vector4<float> color)
+            : Vector4((uchar)(color.x * 255),
+            (uchar)(color.y * 255),
+                (uchar)(color.z * 255),
+                (uchar)(color.w * 255))
+        {}
+
+        Rgba(Vector3<float> color)
+            : Vector4((uchar)(color.x * 255),
+            (uchar)(color.y * 255),
+                (uchar)(color.z * 255),
+                (uchar)(255))
+        {}
+
+        uchar red() const { return x; }
+        uchar green() const { return y; }
+        uchar blue() const { return z; }
+        uchar alpha() const { return w; }
+        int   value() const { return operator int(); }
+
+        operator Vector4<float>() const { return Vector4<float>(x / 255.0f, y / 255.0f, z / 255.0f, w / 255.0f); }
+        operator int() const { return INT_RGBA(red(), green(), blue(), alpha()); }
+    };
+
+
     /**
      * Enumed Colors
      */
-    enum Color
+    enum    EnumColor
     {
         Snow = INT_RGB(255, 250, 250),
         PaleTurquoise1 = INT_RGB(187, 255, 255),
@@ -508,7 +580,7 @@ namespace sge
         LightCyan3 = INT_RGB(180, 205, 205),
         LightCyan4 = INT_RGB(122, 139, 139),
         LightGreen = INT_RGB(144, 238, 144),
-    }
+    };
 
 } // namespace sge
 

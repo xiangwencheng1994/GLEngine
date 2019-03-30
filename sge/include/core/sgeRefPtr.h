@@ -62,8 +62,8 @@ namespace sge
          * Constructor with a pointer created by 'new' method
          */
         explicit RefPtr(T* ptr = NULL)
-            : mPtr(ptr)
-            , mRefCount(ptr ? new size_t(1) : NULL)
+            : _ptr(ptr)
+            , _refCount(ptr ? new size_t(1) : NULL)
         {
         }
 
@@ -72,13 +72,13 @@ namespace sge
          */
         ~RefPtr()
         {
-            if (mRefCount && --(*mRefCount) == 0)
+            if (_refCount && --(*_refCount) == 0)
             {
-                ASSERT(mPtr);
-                delete mPtr;
-                delete mRefCount;
-                mPtr = NULL;
-                mRefCount = NULL;
+                ASSERT(_ptr);
+                delete  _ptr;
+                _ptr    =   NULL;
+                delete  _refCount;
+                _refCount   =   NULL;
             }
         }
 
@@ -87,9 +87,9 @@ namespace sge
          */
         RefPtr(const RefPtr<T> &orig)
         {
-            mPtr = orig.mPtr;
-            mRefCount = orig.mRefCount;
-            if(mRefCount) ++(*mRefCount);
+            _ptr    =   orig._ptr;
+            _refCount   =   orig._refCount;
+            if(_refCount) ++(*_refCount);
         }
 
         /**
@@ -97,15 +97,15 @@ namespace sge
          */
         RefPtr<T>& operator=(const RefPtr<T> &rhs)
         {
-            if (rhs.mRefCount) ++(*rhs.mRefCount);
-            if (mRefCount && --(*mRefCount) == 0)
+            if (rhs._refCount) ++(*rhs._refCount);
+            if (_refCount && --(*_refCount) == 0)
             {
-                ASSERT(mPtr);
-                delete mPtr;
-                delete mRefCount;
+                ASSERT(_ptr);
+                delete  _ptr;
+                delete  _refCount;
             }
-            mPtr = rhs.mPtr;
-            mRefCount = rhs.mRefCount;
+            _ptr    =   rhs._ptr;
+            _refCount   =   rhs._refCount;
             return *this;
         }
 
@@ -114,12 +114,12 @@ namespace sge
          */
         void swap(RefPtr<T> &rhs)
         {
-            T* myPtr = mPtr;
-            size_t* myRefCount = mRefCount;
-            mPtr = rhs.mPtr;
-            mRefCount = rhs.mRefCount;
-            rhs.mPtr = myPtr;
-            rhs.mRefCount = myRefCount;
+            T*  myPtr   =   _ptr;
+            size_t* myRefCount  =   _refCount;
+            _ptr    =   rhs._ptr;
+            _refCount   =   rhs._refCount;
+            rhs._ptr    =   myPtr;
+            rhs._refCount   =   myRefCount;
         }
 
         /**
@@ -131,7 +131,7 @@ namespace sge
          * Get the pointer
          * @note you should not delete the pointer
          */
-        T* get() const { return mPtr; }
+        T* get() const { return _ptr; }
         T& operator*() const { return *get(); }
         T* operator->() const { return get(); }
 
@@ -140,10 +140,10 @@ namespace sge
          * @param rhs The right hand side object
          * @return true if same with rhs
          */
-        bool operator==(const RefPtr<T> &rhs) const { return mPtr == rhs.mPtr; }
+        bool operator==(const RefPtr<T> &rhs) const { return _ptr == rhs._ptr; }
     private:
-        T*      mPtr;
-        size_t* mRefCount;
+        T*      _ptr;
+        size_t* _refCount;
     };
 
 }

@@ -100,9 +100,9 @@ namespace sge
          * Constructor, lock the mutex.
          */
         ScopeLock(const Mutex& mutex)
-            : mMutex(mutex)
+            : _mutex(mutex)
         {
-            mMutex.lock();
+            _mutex.lock();
         }
 
         /**
@@ -110,11 +110,11 @@ namespace sge
          */
         ~ScopeLock()
         {
-            mMutex.unlock();
+            _mutex.unlock();
         }
 
     private:
-        const Mutex& mMutex;
+        const Mutex&    _mutex;
         DISABLE_COPY(ScopeLock)
     };
 

@@ -53,10 +53,10 @@ namespace sge
     /**
      * Class Log is a tool to record logs
      */
-    class SGE_API Log
+    class SGE_API   Log
     {
     public:
-        enum Level
+        enum    Level
         {
             Debug,
             Info,
@@ -72,7 +72,7 @@ namespace sge
          * The real output function pointer.
          * @note You can redistribution this pointer to yours
          */
-        static Output output;
+        static Output   _output;
 
         /**
          * This is the default function for output
@@ -124,28 +124,28 @@ extern "C" {
      * @param fmt The format
      * @... The Var for format string
      */
-    void LogDebug(const char* fmt, ...);
+    void    LogDebug(const char* fmt, ...);
 
     /**
      * Output a info log with string format
      * @param fmt The format
      * @... The Var for format string
      */
-    void LogInfo(const char* fmt, ...);
+    void    LogInfo(const char* fmt, ...);
 
     /**
      * Output a warn log with string format
      * @param fmt The format
      * @... The Var for format string
      */
-    void LogWarn(const char* fmt, ...);
+    void    LogWarn(const char* fmt, ...);
 
     /**
      * Output a error log with string format
      * @param fmt The format
      * @... The Var for format string
      */
-    void LogError(const char* fmt, ...);
+    void    LogError(const char* fmt, ...);
 
 
 #ifdef __cplusplus

@@ -44,27 +44,30 @@
 #define SGE_APP_BASE_H
 
 #include <core/sgePlatform.h>
+#include <core/sgeContext.h>
 
 namespace sge
 {
-    class Scene;
-    class PlatformNative;
-    class Renderer;
-    class GLContext;
-    
-    class ApplicationPrivate;
+    class   Scene;
 
     /**
      * Class Application, to drive the application system
      */
-    class SGE_API  Application
+    class SGE_API   Application
     {
+    public:
+
+        /**
+         * Get current application
+         */
+        static Application* getCurrent();
+
     public:
 
         /**
          * Constructor
          */
-        Application();
+        Application(int width, int height, int samples = 4, bool resizable = true);
 
 
         /**
@@ -74,51 +77,52 @@ namespace sge
 
 
         /**
-         * Get the native platform interface
-         */
-        PlatformNative* getPlatform();
-
-
-        /**
-         * Get the gui renderer
-         */
-        Renderer* getRenderer();
-
-        /**
          * Get the current scene
          */
-        Scene* getCurrentScene();
+        Scene*  getCurrentScene() { return _curScene; }
 
+        /**
+         * Get the context
+         */
+        Context& getContext() { return _context; }
 
         /**
          * Load a scene instead of current scene, old scene will unloaded and deleted
          * @param scene The new scene
          */
-        void loadScene(Scene* scene);
+        void    loadScene(Scene* scene);
 
 
         /**
          * Run the application util quit
          */
-        void run();
+        void    run();
 
 
         /**
          * Send a quit message to platform
          */
-        void quit();
+        void    quit();
 
     protected:
+        virtual void    onFrameBufferSizeEvent(int w, int h);
+        virtual void    onKeyEvent(int key, int scancode, int action, int mods);
+        virtual void    onMouseButtonEvent(int button, int action, int mods);
+        virtual void    onMouseMoveEvent(double x, double y);
+        virtual void    onMouseScrollEvent(double dx, double dy);
+        virtual bool    onCloseEvent();
 
-        /**
-         * Callback on get close event
-         * @return true if you dont want to close
-         */
-        virtual bool onClose();
-
+        friend  void _nativeFrameBufferSizeCallback(GLFWwindow* window, int w, int h);
+        friend  void _nativeKeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
+        friend  void _nativeMouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
+        friend  void _nativeMouseMoveCallback(GLFWwindow* window, double x, double y);
+        friend  void _nativeMouseScrollCallback(GLFWwindow* window, double xoffset, double yoffset);
+        friend  void _nativeCloseCallback(GLFWwindow* window);
     private:
-        friend class ApplicationPrivate;
-        ApplicationPrivate  *d;
+        static int      applicationCount;
+        Scene*          _curScene;
+        GLFWwindow*     _window;
+        Context         _context;
         DISABLE_COPY(Application)
     };
 

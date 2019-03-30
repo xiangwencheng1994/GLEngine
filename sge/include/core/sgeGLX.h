@@ -48,37 +48,40 @@
 #include <core/sgeLog.h>
 #include <core/sgeGLSLProgram.h>
 
-#define PTR_OFFSET(x) ((void*)(x))  // BUFFER_OFFSET
+#define PTR_OFFSET(x)   ((void*)(x))  // BUFFER_OFFSET
 
 /**
  * Clear all errors in OpenGL
  */
-SGE_API void glClearError();
+SGE_API void    glClearError();
 
 /**
  * Check OpenGL errors, return false and logerror if has errors
  */
-SGE_API bool glCheckError(const char* function, const char* file, int line);
+SGE_API bool    glCheckError(const char* function, const char* file, int line);
+
+/**
+ * Log the gpu information
+ */
+SGE_API String  GetGPUInfo();
 
 namespace sge 
 {
     /**
      * Some buffer type in opengl
      */
-    enum BufferType
+    enum    BufferType
     {
         // GL_ARRAY_BUFFER type
-        VertexBuffer    = GL_ARRAY_BUFFER,
+        VertexBuffer    =   GL_ARRAY_BUFFER,
         // GL_ELEMENT_ARRAY_BUFFER type
-        ElementBuffer   = GL_ELEMENT_ARRAY_BUFFER,
+        ElementBuffer   =   GL_ELEMENT_ARRAY_BUFFER,
         // GL_UNIFORM_BUFFER type
-        UniformBuffer   = GL_UNIFORM_BUFFER,
+        UniformBuffer   =   GL_UNIFORM_BUFFER,
         // GL_TRANSFORM_FEEDBACK_BUFFER type
-        TransformBuffer = GL_TRANSFORM_FEEDBACK_BUFFER,
-#ifndef OPENGLES
+        TransformBuffer =   GL_TRANSFORM_FEEDBACK_BUFFER,
         // GL_DRAW_INDIRECT_BUFFER type
-        IndirectBuffer = GL_DRAW_INDIRECT_BUFFER,
-#endif
+        IndirectBuffer =    GL_DRAW_INDIRECT_BUFFER,
     };
 
     /**
@@ -86,41 +89,95 @@ namespace sge
      * @template T for BufferType
      */
     template<BufferType T>
-    struct BufferDesc
+    class SGE_API GLBuffer
     {
-        /**
-         * The id of buffer by gl
-         */
-        GLuint  id;
+    public:
+        GLBuffer()
+            : _id(0)
+            , _size(0)
+        {}
+
+        virtual ~GLBuffer() { destory(); }
 
         /**
-         * The buffer size
+         * Get the id of the buffer
          */
-        size_t  size;
+        GLuint  id() const { return _id; }
 
         /**
-         * Constructor with gl id
+         * Get the buffer size
          */
-        BufferDesc(GLuint id = unsigned(-1)) : id(id), size(0) {}
+        GLuint  size() const { return _size; }
 
         /**
          * Get the buffer is valid
          */
-        bool isValid() const { return id != unsigned(-1); }
+        bool    isValid() const { return _id != 0; }
+
+        /**
+         * Create the buffer
+         */
+        void    create(size_t size, const void* data = NULL, GLenum usage = GL_STATIC_DRAW)
+        {
+            destory();
+            GLCall(glGenBuffers(1, &_id));
+            bind();
+            GLCall(glBufferData(T, size, data, usage));
+            _size   =   size;
+            unbind();
+        }
+
+        /**
+         * Update the buffer
+         */
+        void    update(size_t offset, size_t dataLen, void* data)
+        {
+            ASSERT(isValid() && offset + dataLen <= _size && dataLen > 0);
+            bind();
+            GLCall(glBufferSubData(T, offset, dataLen, data));
+            unbind();
+        }
+
+        /**
+         * Bind the buffer
+         */
+        void    bind() const { GLCall(glBindBuffer(T, _id)); }
+
+        /**
+         * Unbind the buffer
+         */
+        void    unbind() const { GLCall(glBindBuffer(T, 0)); }
+
+        /**
+         * Destory the buffer
+         */
+        void    destory()
+        {
+            if (isValid())
+            {
+                GLCall(glDeleteBuffers(1, &_id));
+                _id     =   0;
+                _size   =   0;
+            }
+        }
+
+    protected:
+        GLuint  _id;
+        size_t  _size;
+
+        DISABLE_COPY(GLBuffer)
     };
 
-    typedef BufferDesc<VertexBuffer>    VBO;
-    typedef BufferDesc<ElementBuffer>   IBO;
-    typedef BufferDesc<ElementBuffer>   EBO;
-    typedef BufferDesc<UniformBuffer>   UBO;
-#ifndef OPENGLES
-    typedef BufferDesc<IndirectBuffer>  CmdBO;
-#endif
+    typedef GLBuffer<VertexBuffer>      VBO;
+    typedef GLBuffer<ElementBuffer>     IBO;
+    typedef GLBuffer<ElementBuffer>     EBO;
+    typedef GLBuffer<UniformBuffer>     UBO;
+    typedef GLBuffer<IndirectBuffer>    CmdBO;
 
     /**
      * Some texture type
      */
-    enum TextureType
+    enum    TextureType
     {
         // GL_TEXTURE_2D type
         Tex2D       =   GL_TEXTURE_2D,
@@ -134,16 +191,13 @@ namespace sge
      * Base texture class
      */
     template<TextureType type>
-    class TextureBase
+    class SGE_API   TextureBase
     {
     public:
         /**
          * Destructor
          */
-        ~TextureBase()
-        {
-            release();
-        }
+        virtual ~TextureBase() { destory(); }
 
         /**
          * Get the type of texture
@@ -153,12 +207,12 @@ namespace sge
         /**
          * Get the texture id in gl
          */
-        GLuint      getTexID() const { return mTexID; }
+        GLuint      getTexID() const { return _texId; }
         
         /**
          * Bind this texture
          */
-        void        bind(int texUnit = 0) const { GLCall(glActiveTexture(GL_TEXTURE0 + texUnit)); GLCall(glBindTexture(type, mTexID)); }
+        void        bind(int texUnit = 0) const { GLCall(glActiveTexture(GL_TEXTURE0 + texUnit)); GLCall(glBindTexture(type, _texId)); }
         
         /**
          * Unbind this texture
@@ -168,25 +222,26 @@ namespace sge
         /**
          * Check this texture valid
          */
-        bool        isValid() const { return mTexID != unsigned(-1); }
+        bool        isValid() const { return _texId != unsigned(-1); }
         
         /**
-         * Release this texture id
+         * Destory this texture id
          */
-        virtual void    release() 
+        void        destory()
         {
             if (isValid())
             {
-                GLCall(glDeleteTextures(1, &mTexID));
-                mTexID = unsigned(-1);
+                GLCall(glDeleteTextures(1, &_texId));
+                _texId  =   unsigned(-1);
             }
         }
     protected:
-        TextureBase(GLuint texId = unsigned(-1)) : mTexID(texId) {}
-        GLuint  mTexID;
+        TextureBase() 
+            : _texId(unsigned(-1))
+        {}
 
-        friend class GLX;
-
+        GLuint  _texId;
+        
         // repeat deleted if copy when destruct
         DISABLE_COPY(TextureBase)
     };
@@ -194,50 +249,50 @@ namespace sge
     /**
      * Class Texture2D
      */
-    class SGE_API Texture2D : public TextureBase<Tex2D>
+    class SGE_API   Texture2D : public TextureBase<Tex2D>
     {
     public:
         /**
          * Constructor while null texture
          */
-        Texture2D() : mSize(0, 0) {}
-
-        /**
-         * Get the size of this texture
-         */
-        int2 getSize() { return mSize; }
+        Texture2D() 
+            : _width(0)
+            , _height(0)
+        {}
 
         /**
          * Get the width of this texture
          */
-        int getWidth() { return mSize.x; }
+        int     getWidth() { return _width; }
 
         /**
          * Get the height of this texture
          */
-        int getHeight() { return mSize.y; }
+        int     getHeight() { return _height; }
         
         /**
          * Load/Reload texture form a image file
          */
-        bool loadFromFile(const char* file);
+        bool    loadFromFile(const char* file);
 
         /**
          * Load/Reload texture form a stream
          */
-        bool loadFromStream(byte* stream, size_t len);
+        bool    loadFromStream(byte* stream, size_t len);
 
         /**
          * Load/Reload texture form a raw dada with rgb format
          */
-        bool loadFromRGB(byte* data, int w, int h);
+        bool    loadFromRGB(byte* data, int w, int h);
 
         /**
          * Load/Reload texture form a raw dada with rgba format
          */
-        bool loadFromRGBA(byte* data, int w, int h);
+        bool    loadFromRGBA(byte* data, int w, int h);
     private:
-        int2    mSize;
+        int     _width;
+        int     _height;
+
         DISABLE_COPY(Texture2D);
     };
 
@@ -264,166 +319,6 @@ namespace sge
         GLuint baseInstance;    //base instance;
     } DrawElementsIndirectCommand;
 
-    /**
-     * Class GLX, easy to use OpenGL API
-     */
-    class GLX
-    {
-    public:
-
-        /**
-         * To log OpenGL version
-         */
-        static void logGLVersion()
-        {
-            const GLubyte* renderer = glGetString(GL_RENDERER);
-            const GLubyte* vendor = glGetString(GL_VENDOR);
-            const GLubyte* glslVersion = glGetString(GL_SHADING_LANGUAGE_VERSION);
-            GLint major, minor;
-            glGetIntegerv(GL_MAJOR_VERSION, &major);
-            glGetIntegerv(GL_MINOR_VERSION, &minor);
-            Log::debug("GL Vendor: %s", vendor);
-            Log::debug("GL Renderer: %s", renderer);
-            Log::debug("GL Version: %d.%d, GLSL%s", major, minor, glslVersion);
-        }
-        
-#pragma region Buffer
-        
-        /**
-         * Create a buffer
-         * @template T  The buffer type
-         * @param size The buffer size
-         * @param data The buffer data
-         * @param usage The buffer usage
-         * @return The buffer desc
-         */
-        template<BufferType T>
-        static BufferDesc<T> createBuffer(size_t size, const void* data = NULL, GLenum usage = GL_STATIC_DRAW)
-        {
-            BufferDesc<T> buffer;
-            buffer.size = size;
-            GLCall(glGenBuffers(1, &buffer.id));
-            GLCall(glBindBuffer(T, buffer.id));
-            GLCall(glBufferData(T, size, data, usage));
-            GLCall(glBindBuffer(T, 0));
-            return buffer;
-        }
-        
-        /**
-         * Bind a buffer
-         * @template T  The buffer type
-         * @param buffer The buffer we wanted bind
-         */
-        template<BufferType T>
-        static void bindBuffer(BufferDesc<T>* buffer)
-        {
-            GLCall(glBindBuffer(T, buffer ? buffer->id : 0));
-        }
-        
-        /**
-         * Update buffer data
-         * @template T  The buffer type
-         * @param buffer The buffer we wanted update
-         * @param offset The start point of the buffer by byte counts
-         * @param dataLen The len we wanted update by byte counts
-         * @param data The new data pointer
-         */
-        template<BufferType T>
-        static void updateBuffer(BufferDesc<T>& buffer, size_t offset, size_t dataLen, void* data)
-        {
-            ASSERT(buffer.isValid() && offset + dataLen <= buffer.size && dataLen);
-            GLCall(glBindBuffer(T, buffer.id));
-            GLCall(glBufferSubData(T, offset, dataLen, data));
-            GLCall(glBindBuffer(T, 0));
-        }
-
-        /**
-         * Delete a buffer
-         * @template T  The buffer type
-         * @param buffer The buffer we wanted delete
-         */
-        template<BufferType T>
-        static void deleteBuffer(BufferDesc<T>& buffer)
-        {
-            if (buffer.isValid())
-            {
-                GLCall(glDeleteBuffers(1, &buffer.id));
-                buffer.id = unsigned(-1);
-            }
-        }
-
-        /**
-         * Set a float vertex input pointer for a program attribute
-         * @params see alse glVertexAttribPointer
-         */
-        static void setVertexAttribPointer(attribute attr, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const void* pointer)
-        {
-            if (attr != unsigned(-1))
-            {
-                GLCall(glEnableVertexAttribArray(attr));
-                GLCall(glVertexAttribPointer(attr, size, type, normalized, stride, pointer));
-            }
-        }
-
-        /**
-         * Set a int vertex input pointer for a program attribute
-         * @params see alse glVertexAttribIPointer
-         */
-        static void setVertexAttribPointerI(attribute attr, GLint size, GLenum type, GLsizei stride, const void* pointer)
-        {
-            if (attr != unsigned(-1))
-            {
-                GLCall(glEnableVertexAttribArray(attr));
-                GLCall(glVertexAttribIPointer(attr, size, type, stride, pointer));
-            }
-        }
-
-#ifndef OPENGLES
-        /**
-         * Set a double vertex input pointer for a program attribute
-         * @params see alse glVertexAttribIPointer
-         */
-        static void setVertexAttribPointerL(attribute attr, GLint size, GLenum type, GLsizei stride, const void* pointer)
-        {
-            if (attr != unsigned(-1))
-            {
-                GLCall(glEnableVertexAttribArray(attr));
-                GLCall(glVertexAttribLPointer(attr, size, type, stride, pointer));
-            }
-        }
-#endif
-
-        /**
-         * Disable a vertex trribute array
-         */
-        static void disableVertexAttribArray(attribute attr)
-        {
-            if (attr != unsigned(-1))
-            {
-                GLCall(glDisableVertexAttribArray(attr));
-            }
-        }
-
-        /**
-         * Delete a texture
-         * @template T  The texture type
-         * @param texture The texture we wanted delete
-         */
-        template<TextureType T>
-        static void deleteTexture(TextureBase<T>& texture)
-        {
-            if (texture.isValid())
-            {
-                GLCall(glDeleteTextures(1, &texture.mTexID));
-                texture.mTexID = unsigned(-1);
-            }
-        }
-
-#pragma endregion
-        
-    private:
-        GLX() = delete; // Delete constructor, all function static
-    };
 
 } // !namespace
 

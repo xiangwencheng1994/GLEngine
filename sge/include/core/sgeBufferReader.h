@@ -62,7 +62,9 @@ namespace sge
          * @param len The buffer length
          */
         BufferReader(const byte* buffer, size_t len)
-            : mBuffer(buffer), mLen(len), mCurPos(0)
+            : _buffer(buffer)
+            , _len(len)
+            , _curPos(0)
         {
             ASSERT(buffer && "buffer can not be null");
         }
@@ -71,7 +73,7 @@ namespace sge
         /**
          * get the current cursor of file
          */
-        size_t tell() override { return mCurPos; }
+        size_t  tell() override { return _curPos; }
 
         /**
          * seek the cursor of buffer
@@ -79,34 +81,34 @@ namespace sge
          * @param seek Must be SEEK_SET | SEEK_CUR | SEEK_END
          * @return true if seek success
          */
-        bool seek(long offset, SeekOrigin seek) override
+        bool    seek(long offset, SeekOrigin seek) override
         {
-            bool ret = true;
-            long pos = 0;
+            bool    ret =   true;
+            long    pos =   0;
             switch(seek)
             {
             case SeekOrigin::SEEK_SET:
-                pos = offset;
+                pos =   offset;
                 break;
             case SeekOrigin::SEEK_CUR:
-                pos = offset + mCurPos;
+                pos =   offset + _curPos;
                 break;
             case SeekOrigin::SEEK_END:
-                pos = offset + mLen;
+                pos =   offset + _len;
                 break;
             default:
-                ret = false;
+                ret =   false;
                 break;
             }
             if (ret)
             {
-                if (pos >= 0 && pos < mLen)
+                if (pos >= 0 && pos < _len)
                 {
-                    mCurPos = (size_t)pos;
+                    _curPos =   (size_t)pos;
                 }
                 else
                 {
-                    ret = false;
+                    ret =   false;
                 }
             }
             return ret;
@@ -116,16 +118,13 @@ namespace sge
          * get the buffer length, count of bytes
          * @return the buffer length
          */
-        size_t length() override { return mLen; }
+        size_t  length() override { return _len; }
 
         /**
          * Check the stream is eof
          * @return true if eof
          */
-        bool isEOF() override
-        {
-            return mCurPos >= mLen;
-        }
+        bool    isEOF() override { return _curPos >= _len; }
 
         /**
          * read bytes to buff for some elements
@@ -134,16 +133,16 @@ namespace sge
          * @param elementCount The count of element wanted
          * @return The count of element has readed
          */
-        size_t read(void* buff, size_t elementSize, size_t elementCount) override
+        size_t  read(void* buff, size_t elementSize, size_t elementCount) override
         {
             ASSERT(buff && "read buff can not be null");
-            size_t readCount = (mLen - mCurPos) / elementSize;
+            size_t  readCount   =   (_len - _curPos) / elementSize;
             if (readCount > elementCount) readCount = elementCount;
             if (readCount > 0)
             {
-                size_t readSize = elementSize * readCount;
-                memcpy(buff, mBuffer + mCurPos, readSize);
-                mCurPos = readSize;
+                size_t  readSize    =   elementSize * readCount;
+                memcpy(buff, _buffer + _curPos, readSize);
+                _curPos =   readSize;
             }
             return readCount;
         }
@@ -154,40 +153,40 @@ namespace sge
          * @param bufferSize The max sizeof bytes
          * @return True if has readed success, but the max read count is bufferSize - 1
          */            
-        bool getLine(char* buff, size_t bufferSize) override
+        bool    getLine(char* buff, size_t bufferSize) override
         {
-            if (mCurPos >= mLen)
+            if (_curPos >= _len)
                 return false;
             
-            size_t maxCount = bufferSize - 1;
+            size_t  maxCount    =   bufferSize - 1;
             
-            for (size_t i = 0; i < maxCount && mCurPos < mLen; ++i)
+            for (size_t i = 0; i < maxCount && _curPos < _len; ++i)
             {
-                if (mBuffer[mCurPos] != '\n')
+                if (_buffer[_curPos] != '\n')
                 {
-                    buff[i] = mBuffer[mCurPos];
-                    ++mCurPos;
+                    buff[i] =   _buffer[_curPos];
+                    ++_curPos;
                 }
                 else
                 {
-                    ++mCurPos;
-                    buff[i] = '\0';
-                    return true;
+                    ++_curPos;
+                    buff[i] =   '\0';
+                    return  true;
                 }
             }
-            buff[maxCount] = '\0';
-            return true;
+            buff[maxCount]  =   '\0';
+            return  true;
         }
 
         /**
          * Get the data pointer of buffer
          */
-        const byte*   data() { return mBuffer; }
+        const   byte* data() { return _buffer; }
 
     private:
-        const byte*     mBuffer;
-        size_t          mCurPos;
-        size_t          mLen;
+        const byte*     _buffer;
+        size_t          _curPos;
+        size_t          _len;
         DISABLE_COPY(BufferReader)
     };
 

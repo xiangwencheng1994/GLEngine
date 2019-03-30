@@ -48,12 +48,12 @@
 
 namespace sge
 {
-    class TextureManager;
+    class   TextureManager;
     
     /**
      * The references texture2d
      */
-    class Texture2DRef : public Texture2D
+    class SGE_API   Texture2DRef : public Texture2D
     {
     public:
         /**
@@ -74,14 +74,14 @@ namespace sge
         /**
          * Reset texture form rhs
          */
-        Texture2DRef& operator=(const Texture2DRef& rhs);
+        Texture2DRef&   operator=(const Texture2DRef& rhs);
 
         /**
-         * Release object
+         * Destory object
          */
-        void    release();
+        void    destory();
     protected:
-        friend class TextureManager;
+        friend class    TextureManager;
         TextureManager* _mgr;
         size_t*         _refCount;
     };
@@ -89,8 +89,8 @@ namespace sge
     /**
      * Class TextureManager
      */
-    class TextureManager
-    {        
+    class SGE_API   TextureManager
+    {
     public:
         /**
          * Constructor
@@ -105,22 +105,22 @@ namespace sge
         /**
          * Load a texture form file
          */
-        Texture2DRef LoadTexture(const char* file);
+        Texture2DRef    LoadTexture(const char* file);
 
     protected:
-        friend class Texture2DRef;
-        void RemoveTex(GLuint tex); // unload tex
-        void AddRefItem(Texture2DRef* item); // add a item to manager
-        void RemoveRefItem(Texture2DRef* item); // remove item from nanager
+        friend class    Texture2DRef;
+        void    removeTex(GLuint tex); // unload tex
+        void    addRefItem(Texture2DRef* item); // add a item to manager
+        void    removeRefItem(Texture2DRef* item); // remove item from nanager
     private:
         struct TextureDesc
         {
             String  file;
-            int2    size;
+            vec2i   size;
             size_t  refCount;
         };
-        Map<GLuint, TextureDesc> _tex_ref_map;
-        List<Texture2DRef*> _mItems;
+        Map<GLuint, TextureDesc>    _texRefMap;
+        List<Texture2DRef*>         _items;
     };
 
 }

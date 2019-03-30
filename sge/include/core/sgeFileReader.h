@@ -62,7 +62,7 @@ namespace sge
          */
         FileReader(const char* fileName, bool* ret)
         {
-            errno_t error = fopen_s(&mFile, fileName, "rb");
+            errno_t error = fopen_s(&_file, fileName, "rb");
             if (ret)
             {
                 *ret = (error == 0);
@@ -78,17 +78,17 @@ namespace sge
          */
         ~FileReader()
         {
-            if (mFile)
+            if (_file)
             {
-                fclose(mFile);
-                mFile = NULL;
+                fclose(_file);
+                _file = NULL;
             }
         }
 
         /**
          * get the current cursor of file
          */
-        size_t tell() override { return ftell(mFile); }
+        size_t tell() override { return ftell(_file); }
 
         /**
          * seek the cursor of file
@@ -96,7 +96,7 @@ namespace sge
          * @param seek Must be SEEK_SET | SEEK_CUR | SEEK_END
          * @return true if seek success
          */
-        bool seek(long offset, int seek) override { return 0 == fseek(mFile, offset, seek); }
+        bool seek(long offset, int seek) override { return 0 == fseek(_file, offset, seek); }
 
         /**
          * get the file length, count of bytes
@@ -120,7 +120,7 @@ namespace sge
          */
         bool isEOF() override
         {
-            return 0 != feof(mFile);
+            return 0 != feof(_file);
         }
 
         /**
@@ -132,7 +132,7 @@ namespace sge
          */
         size_t read(void* buff, size_t elementSize, size_t elementCount)  override
         {
-            return fread(buff, elementSize, elementCount, mFile);
+            return fread(buff, elementSize, elementCount, _file);
         }
         
         /**
@@ -143,11 +143,11 @@ namespace sge
          */
         bool getLine(char* buff, size_t bufferSize) override
         {
-            return fgets(buff, bufferSize, mFile) != NULL;
+            return fgets(buff, bufferSize, _file) != NULL;
         }
-                
+
     private:
-        FILE*       mFile;
+        FILE*       _file;
         DISABLE_COPY(FileReader)
     };
 

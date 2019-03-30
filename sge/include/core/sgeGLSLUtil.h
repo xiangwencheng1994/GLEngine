@@ -46,7 +46,6 @@
 #include <core/sgeLog.h>
 #include <core/sgeGLSLProgram.h>
 #include <core/sgeGLX.h>
-#include <core/sgeMath.h>
 
 #include <core/sgeFileReader.h>
 
@@ -58,9 +57,9 @@ namespace sge
      * read ShaderPath.tesc for tess control shader source if exists
      * read ShaderPath.tese for tess evaluation shader source if exists
      * read ShaderPath.geom for geometry shader source if exists
-     * read ShaderPath.geom for fragment shader source if exists
+     * read ShaderPath.frag for fragment shader source if exists
      */
-    class PROGRAM_FILED : public GLSLProgram
+    class SGE_API   PROGRAM_FILED : public GLSLProgram
     {
     public:
         /**
@@ -69,28 +68,29 @@ namespace sge
         virtual const char* getShaderPath() const   =   0;
 
     private:
-        std::string tryGetShader(const char* type) const
+        virtual String  tryGetShader(const char* type) const
         {
-            bool hasFile = false;
+            bool    hasFile =   false;
             char    path[MAX_PATH];
             sprintf(path, "%s.%s", getShaderPath(), type);
-            FileReader file(path, &hasFile);
-            return hasFile ? file.ReadAll() : std::string();
+            FileReader  file(path, &hasFile);
+            return  hasFile ? file.ReadAll() : String();
         }
-        std::string getVertexShaderSrc() const override { return tryGetShader("vert"); }
-        std::string getTessControlShaderSrc() const override { return tryGetShader("tesc"); }
-        std::string getTessEvaluationShaderSrc() const override { return tryGetShader("tese"); }
-        std::string getGeometryShaderSrc() const override { return tryGetShader("geom"); }
-        std::string getFragmentShaderSrc() const override { return tryGetShader("frag"); }
+
+        virtual String  getVertexShaderSrc() const override { return tryGetShader("vert"); }
+        virtual String  getTessControlShaderSrc() const override { return tryGetShader("tesc"); }
+        virtual String  getTessEvaluationShaderSrc() const override { return tryGetShader("tese"); }
+        virtual String  getGeometryShaderSrc() const override { return tryGetShader("geom"); }
+        virtual String  getFragmentShaderSrc() const override { return tryGetShader("frag"); }
     };
 
     /**
      * The base P3 C4 program
      */
-    class PROGRAM_P3C4 : public PROGRAM_FILED
+    class SGE_API   PROGRAM_P3C4 : public PROGRAM_FILED
     {
     public:
-        const char* ShaderPath() const override { return "shader/P3C4"; }
+        const char* getShaderPath() const override { return "shader/P3C4"; }
 
     public:
         uniform     _mvp;
@@ -100,171 +100,52 @@ namespace sge
     private:
         void onAfterCreate() override
         {
-            _mvp        =   GetUniformLocation("_mvp");
-            _position   =   GetAttribLocation("_position");
-            _color      =   GetAttribLocation("_color");
+            _mvp        =   getUniformLocation("_mvp");
+            _position   =   getAttribLocation("_position");
+            _color      =   getAttribLocation("_color");
         }
     };
 
     /**
      * The cube texture sky box demo program
      */
-    class PROGRAM_SKYBOX : public PROGRAM_FILED
+    class SGE_API   PROGRAM_SKYBOX : public PROGRAM_FILED
     {
     public:
-        const char* ShaderPath() const override { return "shader/Skybox"; }
+        const char* getShaderPath() const override { return "shader/Skybox"; }
 
     public:
-        uniform     _mvp;
         attribute   _position;
-
+        uniform     _mvp;
         uniform     _cubeTexture;
 
-        void begin() const override
+        void    begin() override
         {
-            __super::begin();
-            glGetIntegerv(GL_CULL_FACE_MODE, (GLint*)&OldCullFaceMode);
-            glGetIntegerv(GL_DEPTH_FUNC, (GLint*)&OldDepthFuncMode);
-            glCullFace(GL_FRONT);
-            glDepthFunc(GL_LEQUAL);
-            glEnableVertexAttribArray(_position);
+            PROGRAM_FILED::begin();
+            GLCall(glGetIntegerv(GL_CULL_FACE_MODE, &_oldCullFaceMode));
+            GLCall(glGetIntegerv(GL_DEPTH_FUNC, &_oldDepthFuncMode));
+            GLCall(glCullFace(GL_FRONT));
+            GLCall(glDepthFunc(GL_LEQUAL));
+            GLCall(glEnableVertexAttribArray(_position));
         }
 
-        void end() const override
+        void    end() override
         {
-            glCullFace(OldCullFaceMode);
-            glDepthFunc(OldDepthFuncMode);
-            glDisableVertexAttribArray(_position);
-            __super::end();
+            GLCall(glCullFace(_oldCullFaceMode));
+            GLCall(glDepthFunc(_oldDepthFuncMode));
+            GLCall(glDisableVertexAttribArray(_position));
+            PROGRAM_FILED::end();
         }
 
     private:
-        GLint OldCullFaceMode;
-        GLint OldDepthFuncMode;
-    private:
-        void onAfterCreate() override
-        {
-            _mvp        =   GetUniformLocation("_mvp");
-            _position   =   GetAttribLocation("_position");
-            _cubeTexture    =   GetUniformLocation("_cubeTexture");
-        }
-    };
-
-    /**
-     * The base model shader
-     */
-    class PROGRAM_MODEL : public PROGRAM_FILED
-    {
-    public:
-        const char* getShaderPath() const override { return "shader/Model"; }
-        
-    public:
-        // mesh attribute
-        attribute       _position;
-        attribute       _normal;
-
-        // instance data
-        attribute       _local;
-        attribute       _matIndex;
-
-        // model-view-projection matrix
-        uniform         MVP;
-        // the camera pos in world space
-        uniform         CameraPos;
-        // the normalized light direction
-        uniform         LightDir;
-        // the ambient intensity
-        uniform         AmbientIntensity;
-        // the diffuse intensity
-        uniform         DiffuseIntensity;
-        // the specular intensity
-        uniform         SpecularIntensity;
-
-        UniformBlock    Materials;
+        GLint   _oldCullFaceMode;
+        GLint   _oldDepthFuncMode;
     private:
         void onAfterCreate() override
         {
-            //Get uniform and attribute.
-
-            // mesh attribute
-            _position   =   GetAttribLocation("_position");
-            _normal     =   GetAttribLocation("_normal");
-            // material attribute
-            _local      =   GetAttribLocation("_local");
-            _matIndex   =   GetAttribLocation("_matIndex");
-
-            // model-view-projection matrix
-            MVP         =   GetUniformLocation("MVP");
-            // the camera pos in world space
-            CameraPos   =   GetUniformLocation("CameraPos");
-            // the normalized light direction
-            LightDir    =   GetUniformLocation("LightDir");
-            // the ambient intensity
-            AmbientIntensity    =   GetUniformLocation("AmbientIntensity");
-            // the diffuse intensity
-            DiffuseIntensity    =   GetUniformLocation("DiffuseIntensity");
-            // the specular intensity
-            SpecularIntensity   =   GetUniformLocation("SpecularIntensity");
-
-            Materials = GetUniformBlock("Materials");
-        }
-    };
-
-
-    class PROGRAM_FEEDBACK_CALC_INST_CMD : public PROGRAM_FILED
-    {
-    public:
-        // The mesh id of this instance
-        attribute   _meshId;        
-        // The flag of this instance
-        attribute   _flag;
-        // The local matrix of this instance
-        attribute   _local;
-
-        // The mvp matrix for world
-        uniform     _mvp;
-
-        // The meshes desc
-        UniformBlock Meshes;
-    public:
-        const char* getShaderPath() const override { return "shader/InstCmd"; }
-
-        void begin() const override
-        {
-            __super::begin();
-            GLCall(glBeginTransformFeedback(GL_POINTS));
-            GLCall(glEnable(GL_RASTERIZER_DISCARD));
-        }
-
-        void end() const override
-        {
-            GLCall(glEndTransformFeedback());
-            GLCall(glDisable(GL_RASTERIZER_DISCARD));
-            __super::end();
-        }
-    private:
-        void onBeforeLink() override
-        {
-            const GLchar* feedbackVaryings[] = {
-                "vertCount",
-                "primCount",
-                "firstIndex",
-                "baseVertex",
-                "baseInstance",
-            };
-            GLCall(glTransformFeedbackVaryings(ProgramId(), 5,
-                feedbackVaryings, GL_INTERLEAVED_ATTRIBS));
-        }
-
-        void onAfterCreate() override
-        {
-            _meshId = GetAttribLocation("_meshId");
-            _flag = GetAttribLocation("_flag");
-            _local = GetAttribLocation("_local");
-            
-            _mvp = GetUniformLocation("_mvp");
-            
-            Meshes = GetUniformBlock("Meshes");
+            _position   =   getAttribLocation("_position");
+            _mvp        =   getUniformLocation("_mvp");
+            _cubeTexture    =   getUniformLocation("_cubeTexture");
         }
     };
 

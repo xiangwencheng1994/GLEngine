@@ -43,197 +43,81 @@
 #ifndef SGE_SCENE_H
 #define SGE_SCENE_H
 
-#include <core/sgePlatform.h>
-#include <core/sgePlatformNative.h>
-#include <core/sgeRefPtr.h>
+#include <core/sgeContext.h>
 
 namespace sge
 {
-    class Application;
-
-    namespace ui
-    {
-        class View;
-    }
-
-    class ScenePrivate;
 
     /**
      * Class scene, execute by Application
      * @note must use 'new' method to create instance, it will be deleted after unload.
      */
-    class SGE_API Scene
+    class SGE_API   Scene
     {
     public:
         /**
          * Constructor
          */
-        explicit Scene(Application* app_not_null);
+        explicit    Scene();
         
         /**
          * Destructor
          */
-        virtual ~Scene();
+        virtual     ~Scene() {}
 
         /**
          * Get the background brush color
          */
-        const float4& getBrushColor();
+        const vec4f& getBrushColor() { return _brushColor; }
 
         /**
          * Set the background brush color
          */
-        void setBrushColor(const float4& color);
-
-        /**
-         *  Set root view
-         */
-        void setRootView(RefPtr<ui::View> view);
-
-        /**
-         * Get root view
-         */
-        RefPtr<ui::View> getRootView();
-
-        /**
-         * Get the context
-         */
-        Application* getApplicaton();
+        void    setBrushColor(const vec4f& color) { _brushColor = color; }
 
     protected:
 
         /**
          * Load the base scene
          */
-        virtual void onLoad();
+        virtual void    onLoad(Context& context) {}
 
         /**
          * Unload the base scene
          */
-        virtual void onUnLoad();
+        virtual void    onUnLoad(Context& context) {}
 
         /**
          * Render the base scene
          */
-        void onRender();
+        void    onRender(Context& context);
         
         /**
          * Callback while need render models
          */
-        virtual void onRenderModel();
+        virtual void    onRenderModel(Context& context);
 
         /**
          * Callback while need render ui
          */
-        virtual void onRenderUI();
-
-        /**
-         * Callback while mouse left button down
-         * @param event The event data
-         * @return true if you has processed this event
-         */
-        virtual bool onLeftButtonDownEvent(const MouseDownEvent& event);
-
-        /**
-         * Callback while mouse left button up
-         * @param event The event data
-         * @return true if you has processed this event
-         */
-        virtual bool onLeftButtonUpEvent(const MouseUpEvent& event);
-
-        /**
-         * Callback while mouse left button click
-         * @param event The event data
-         * @return true if you has processed this event
-         */
-        virtual bool onLeftButtonClickEvent(const MouseClickEvent& event);
-
-        /**
-         * Callback while mouse right button down
-         * @param event The event data
-         * @return true if you has processed this event
-         */
-        virtual bool onRightButtonDownEvent(const MouseDownEvent& event);
-
-        /**
-         * Callback while mouse right button up
-         * @param event The event data
-         * @return true if you has processed this event
-         */
-        virtual bool onRightButtonUpEvent(const MouseUpEvent& event);
-
-        /**
-         * Callback while mouse right button click
-         * @param event The event data
-         * @return true if you has processed this event
-         */
-        virtual bool onRightButtonClickEvent(const MouseClickEvent& event);
-
-        /**
-         * Callback while mouse middle button down
-         * @param event The event data
-         * @return true if you has processed this event
-         */
-        virtual bool onMiddleButtonDownEvent(const MouseDownEvent& event);
-
-        /**
-         * Callback while mouse middle button up
-         * @param event The event data
-         * @return true if you has processed this event
-         */
-        virtual bool onMiddleButtonUpEvent(const MouseUpEvent& event);
-
-        /**
-         * Callback while mouse middle button click
-         * @param event The event data
-         * @return true if you has processed this event
-         */
-        virtual bool onMiddleButtonClickEvent(const MouseClickEvent& event);
-
-        /**
-         * Callback while mouse move
-         * @param event The event data
-         * @return true if you has processed this event
-         */
-        virtual bool onMouseMoveEvent(const MouseMoveEvent& event);
-
-        /**
-         * Callback while mouse wheel wheeled
-         * @param event The event data
-         * @return true if you has processed this event
-         */
-        virtual bool onMouseWheelEvent(const MouseWheelEvent& event);
-
-        /**
-         * Callback while key down
-         * @param event The event data
-         * @return true if you has processed this event
-         */
-        virtual bool onKeyDownEvent(const KeyDownEvent& event);
-
-        /**
-         * Callback while key up
-         * @param event The event data
-         * @return true if you has processed this event
-         */
-        virtual bool onKeyUpEvent(const KeyUpEvent& event);
-
-        /**
-         * Callback while wanted set size
-         * @param event The event data
-         * @return true if you has processed this event
-         */
-        virtual bool onResizeEvent(const ResizeEvent& event);
+        virtual void    onRenderUI(Context& context);
 
         /**
          * Release this object
+         * delete this by default
          */
-        virtual void release();
+        virtual void    release() { delete this; }
 
+        virtual void    onResizeEvent(int w, int h);
+        virtual void    onKeyEvent(int key, int scancode, int action, int mods);
+        virtual void    onMouseButtonEvent(int button, int action, int mods);
+        virtual void    onMouseMoveEvent(double x, double y);
+        virtual void    onMouseScrollEvent(double dx, double dy);
+        virtual bool    onCloseEvent();
+
+        friend class    Application;
     private:
-        friend class Application;
-        friend class ScenePrivate;
-        ScenePrivate* d;
+        vec4f               _brushColor;
     };
 
 }

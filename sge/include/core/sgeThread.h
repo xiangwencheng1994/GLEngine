@@ -49,16 +49,16 @@
 
 namespace sge
 {
-    class ThreadPrivate;
+    class   ThreadPrivate;
 
     typedef Delegate0<int>  Runable;
 
-    typedef unsigned long TID;
+    typedef unsigned long   TID;
 
     /**
      * Class Thread
      */
-    class SGE_API Thread
+    class SGE_API   Thread
     {
     public:
 
@@ -71,7 +71,7 @@ namespace sge
 		/**
 		 * Get the current thread id.
 		 */
-		static TID	getCurrentThreadId();
+		static TID  getCurrentThreadId();
 
         /**
          * Constructor
@@ -92,26 +92,26 @@ namespace sge
         /**
          * Start this thread
          */
-        bool start();
+        bool    start();
 
         /**
          * Wait for thread exit, if thread is finished it will return immediately
          * @return The run function result.
          */
-        int join();
+        int     join();
 
         /**
          * Get thread id, NULL if not started
          */
-        TID getThreadId() const;
+        TID     getThreadId() const;
 
 #ifdef _WIN32
-        typedef void * HANDLE;
+        typedef void *  HANDLE;
 
         /**
          * Get the Thread Handle, windows only
          */
-        HANDLE getHandle() const;
+        HANDLE  getHandle() const;
 #endif
 
         /**
@@ -119,9 +119,9 @@ namespace sge
          */
         virtual int run();
     protected:
-        ThreadPrivate* d;
+        ThreadPrivate*  d;
 
-        friend class ThreadPrivate;
+        friend class    ThreadPrivate;
         DISABLE_COPY(Thread)
     };
 
