@@ -50,9 +50,9 @@ namespace sge
 
     typedef enum    SeekOrigin
     {
-        SEEK_SET = 0,
-        SEEK_CUR = 1,
-        SEEK_END = 2,
+        SeekSet = 0,
+        SeekCur = 1,
+        SeekEnd = 2,
     } SeekOrigin;
 
     /**
@@ -74,7 +74,7 @@ namespace sge
         /**
          * seek the cursor
          * @param offset The offset the pointer, if offset < 0 will seek on back
-         * @param seek Must be SEEK_SET | SEEK_CUR | SEEK_END
+         * @param seek Must be SeekOrigin
          * @return true if seek success
          */
         virtual bool    seek(long offset, SeekOrigin seek) = 0;

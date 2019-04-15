@@ -63,7 +63,7 @@ SGE_API bool    glCheckError(const char* function, const char* file, int line);
 /**
  * Log the gpu information
  */
-SGE_API String  GetGPUInfo();
+SGE_API String  getGPUInfo();
 
 namespace sge 
 {

@@ -9,6 +9,8 @@
 
 IF(WIN32)
     FIND_PATH( GLFW3_INCLUDE_PATH GLFW/glfw3.h
+		${GLFW_ROOT_DIR}/include
+		${PROJECT_SOURCE_DIR}/3rd/GLFW3/include
 		${CMAKE_CURRENT_SOURCE_DIR}/3rd/GLFW3/include
 		DOC "The directory where GLFW/glfw3.h resides")
         
@@ -21,6 +23,8 @@ IF(WIN32)
     FIND_LIBRARY( GLFW3_LIBRARY
         NAMES glfw3 GLFW
         PATHS
+		${GLFW_ROOT_DIR}/lib/${PLATFORM}
+        ${PROJECT_SOURCE_DIR}/3rd/GLFW3/lib/${PLATFORM}
         ${CMAKE_CURRENT_SOURCE_DIR}/3rd/GLFW3/lib/${PLATFORM}
         DOC "The GLFW library")
         

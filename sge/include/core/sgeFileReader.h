@@ -96,7 +96,7 @@ namespace sge
          * @param seek Must be SEEK_SET | SEEK_CUR | SEEK_END
          * @return true if seek success
          */
-        bool seek(long offset, int seek) override { return 0 == fseek(_file, offset, seek); }
+        bool seek(long offset, SeekOrigin seek) override { return 0 == fseek(_file, offset, seek); }
 
         /**
          * get the file length, count of bytes
@@ -105,11 +105,11 @@ namespace sge
         size_t length() override
         {
             size_t ret = unsigned(-1);
-            size_t cur = Tell();
-            if (Seek(0, SEEK_SET))
+            size_t cur = tell();
+            if (seek(0, SeekSet))
             {
-                if (Seek(0, SEEK_END)) ret = Tell();
-                Seek(cur, SEEK_SET);
+                if (seek(0, SeekEnd)) ret = tell();
+                seek(cur, SeekSet);
             }
             return ret;
         }
@@ -143,7 +143,7 @@ namespace sge
          */
         bool getLine(char* buff, size_t bufferSize) override
         {
-            return fgets(buff, bufferSize, _file) != NULL;
+            return fgets(buff, (int)bufferSize, _file) != NULL;
         }
 
     private:

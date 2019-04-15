@@ -42,10 +42,13 @@
 
 #include <core/sgeApplication.h>
 #include <core/sgeScene.h>
-#include <core/sgeGUIRenderer.h>
 #include <core/sgeLog.h>
 #include <core/sgeContext.h>
+#include <core/sgeGLX.h>
 #include <core/sgeTimer.h>
+#include <core/sgeGUIRenderer.h>
+#include <core/sgeTextureManager.h>
+#include <core/sgeShaderManager.h>
 
 namespace sge
 {
@@ -112,9 +115,13 @@ namespace sge
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
         glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE); // mac os needed.
-        glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+        glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_ANY_PROFILE);
         glfwWindowHint(GLFW_RESIZABLE, resizable ? GLFW_TRUE : GLFW_FALSE);
         glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
+#ifdef _DEBUG
+        glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
+#endif // _DEBUG
+
 
         _window =   glfwCreateWindow(width, height, "sge", NULL, NULL);
         if (NULL == _window)
@@ -143,13 +150,18 @@ namespace sge
                 return;
             }
             glEnable(GL_MULTISAMPLE);
+            Log::info("GPUInfo:\n%s", getGPUInfo().c_str());
         }
         ++applicationCount;
 
-        _context._guiRenderer = new GUIRenderer();
+        _context._guiRenderer   =   new GUIRenderer();
+        _context._textureManager    =   new TextureManager();
+        _context._shaderManager =   new ShaderManager();
+
+        // load base resources
+        if (0 > _context._guiRenderer->loadFont("default", "fonts/default.ttf"))
+            Log::error("GUIRenderer load fonts/default.ttf failed");
         
-        // load fonts
-        _context._guiRenderer->loadFont("default", "fonts/YaHei.Consolas.ttf");
     }
 
 
@@ -160,10 +172,21 @@ namespace sge
             loadScene(NULL);
             assert(_curScene == NULL);
         }
+        _context._app = NULL;
+        if (_context._textureManager)
+        {
+            delete _context._textureManager;
+            _context._textureManager    =   NULL;
+        }
         if (_context._guiRenderer)
         {
             delete  _context._guiRenderer;
             _context._guiRenderer =   NULL;
+        }
+        if (_context._shaderManager)
+        {
+            delete _context._shaderManager;
+            _context._shaderManager =   NULL;
         }
         if (_window)
         {
@@ -245,7 +268,9 @@ namespace sge
 
     inline void Application::onFrameBufferSizeEvent(int w, int h)
     {
-        ASSERT(w > 0 && h > 0);
+        if (h == 0)
+            h = 1;
+        
         _context._frameBufferWidth  =   w;
         _context._frameBufferHeight =   h;
         if (_curScene)

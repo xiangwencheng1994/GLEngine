@@ -59,7 +59,7 @@ bool    glCheckError(const char* function, const char* file, int line)
     return  true;
 }
 
-String  GetGPUInfo()
+String  getGPUInfo()
 {
     const GLubyte*  renderer = glGetString(GL_RENDERER);
     const GLubyte*  vendor = glGetString(GL_VENDOR);

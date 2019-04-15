@@ -138,4 +138,22 @@ SGE_API void    glClearError();
 #define REMOVE_FLAG(item, flag)         ((item) &= ~(flag))
 #define SET_FLAG(item, flag, enable)    ((enable) ? ((item) |= (flag)) : ((item) &= ~(flag)))
 
+typedef int32_t four_char_enum;
+#define ENUM(e) enum class e : four_char_enum
+
+// append std
+namespace sge
+{
+    namespace details
+    {
+        constexpr int32_t i32(const char* s, int32_t v) { return *s ? i32(s + 1, v * 256 + *s) : v; }
+        constexpr uint16_t u16(const char* s, uint16_t v) { return *s ? u16(s + 1, v * 256 + *s) : v; }
+        constexpr uint32_t u32(const char* s, uint32_t v) { return *s ? u32(s + 1, v * 256 + *s) : v; }
+    }
+
+    constexpr int32_t operator "" _i32(const char* s, size_t) { return details::i32(s, 0); }
+    constexpr uint32_t operator "" _u32(const char* s, size_t) { return details::u32(s, 0); }
+    constexpr uint16_t operator "" _u16(const char* s, size_t) { return details::u16(s, 0); }
+}
+
 #endif

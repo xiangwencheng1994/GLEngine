@@ -74,7 +74,7 @@ namespace sge
             char    path[MAX_PATH];
             sprintf(path, "%s.%s", getShaderPath(), type);
             FileReader  file(path, &hasFile);
-            return  hasFile ? file.ReadAll() : String();
+            return  hasFile ? file.readAll() : String();
         }
 
         virtual String  getVertexShaderSrc() const override { return tryGetShader("vert"); }
