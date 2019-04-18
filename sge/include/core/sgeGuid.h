@@ -1,52 +1,8 @@
-/**
- *
- * Simple graphic engine
- * "sge" libraiy is a simple graphics engine, named sge.
- *
- * sgeGuid.h
- * date: 2019/03/29
- * author: xiang
- *
- * License
- *
- * Copyright (c) 2017-2019, Xiang Wencheng <xiangwencheng@outlook.com>
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *
- * - Redistributions of source code must retain the above copyright
- *   notice, this list of conditions and the following disclaimer.
- * - Redistributions in binary form must reproduce the above copyright
- *   notice, this list of conditions and the following disclaimer in
- *   the documentation and/or other materials provided with the
- *   distribution.
- * - Neither the names of its contributors may be used to endorse or
- *   promote products derived from this software without specific
- *   prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
- * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY
- * WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- */
+#pragma once
 
-#ifndef SGE_GUID_H
-#define SGE_GUID_H
+#include <core/sgeDefs.h>
 
-#include <core/sgePlatform.h>
-#undef String
-
-#if(SGE_TARGET_PLATFORM == SGE_PLATFORM_ANDROID)
+#ifdef SGE_ANDROID
 #include <thread>
 #include <jni.h>
 #endif
@@ -65,27 +21,85 @@ namespace sge
     /**
      * Guid class
      */
-    class SGE_API   Guid
+    class SGE_CORE_API  Guid
     {
     public:
+        /**
+         * Constructor with 16 bytes
+         */
         explicit Guid(const std::array<unsigned char, 16> &bytes);
+        
+        /**
+         * Constructor with 16 bytes ref
+         */
         explicit Guid(std::array<unsigned char, 16> &&bytes);
     
+        /**
+         * Constructor with string
+         */
         explicit Guid(std::string fromString);
+
+        /**
+         * Constructor with empty
+         */
         Guid();
     
+        /**
+         * Constructor with other object
+         */
         Guid(const Guid &other) = default;
+        
+        /**
+         * Copy from other object
+         */
         Guid &operator=(const Guid &other) = default;
+        
+        /**
+         * Constructor with other object
+         */
         Guid(Guid &&other) = default;
+        
+        /**
+         * Copy from other object
+         */
         Guid &operator=(Guid &&other) = default;
     
+        /**
+         * Check equal with other object
+         */
         bool operator==(const Guid &other) const;
+        
+        /**
+         * Check not equal with other object
+         */
         bool operator!=(const Guid &other) const;
     
+
+        /**
+         * To string
+         */
         std::string str() const;
+
+        
+        /**
+         * To string auto
+         */
         operator std::string() const;
+
+        
+        /**
+         * To bytes array auto
+         */
         const std::array<unsigned char, 16>& bytes() const;
+
+        /**
+         * Swap with other object
+         */
         void swap(Guid &other);
+
+        /**
+         * Check is valid
+         */
         bool isValid() const;
     
     private:
@@ -99,9 +113,9 @@ namespace sge
         friend bool operator<(const Guid &lhs, const Guid &rhs);
     };
     
-    Guid SGE_API newGuid();
+    Guid SGE_CORE_API newGuid();
 
-#if(SGE_TARGET_PLATFORM == SGE_PLATFORM_ANDROID)
+#ifdef SGE_ANDROID
     struct AndroidGuidInfo
     {
         static AndroidGuidInfo fromJniEnv(JNIEnv *env);
@@ -167,4 +181,3 @@ namespace std
     };
 }
 
-#endif //!SGE_GUID_H
