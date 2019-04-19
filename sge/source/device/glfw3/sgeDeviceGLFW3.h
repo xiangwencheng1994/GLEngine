@@ -15,6 +15,7 @@ namespace sge
         virtual void finalize();
         virtual void tick();
 
+        virtual void swapBuffer() { glfwSwapBuffers(_window); }
         virtual void setInputModule(InputSystem* inputSystem) { _inputSystem = inputSystem; }
         virtual InputSystem* getInputModule() const { return _inputSystem; }
 

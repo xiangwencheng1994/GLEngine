@@ -49,6 +49,10 @@ namespace sge
          * Do a tick
          */
         virtual void tick() = 0;
+
+    protected:
+        IRuntimeModule() = default;
+        DISABLE_COPY(IRuntimeModule)
     };
 
 }

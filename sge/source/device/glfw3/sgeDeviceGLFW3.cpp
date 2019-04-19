@@ -184,18 +184,19 @@ namespace sge
         }
     }
 
-}
-
-SGE_DEVICE_API sge::DeviceModule* newDeviceModule()
-{
-    return new sge::DeviceGLFW3();
-}
-
-SGE_DEVICE_API void deleteDeviceModule(sge::DeviceModule* object)
-{
-    sge::DeviceGLFW3* myImpl = dynamic_cast<sge::DeviceGLFW3*>(object);
-    if (myImpl)
+    SGE_DEVICE_API DeviceModule* newDeviceModule()
     {
-        delete myImpl;
+        return new DeviceGLFW3();
     }
+
+    SGE_DEVICE_API void deleteDeviceModule(DeviceModule* object)
+    {
+        DeviceGLFW3* myImpl = dynamic_cast<DeviceGLFW3*>(object);
+        if (myImpl)
+        {
+            delete myImpl;
+        }
+    }
+
 }
+

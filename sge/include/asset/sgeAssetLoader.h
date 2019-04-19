@@ -2,6 +2,12 @@
 
 #include <core/sgeRuntimeModule.h>
 
+#ifdef MODULE_ASSET_EXPORTS
+    #define SGE_ASSET_API SGE_EXPORT
+#else
+    #define SGE_ASSET_API SGE_IMPORT
+#endif
+
 namespace sge
 {
 
@@ -32,21 +38,16 @@ namespace sge
         virtual sgeString findFile(const char *name) const = 0;
     };
 
+
+    /**
+     * Create asset loader object
+     */
+    SGE_ASSET_API AssetLoader* newAssetLoader();
+
+    /**
+     * Destory asset loader object
+     */
+    SGE_ASSET_API void deleteAssetLoader(AssetLoader* object);
+    
 }
 
-
-#ifdef MODULE_ASSET_EXPORTS
-    #define SGE_ASSET_API extern "C" SGE_EXPORT
-#else
-    #define SGE_ASSET_API extern "C" SGE_IMPORT
-#endif
-
-/**
- * Create asset loader object
- */
-SGE_ASSET_API sge::AssetLoader* newAssetLoader();
-
-/**
- * Destory asset loader object
- */
-SGE_ASSET_API void deleteAssetLoader(sge::AssetLoader* object);

@@ -32,8 +32,7 @@
 #define SGE_IMPORT _declspec(dllimport)
 #define _CRT_SECURE_NO_WARNINGS
 #pragma warning(disable: 4251)
-#elif defined(SGE_LINUX)
-#define SGE_CORE_API
+#else
 #define SGE_EXPORT
 #define SGE_IMPORT
 #endif

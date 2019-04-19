@@ -3,6 +3,12 @@
 #include <core/sgeRuntimeModule.h>
 #include <input/sgeInputSystem.h>
 
+#ifdef MODULE_DEVICE_EXPORTS
+    #define SGE_DEVICE_API SGE_EXPORT
+#else
+    #define SGE_DEVICE_API SGE_IMPORT
+#endif
+
 namespace sge
 {
 
@@ -15,6 +21,11 @@ namespace sge
         ModuleType moduleType() const override final { return ModuleType::kModuleTypeDevice; }
 
         /**
+         * Swap buffer
+         */
+        virtual void swapBuffer() = 0;
+
+        /**
          * Set the input handler
          */
         virtual void setInputModule(InputSystem* inputSystem) = 0;
@@ -24,21 +35,17 @@ namespace sge
          */
         virtual InputSystem* getInputModule() const = 0;
     };
-    
+
+
+    /**
+     * Create device module object
+     */
+    SGE_DEVICE_API DeviceModule* newDeviceModule();
+
+    /**
+     * Destory device module object
+     */
+    SGE_DEVICE_API void deleteDeviceModule(DeviceModule* object);
+
 }
 
-#ifdef MODULE_DEVICE_EXPORTS
-#define SGE_DEVICE_API extern "C" SGE_EXPORT
-#else
-#define SGE_DEVICE_API extern "C" SGE_IMPORT
-#endif
-
-/**
- * Create device module object
- */
-SGE_DEVICE_API sge::DeviceModule* newDeviceModule();
-
-/**
- * Destory device module object
- */
-SGE_DEVICE_API void deleteDeviceModule(sge::DeviceModule* object);

@@ -77,19 +77,19 @@ namespace sge
         return fullPath;
     }
 
-}
-
-
-SGE_ASSET_API sge::AssetLoader* newAssetLoader()
-{
-    return (sge::AssetLoader*)new sge::AssetLoaderImpl();
-}
-
-SGE_ASSET_API void deleteAssetLoader(sge::AssetLoader* object)
-{
-    sge::AssetLoaderImpl* myImpl = dynamic_cast<sge::AssetLoaderImpl*>(object);
-    if (myImpl)
+    SGE_ASSET_API AssetLoader* newAssetLoader()
     {
-        delete myImpl;
+        return (AssetLoader*)new AssetLoaderImpl();
     }
+
+    SGE_ASSET_API void deleteAssetLoader(AssetLoader* object)
+    {
+        AssetLoaderImpl* myImpl = dynamic_cast<AssetLoaderImpl*>(object);
+        if (myImpl)
+        {
+            delete myImpl;
+        }
+    }
+
 }
+
