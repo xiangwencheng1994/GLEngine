@@ -5,6 +5,19 @@ namespace sge
 {
     static int deviceCount = 0;
 
+    DeviceGLFW3::DeviceGLFW3()
+        : _window(NULL)
+        , _title("sge.device.glfw3")
+        , _samples(4)
+        , _resizable(true)
+        , _width(800)
+        , _height(600)
+        , _glMAJOR(4)
+        , _glMINOR(3)
+        , _inputSystem(NULL)
+    {
+    }
+
     int DeviceGLFW3::initialize()
     {
         if (deviceCount == 0)
@@ -23,7 +36,7 @@ namespace sge
         glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE); // mac os needed.
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
         glfwWindowHint(GLFW_RESIZABLE, _resizable ? GLFW_TRUE : GLFW_FALSE);
-        glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
+        glfwWindowHint(GLFW_VISIBLE, GLFW_TRUE);
 #ifdef _DEBUG
         glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
 #endif // _DEBUG
@@ -171,19 +184,18 @@ namespace sge
         }
     }
 
-    DeviceModule* createDeviceModule()
-    {
-        return new DeviceGLFW3();
-    }
-
-    void destoryDeviceModule(DeviceModule* object)
-    {
-        DeviceGLFW3* myImpl = dynamic_cast<DeviceGLFW3*>(object);
-        if(myImpl)
-        {
-            delete myImpl;
-        }
-    }
-
 }
 
+SGE_DEVICE_API sge::DeviceModule* newDeviceModule()
+{
+    return new sge::DeviceGLFW3();
+}
+
+SGE_DEVICE_API void deleteDeviceModule(sge::DeviceModule* object)
+{
+    sge::DeviceGLFW3* myImpl = dynamic_cast<sge::DeviceGLFW3*>(object);
+    if (myImpl)
+    {
+        delete myImpl;
+    }
+}

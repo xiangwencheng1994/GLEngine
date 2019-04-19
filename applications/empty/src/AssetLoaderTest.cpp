@@ -1,19 +1,27 @@
 #include <asset/sgeAssetLoader.h>
-#include <iostream>
+#include <device/sgeDeviceModule.h>
+#include <core/sgeThread.h>
+
+
 
 int main()
 {
-    sge::AssetLoader* assetLoader = sge::createAssetLoader();
+    sge::AssetLoader* assetLoader = newAssetLoader();
+    sge::DeviceModule* device = newDeviceModule();
     if (0 != assetLoader->initialize())
         return 1;
-    if (assetLoader->moduleType() != sge::ModuleType::kModuleTypeAsset)
+    if (0 != device->initialize())
         return 2;
-    assetLoader->tick();
-    sgeString f = assetLoader->findFile("fonts/DroidSans.ttf");
-    if (f.empty())
-        return 3;
-    printf("File: %s\n", f.c_str());
+    
+    while (true)
+    {
+        assetLoader->tick();
+        device->tick();
+    }
+    
+    device->finalize();
     assetLoader->finalize();
-    sge::destoryAssetLoader(assetLoader);
+    deleteAssetLoader(assetLoader);
+    deleteDeviceModule(device);
     return 0;
 }

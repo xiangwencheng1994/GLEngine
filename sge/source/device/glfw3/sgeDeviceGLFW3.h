@@ -9,7 +9,8 @@ namespace sge
     class DeviceGLFW3 : public DeviceModule
     {
     public:
-        virtual ModuleType moduleType() const { return ModuleType::kModuleTypeDevice; }
+        DeviceGLFW3();
+
         virtual int initialize();
         virtual void finalize();
         virtual void tick();

@@ -12,6 +12,8 @@ namespace sge
     class DeviceModule : public IRuntimeModule
     {
     public:
+        ModuleType moduleType() const override final { return ModuleType::kModuleTypeDevice; }
+
         /**
          * Set the input handler
          */
@@ -23,20 +25,20 @@ namespace sge
         virtual InputSystem* getInputModule() const = 0;
     };
     
-    #ifdef MODULE_DEVICE_EXPORTS
-    #define SGE_DEVICE_API SGE_EXPORT
-    #else
-    #define SGE_DEVICE_API SGE_IMPORT
-    #endif
-
-    /**
-     * Create device module object
-     */
-    SGE_DEVICE_API DeviceModule* createDeviceModule();
-
-    /**
-     * Destory device module object
-     */
-    SGE_DEVICE_API void destoryDeviceModule(DeviceModule* object);
-
 }
+
+#ifdef MODULE_DEVICE_EXPORTS
+#define SGE_DEVICE_API extern "C" SGE_EXPORT
+#else
+#define SGE_DEVICE_API extern "C" SGE_IMPORT
+#endif
+
+/**
+ * Create device module object
+ */
+SGE_DEVICE_API sge::DeviceModule* newDeviceModule();
+
+/**
+ * Destory device module object
+ */
+SGE_DEVICE_API void deleteDeviceModule(sge::DeviceModule* object);

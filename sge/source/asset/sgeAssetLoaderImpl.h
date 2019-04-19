@@ -10,7 +10,6 @@ namespace sge
     public:
         AssetLoaderImpl();
         ~AssetLoaderImpl();
-        ModuleType moduleType() const final { return ModuleType::kModuleTypeAsset; }
         int initialize() override;
         void finalize() override;
         void tick() override {}

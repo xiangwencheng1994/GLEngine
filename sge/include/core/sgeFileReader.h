@@ -66,7 +66,7 @@ namespace sge
             if (seek(0, SeekSet))
             {
                 if (seek(0, SeekEnd)) ret = tell();
-                seek(cur, SeekSet);
+                seek((long)cur, SeekSet);
             }
             return ret;
         }

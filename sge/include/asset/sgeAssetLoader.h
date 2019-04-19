@@ -11,6 +11,8 @@ namespace sge
     class AssetLoader : public IRuntimeModule
     {
     public:
+        ModuleType moduleType() const override final { return ModuleType::kModuleTypeAsset; }
+
         /**
          * Add a search path
          * @param path
@@ -30,19 +32,21 @@ namespace sge
         virtual sgeString findFile(const char *name) const = 0;
     };
 
-    #ifdef MODULE_ASSET_EXPORTS
-    #define SGE_ASSET_API SGE_EXPORT
-    #else
-    #define SGE_ASSET_API SGE_IMPORT
-    #endif
-    /**
-     * Create asset loader object
-     */
-    SGE_ASSET_API AssetLoader* createAssetLoader();
-
-    /**
-     * Destory asset loader object
-     */
-    SGE_ASSET_API void destoryAssetLoader(AssetLoader* object);
-
 }
+
+
+#ifdef MODULE_ASSET_EXPORTS
+    #define SGE_ASSET_API extern "C" SGE_EXPORT
+#else
+    #define SGE_ASSET_API extern "C" SGE_IMPORT
+#endif
+
+/**
+ * Create asset loader object
+ */
+SGE_ASSET_API sge::AssetLoader* newAssetLoader();
+
+/**
+ * Destory asset loader object
+ */
+SGE_ASSET_API void deleteAssetLoader(sge::AssetLoader* object);
