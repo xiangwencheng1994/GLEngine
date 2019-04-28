@@ -6,7 +6,7 @@ namespace sge
 {
 
     /**
-     * Class Ref
+     * Class auto release
      */
     class SGE_CORE_API Ref
     {

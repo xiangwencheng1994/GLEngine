@@ -37,10 +37,10 @@
 #define SGE_IMPORT
 #endif
 
-#ifdef sge_core_EXPORTS
-#define SGE_CORE_API SGE_EXPORT
+#ifdef sge_EXPORTS
+#define SGE_API SGE_EXPORT
 #else
-#define SGE_CORE_API SGE_IMPORT
+#define SGE_API SGE_IMPORT
 #endif
 
 // define ASSERT for debugger

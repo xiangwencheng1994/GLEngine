@@ -2,19 +2,13 @@
 
 #include <core/sgeRuntimeModule.h>
 
-#ifdef MODULE_ASSET_EXPORTS
-    #define SGE_ASSET_API SGE_EXPORT
-#else
-    #define SGE_ASSET_API SGE_IMPORT
-#endif
-
 namespace sge
 {
 
     /**
      * Interface AssetLoader
      */
-    class AssetLoader : public IRuntimeModule
+    class SGE_API AssetLoader : public IRuntimeModule
     {
     public:
         ModuleType moduleType() const override final { return ModuleType::kModuleTypeAsset; }
@@ -24,30 +18,23 @@ namespace sge
          * @param path
          * @return true if add success
          */
-        virtual bool addSearchPath(const char *path) = 0;
+        virtual bool addSearchPath(const char *path);
         
         /**
          * Remove a search path
          */
-        virtual void removeSearchPath(const char *path) = 0;
+        virtual void removeSearchPath(const char *path);
 
         /**
          * Find a file in all search path
          * @return the real path for sgeFileReader, empty if not find
          */
-        virtual sgeString findFile(const char *name) const = 0;
+        virtual sgeString findFile(const char *name) const;
+
+    protected:
+        friend class AssetLoaderPrivate;
+        AssetLoaderPrivate* d;
     };
 
-
-    /**
-     * Create asset loader object
-     */
-    SGE_ASSET_API AssetLoader* newAssetLoader();
-
-    /**
-     * Destory asset loader object
-     */
-    SGE_ASSET_API void deleteAssetLoader(AssetLoader* object);
-    
 }
 

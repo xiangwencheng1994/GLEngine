@@ -2,8 +2,6 @@
 
 #include <core/sgeRuntimeModule.h>
 
-#include <graphics/sgeVertexBuffer.h>
-
 #ifdef MODULE_GRAPHICS_EXPORTS
     #define SGE_GRAPHICS_API SGE_EXPORT
 #else
@@ -12,14 +10,14 @@
 
 namespace sge
 {
+    
     /**
      * The graphics module interface
      */
     class GraphicsSystem : public IRuntimeModule
     {
     public:
-        virtual sgeSharedPtr<VertexBuffer*> createVertexBuffer();
-
+        
     };
     
     /**
