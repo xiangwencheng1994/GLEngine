@@ -70,7 +70,7 @@ namespace sge
 extern "C" {
 #endif // __cplusplus
 
-    void LogDebug(const char* fmt, ...)
+    void sgeLogDebug(const char* fmt, ...)
     {
         FORMAT(strBuffer, fmt);
         if (sge::Log::_output) (*sge::Log::_output)(sge::Log::Debug, strBuffer);
@@ -81,7 +81,7 @@ extern "C" {
      * @param fmt The format
      * @... The Var for format string
      */
-    void LogInfo(const char* fmt, ...)
+    void sgeLogInfo(const char* fmt, ...)
     {
         FORMAT(strBuffer, fmt);
         if (sge::Log::_output) (*sge::Log::_output)(sge::Log::Info, strBuffer);
@@ -92,7 +92,7 @@ extern "C" {
      * @param fmt The format
      * @... The Var for format string
      */
-    void LogWarn(const char* fmt, ...)
+    void sgeLogWarn(const char* fmt, ...)
     {
         FORMAT(strBuffer, fmt);
         if (sge::Log::_output) (*sge::Log::_output)(sge::Log::Warn, strBuffer);
@@ -103,7 +103,7 @@ extern "C" {
      * @param fmt The format
      * @... The Var for format string
      */
-    void LogError(const char* fmt, ...)
+    void sgeLogError(const char* fmt, ...)
     {
         FORMAT(strBuffer, fmt);
         if (sge::Log::_output) (*sge::Log::_output)(sge::Log::Error, strBuffer);

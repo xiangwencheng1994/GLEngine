@@ -15,7 +15,7 @@ namespace sge
     /**
      * Class Thread
      */
-    class SGE_CORE_API Thread
+    class SGE_API Thread
     {
     public:
 

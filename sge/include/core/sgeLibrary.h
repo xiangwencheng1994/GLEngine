@@ -21,7 +21,7 @@ namespace sge
     /**
      *  Class for load dynamic library
      */
-    class SGE_CORE_API sgeLibrary
+    class SGE_API sgeLibrary
     {
     public:
         sgeLibrary(const char* file);
@@ -63,7 +63,7 @@ namespace sge
          */
         void            release();
     private:
-        sgeString       _path;
+        String          _path;
         HMODULE         _module;
         bool            _needDelete;
 

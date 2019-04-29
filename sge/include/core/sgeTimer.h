@@ -10,7 +10,7 @@ namespace sge
     /**
      * Class Timer for get elapsed times
      */
-    class SGE_CORE_API Timer
+    class SGE_API Timer
     {
     public:
 

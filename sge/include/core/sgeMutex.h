@@ -9,7 +9,7 @@ namespace sge
     /**
      * Class Mutex
      */
-    class SGE_CORE_API Mutex
+    class SGE_API Mutex
     {
     public:
 

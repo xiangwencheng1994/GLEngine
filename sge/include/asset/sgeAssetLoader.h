@@ -1,16 +1,30 @@
 #pragma once
 
 #include <core/sgeRuntimeModule.h>
+#include <core/sgeBufferReader.h>
 
 namespace sge
 {
 
     /**
-     * Interface AssetLoader
+     * Class AssetLoader
      */
     class SGE_API AssetLoader : public IRuntimeModule
     {
     public:
+        /**
+         * Constructor
+         */
+        AssetLoader();
+
+        /**
+         * Destructor
+         */
+        ~AssetLoader();
+
+        /**
+         * Get type enum
+         */
         ModuleType moduleType() const override final { return ModuleType::kModuleTypeAsset; }
 
         /**
@@ -18,18 +32,22 @@ namespace sge
          * @param path
          * @return true if add success
          */
-        virtual bool addSearchPath(const char *path);
+        bool addSearchPath(const char *path);
         
         /**
          * Remove a search path
          */
-        virtual void removeSearchPath(const char *path);
+        void removeSearchPath(const char *path);
 
         /**
          * Find a file in all search path
-         * @return the real path for sgeFileReader, empty if not find
          */
-        virtual sgeString findFile(const char *name) const;
+        SharedPtr<StreamReader> findFile(const char *name) const;
+
+    public:
+        int     initialize() override;
+        void    finalize() override;
+        void    tick() override {}
 
     protected:
         friend class AssetLoaderPrivate;

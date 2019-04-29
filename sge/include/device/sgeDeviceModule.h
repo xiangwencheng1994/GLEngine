@@ -1,51 +1,56 @@
 #pragma once
 
 #include <core/sgeRuntimeModule.h>
-#include <input/sgeInputSystem.h>
-
-#ifdef MODULE_DEVICE_EXPORTS
-    #define SGE_DEVICE_API SGE_EXPORT
-#else
-    #define SGE_DEVICE_API SGE_IMPORT
-#endif
+#include <core/sgeIInputHandler.h>
 
 namespace sge
 {
 
     /**
-     * The device module interface
+     * The device module
      */
-    class DeviceModule : public IRuntimeModule
+    class SGE_API DeviceModule : public IRuntimeModule
     {
     public:
+        /**
+         * Constructor
+         */
+        DeviceModule();
+
+        /**
+         * Destructor
+         */
+        ~DeviceModule();
+
+        /**
+         * Get enum type
+         */
         ModuleType moduleType() const override final { return ModuleType::kModuleTypeDevice; }
 
         /**
          * Swap buffer
          */
-        virtual void swapBuffer() = 0;
+        void swapBuffer();
 
         /**
          * Set the input handler
          */
-        virtual void setInputModule(InputSystem* inputSystem) = 0;
+        void setInputModule(IInputHandler* inputSystem);
 
         /**
          * Get the input handler
          */
-        virtual InputSystem* getInputModule() const = 0;
+        IInputHandler* getInputModule() const;
+
+    public:
+        int     initialize() override;
+        void    finalize() override;
+        void    tick() override;
+
+    protected:
+        friend class DeviceModulePrivate;
+        DeviceModulePrivate* d;
     };
-
-
-    /**
-     * Create device module object
-     */
-    SGE_DEVICE_API DeviceModule* newDeviceModule();
-
-    /**
-     * Destory device module object
-     */
-    SGE_DEVICE_API void deleteDeviceModule(DeviceModule* object);
 
 }
 

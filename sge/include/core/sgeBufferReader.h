@@ -26,6 +26,10 @@ namespace sge
             ASSERT(buffer && "buffer can not be null");
         }
 
+        /**
+         * Check buffer is good
+         */
+        bool isGood() const { return _buffer != NULL; }
 
         /**
          * get the current cursor of file
@@ -44,13 +48,13 @@ namespace sge
             long    pos =   0;
             switch(seek)
             {
-            case SeekOrigin::SEEK_SET:
+            case SeekOrigin::SeekSet:
                 pos =   offset;
                 break;
-            case SeekOrigin::SEEK_CUR:
+            case SeekOrigin::SeekCur:
                 pos =   offset + _curPos;
                 break;
-            case SeekOrigin::SEEK_END:
+            case SeekOrigin::SeekEnd:
                 pos =   offset + _len;
                 break;
             default:

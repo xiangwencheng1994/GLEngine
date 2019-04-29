@@ -1,11 +1,10 @@
 #pragma once
 
-#include <core/sgeDefs.h>
 #include <core/sgeMath.h>
+#include <graphics/sgeGraphicsSystem.h>
 
 namespace sge
 {
-    class GraphicsSystem;
 
     /**
      * Enum buffer type
@@ -49,31 +48,20 @@ namespace sge
     /**
      * The GPU buffer
      */
-    class GpuBuffer
+    class SGE_API GpuBuffer
     {
     public:
-        virtual ~GpuBuffer() = default;
-
-        /**
-         * Get the buffer id
-         */
-        virtual uint64_t    getId() const = 0;
+        virtual ~GpuBuffer() = 0;
 
         /**
          * Get buffer type
          */
         virtual BufferType  getType() const = 0;
 
-        /**
-         * Get the buffer size
-         */
-        virtual uint        getSize() const = 0;
-
     protected:
         GpuBuffer() = default;
     private:
         DISABLE_COPY(GpuBuffer)
     };
-
-
+    
 }

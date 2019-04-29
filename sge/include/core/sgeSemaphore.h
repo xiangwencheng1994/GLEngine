@@ -9,7 +9,7 @@ namespace sge
     /**
      * Class Semaphore
      */
-    class SGE_CORE_API Semaphore
+    class SGE_API Semaphore
     {
     public:
         /**

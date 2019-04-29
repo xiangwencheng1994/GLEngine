@@ -10,7 +10,7 @@ namespace sge
     /**
      * Class Log is a tool to record logs
      */
-    class SGE_CORE_API Log
+    class SGE_API Log
     {
     public:
         enum    Level
@@ -81,28 +81,28 @@ extern "C" {
      * @param fmt The format
      * @... The Var for format string
      */
-    void    LogDebug(const char* fmt, ...);
+    void    sgeLogDebug(const char* fmt, ...);
 
     /**
      * Output a info log with string format
      * @param fmt The format
      * @... The Var for format string
      */
-    void    LogInfo(const char* fmt, ...);
+    void    sgeLogInfo(const char* fmt, ...);
 
     /**
      * Output a warn log with string format
      * @param fmt The format
      * @... The Var for format string
      */
-    void    LogWarn(const char* fmt, ...);
+    void    sgeLogWarn(const char* fmt, ...);
 
     /**
      * Output a error log with string format
      * @param fmt The format
      * @... The Var for format string
      */
-    void    LogError(const char* fmt, ...);
+    void    sgeLogError(const char* fmt, ...);
 
 
 #ifdef __cplusplus

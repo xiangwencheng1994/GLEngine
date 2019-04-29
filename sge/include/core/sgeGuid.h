@@ -21,7 +21,7 @@ namespace sge
     /**
      * Guid class
      */
-    class SGE_CORE_API  Guid
+    class SGE_API  Guid
     {
     public:
         /**
@@ -113,7 +113,7 @@ namespace sge
         friend bool operator<(const Guid &lhs, const Guid &rhs);
     };
     
-    Guid SGE_CORE_API newGuid();
+    Guid SGE_API newGuid();
 
 #ifdef SGE_ANDROID
     struct AndroidGuidInfo

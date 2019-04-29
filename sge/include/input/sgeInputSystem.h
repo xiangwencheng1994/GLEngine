@@ -1,37 +1,58 @@
 #pragma once
 
-#include <core/sgeRuntimeModule.h>
+#include <core/sgeIInputHandler.h>
 
 namespace sge
 {
 
-    class InputSystem : public IRuntimeModule
+    /**
+     * Class input module
+     */
+    class SGE_API InputSystem : public IInputHandler
     {
     public:
         // keybord
-        virtual void onKeyDown(int keyCode) = 0;
-        virtual void onKeyUp(int keyCode) = 0;
-        virtual void onKeyPress(int keyCode) = 0;
-        
+        virtual void onKeyDown(int keyCode);
+        virtual void onKeyUp(int keyCode);
+        virtual void onKeyPress(int keyCode);
+
         // mouse
-        virtual void onLeftButtonDown() = 0;
-        virtual void onRightButtonDown() = 0;
-        virtual void onMiddleButtonDown() = 0;
-        virtual void onLeftButtonUp() = 0;
-        virtual void onRightButtonUp() = 0;
-        virtual void onMiddleButtonUp() = 0;
-        virtual void onScroll(double xoffset, double yoffset) = 0;
-        virtual void onCursorPos(double x, double y) = 0;
+        virtual void onLeftButtonDown();
+        virtual void onRightButtonDown();
+        virtual void onMiddleButtonDown();
+        virtual void onLeftButtonUp();
+        virtual void onRightButtonUp();
+        virtual void onMiddleButtonUp();
+        virtual void onScroll(double xoffset, double yoffset);
+        virtual void onCursorPos(double x, double y);
 
         // window event
-        virtual void onSizeChange(int w, int h) = 0;
-        virtual void onCloseEvent() = 0;
+        virtual void onSizeChange(int w, int h);
+        virtual void onCloseEvent();
 
         // get status
-        virtual bool isLeftButtonPressed() = 0;
-        virtual bool isRightButtonPressed() = 0;
-        virtual bool isMiddleButtonPressed() = 0;
-        virtual bool isKeyPressed(int keyCode) = 0;
+        virtual bool isLeftButtonPressed();
+        virtual bool isRightButtonPressed();
+        virtual bool isMiddleButtonPressed();
+        virtual bool isKeyPressed(int keyCode);
+
+    public:
+        ModuleType moduleType() const { return ModuleType::kModuleTypeInput; }
+
+        /**
+         * Initialize system
+         */
+        int initialize();
+
+        /**
+         * Finalize system
+         */
+        void finalize();
+
+        /**
+         * Do a tick
+         */
+        void tick();
     };
 
 }

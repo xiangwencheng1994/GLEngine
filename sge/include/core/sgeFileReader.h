@@ -13,20 +13,25 @@ namespace sge
     {
     public:
         /**
+         * Constructor with no open file
+         */
+        FileReader()
+            : _file(NULL)
+        {
+        }
+        
+        /**
          * Constructor
          * @param fileName The fileName for open wanted 
          * @param ret The result of open the file
+         * @throw 
          */
         FileReader(const char* fileName, bool* ret)
         {
-            errno_t error = fopen_s(&_file, fileName, "rb");
+            bool isOpend = open(fileName);
             if (ret)
             {
-                *ret = (error == 0);
-            }
-            else
-            {
-                ASSERT(error == 0);
+                *ret = isOpend;
             }
         }
 
@@ -35,12 +40,36 @@ namespace sge
          */
         ~FileReader()
         {
+            close();
+        }
+
+        /**
+         * Close the file
+         */
+        void close()
+        {
             if (_file)
             {
                 fclose(_file);
                 _file = NULL;
             }
         }
+
+        /**
+         * Open a file with file name
+         */
+        bool open(const char* fileName)
+        {
+            ASSERT(fileName);
+            close();
+            errno_t error = fopen_s(&_file, fileName, "rb");
+            return error == 0 && _file;
+        }
+
+        /**
+         * Check file is good
+         */
+        bool isGood() const { return _file != NULL; }
 
         /**
          * get the current cursor of file

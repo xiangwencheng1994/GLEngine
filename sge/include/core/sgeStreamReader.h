@@ -39,6 +39,16 @@ namespace sge
         virtual ~StreamReader(){};
 
         /**
+         * Check stream is good
+         */
+        virtual bool isGood() const = 0;
+
+        /**
+         * Check stream is bad
+         */
+        bool isBad() const { return ! isGood(); }
+
+        /**
          * get the current cursor offset from SEEK_SET
          */
         virtual size_t  tell() = 0;
@@ -90,10 +100,10 @@ namespace sge
         /**
          * read all  data as text
          */
-        virtual sgeString  readAll() 
+        virtual String  readAll() 
         {
             size_t len = length();
-            sgeString data(len, 0);
+            String data(len, 0);
             len = read((void*)data.c_str(), len, 1);
             ASSERT(len == 1);
             return  data;

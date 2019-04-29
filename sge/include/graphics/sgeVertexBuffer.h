@@ -33,6 +33,6 @@ namespace sge
         GraphicsSystem* _mgr;
     };
 
-    typedef sgeSharedPtr<VertexBuffer> VBO;
+    typedef SharedPtr<VertexBuffer> VBO;
 
 }

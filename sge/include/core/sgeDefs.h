@@ -64,20 +64,22 @@ typedef int32_t four_char_enum;
 
 //now: Use std string, vector, list, map
 #include <string>
-#define sgeString   std::string
 #include <vector>
-#define sgeVector   std::vector
 #include <list>
-#define sgeList     std::list
 #include <map>
-#define sgeMap      std::map
-#define sgeMMap     std::multimap
 #include <memory>
-#define sgeSharedPtr    std::shared_ptr
-#define sgeWeakPtr      std::weak_ptr
 
 namespace sge
 {
+    using byte = unsigned char;
+    using String = std::string;
+    template<typename T> using Vector = std::vector<T>;
+    template<typename T> using List = std::list<T>;
+    template<typename K, typename V> using Map = std::map<K, V>;
+    template<typename K, typename V> using MMap = std::multimap<K, V>;
+    template<typename T> using SharedPtr = std::shared_ptr<T>;
+    template<typename T> using WeakPtr = std::weak_ptr<T>;
+
     namespace details
     {
         constexpr int32_t i32(const char* s, int32_t v) { return *s ? i32(s + 1, v * 256 + *s) : v; }
