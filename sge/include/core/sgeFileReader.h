@@ -79,7 +79,7 @@ namespace sge
         /**
          * seek the cursor of file
          * @param offset The offset the pointer, if offset < 0 will seek on back
-         * @param seek Must be SEEK_SET | SEEK_CUR | SEEK_END
+         * @param seek Must be SeekOrigin
          * @return true if seek success
          */
         bool seek(long offset, SeekOrigin seek) override { return 0 == fseek(_file, offset, seek); }

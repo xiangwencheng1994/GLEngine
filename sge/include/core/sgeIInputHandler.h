@@ -8,7 +8,7 @@ namespace sge
     /**
      * Interface input handler
      */
-    class IInputHandler : public IRuntimeModule
+    class SGE_API IInputHandler : public IRuntimeModule
     {
     public:
         // keybord

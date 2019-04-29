@@ -1,7 +1,8 @@
 #pragma once
 
 #include <core/sgeMath.h>
-#include <graphics/sgeGraphicsSystem.h>
+#include <graphics/sgeGPUCommand.h>
+
 
 namespace sge
 {
@@ -51,7 +52,7 @@ namespace sge
     class SGE_API GpuBuffer
     {
     public:
-        virtual ~GpuBuffer() = 0;
+        virtual ~GpuBuffer() = default;
 
         /**
          * Get buffer type
@@ -63,5 +64,5 @@ namespace sge
     private:
         DISABLE_COPY(GpuBuffer)
     };
-    
+        
 }

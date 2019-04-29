@@ -25,7 +25,7 @@ namespace sge
     /**
      * Interface IRuntimeModule
      */
-    class IRuntimeModule
+    class SGE_API IRuntimeModule
     {
     public:
         virtual ~IRuntimeModule() = default;

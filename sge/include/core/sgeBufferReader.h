@@ -39,7 +39,7 @@ namespace sge
         /**
          * seek the cursor of buffer
          * @param offset The offset the pointer, if offset < 0 will seek on back
-         * @param seek Must be SEEK_SET | SEEK_CUR | SEEK_END
+         * @param seek Must be SeekOrigin
          * @return true if seek success
          */
         bool    seek(long offset, SeekOrigin seek) override
@@ -52,10 +52,10 @@ namespace sge
                 pos =   offset;
                 break;
             case SeekOrigin::SeekCur:
-                pos =   offset + _curPos;
+                pos =   offset + (long)_curPos;
                 break;
             case SeekOrigin::SeekEnd:
-                pos =   offset + _len;
+                pos =   offset + (long)_len;
                 break;
             default:
                 ret =   false;
@@ -63,7 +63,7 @@ namespace sge
             }
             if (ret)
             {
-                if (pos >= 0 && pos < _len)
+                if (pos >= 0 && pos < (long)_len)
                 {
                     _curPos =   (size_t)pos;
                 }
