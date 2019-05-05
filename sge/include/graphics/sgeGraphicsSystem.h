@@ -25,7 +25,7 @@ namespace sge
         /**
          * Get the graphics device
          */
-        GraphicsDevice* getDevice() { return _device; }
+        GraphicsDevice& getDevice() { return _device; }
 
     public:
         /**
@@ -50,7 +50,7 @@ namespace sge
 
     protected:
         friend class GraphicsSystemPrivate;
-        GraphicsDevice*         _device;
+        GraphicsDevice  _device;
 
         GraphicsSystemPrivate*  d;
         DISABLE_COPY(GraphicsSystem)

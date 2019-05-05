@@ -11,13 +11,6 @@
 
 namespace sge 
 {
-    // format string by args
-    #define FORMAT(out, fmtStr) char out[512] = { 0 };          \
-                            va_list __vl;                       \
-                            va_start(__vl, fmtStr);             \
-                            vsnprintf(out, 512, fmtStr, __vl);  \
-                            va_end(__vl)
-
     Log::Output Log::_output    =   Log::defaultOutput;
 
     void Log::defaultOutput(Log::Level lv, char *msg)
@@ -40,25 +33,29 @@ namespace sge
 
     void Log::debug(const char* fmt, ...)
     {
-        FORMAT(strBuffer, fmt);
+        char strBuffer[512];
+        FORMAT_ARG(strBuffer, ARRAYSIZE(strBuffer), fmt);
         if (_output) (*_output)(Log::Debug, strBuffer);
     }
 
     void Log::info(const char* fmt, ...)
     {
-        FORMAT(strBuffer, fmt);
+        char strBuffer[512];
+        FORMAT_ARG(strBuffer, ARRAYSIZE(strBuffer), fmt);
         if (_output) (*_output)(Log::Info, strBuffer);
     }
 
     void Log::warn(const char* fmt, ...)
     {
-        FORMAT(strBuffer, fmt);
+        char strBuffer[512];
+        FORMAT_ARG(strBuffer, ARRAYSIZE(strBuffer), fmt);
         if (_output) (*_output)(Log::Warn, strBuffer);
     }
 
     void Log::error(const char* fmt, ...)
     {
-        FORMAT(strBuffer, fmt);
+        char strBuffer[512];
+        FORMAT_ARG(strBuffer, ARRAYSIZE(strBuffer), fmt);
         if (_output) (*_output)(Log::Error, strBuffer);
     }
 
@@ -72,7 +69,8 @@ extern "C" {
 
     void sgeLogDebug(const char* fmt, ...)
     {
-        FORMAT(strBuffer, fmt);
+        char strBuffer[512];
+        FORMAT_ARG(strBuffer, ARRAYSIZE(strBuffer), fmt);
         if (sge::Log::_output) (*sge::Log::_output)(sge::Log::Debug, strBuffer);
     }
 
@@ -83,7 +81,8 @@ extern "C" {
      */
     void sgeLogInfo(const char* fmt, ...)
     {
-        FORMAT(strBuffer, fmt);
+        char strBuffer[512];
+        FORMAT_ARG(strBuffer, ARRAYSIZE(strBuffer), fmt);
         if (sge::Log::_output) (*sge::Log::_output)(sge::Log::Info, strBuffer);
     }
 
@@ -94,7 +93,8 @@ extern "C" {
      */
     void sgeLogWarn(const char* fmt, ...)
     {
-        FORMAT(strBuffer, fmt);
+        char strBuffer[512];
+        FORMAT_ARG(strBuffer, ARRAYSIZE(strBuffer), fmt);
         if (sge::Log::_output) (*sge::Log::_output)(sge::Log::Warn, strBuffer);
     }
 
@@ -105,7 +105,8 @@ extern "C" {
      */
     void sgeLogError(const char* fmt, ...)
     {
-        FORMAT(strBuffer, fmt);
+        char strBuffer[512];
+        FORMAT_ARG(strBuffer, ARRAYSIZE(strBuffer), fmt);
         if (sge::Log::_output) (*sge::Log::_output)(sge::Log::Error, strBuffer);
     }
 

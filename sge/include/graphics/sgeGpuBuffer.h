@@ -1,8 +1,6 @@
 #pragma once
 
-#include <core/sgeMath.h>
-#include <graphics/sgeGraphicsSystem.h>
-
+#include <graphics/sgeGraphicsDevice.h>
 
 namespace sge
 {
@@ -21,22 +19,16 @@ namespace sge
          * @param place The place wanted
          * @param data The initialize data
          */
-        GpuBuffer(GraphicsSystem* mgr, size_t size, BufferPlace place, const void * data = 0)
-            : _mgr(NULL)
-            , _id(0)
+        GpuBuffer(GraphicsDevice& device, size_t size, BufferPlace place, const void * data = 0)
+            : _device(device)
+            , _id(sge::kInvalidBufferId)
             , _size(0)
         {
-            ASSERT(mgr && size > 0);
-            if (mgr && size)
+            ASSERT(size > 0);
+            _id = device.createBuffer(getType(), size, data, place);
+            if (isValid())
             {
-                GraphicsDevice* device = mgr->getDevice();
-                ASSERT(device);
-                _id = device->createBuffer(BufferType::VBO, size, data, place);
-                if (_id)
-                {
-                    _size = (uint)size;
-                    _mgr = mgr;
-                }
+                _size = (uint)size;
             }
         }
 
@@ -45,7 +37,13 @@ namespace sge
          */
         ~GpuBuffer()
         {
-            release();
+            if (isValid())
+            {
+                ASSERT(_size > 0);
+                _device.destoryBuffer(_id);
+                _id = NULL;
+                _size = 0;
+            }
         }
 
         /**
@@ -56,7 +54,7 @@ namespace sge
         /**
          * Check the buffer valid status
          */
-        bool        isValid() const { return _id != InvalidBufferId; }
+        bool        isValid() const { return _id != sge::kInvalidBufferId; }
 
         /**
          * Get buffer type
@@ -66,36 +64,17 @@ namespace sge
         /**
          * Get the buffer size
          */
-        uint        getSize() const { return _size; }
-
-        /**
-         * Release the buffer
-         */
-        void        release()
-        {
-            if (_id)
-            {
-                ASSERT(_mgr && _size > 0);
-                GraphicsDevice* device = _mgr->getDevice();
-                ASSERT(device);
-                device->destoryBuffer(_id);
-                _mgr = NULL;
-                _id = NULL;
-                _size = 0;
-            }
-        }
+        size_t      getSize() const { return _size; }
 
         /**
          * Update data
          */
         void        updateData(size_t offset, size_t size, const void* data)
         {
-            if (_id && data && size)
+            if (isValid() && data && size)
             {
-                ASSERT(_mgr && _size >= offset + size);
-                GraphicsDevice* device = _mgr->getDevice();
-                ASSERT(device);
-                device->updateBuffer(_id, offset, size, data);
+                ASSERT(_size >= offset + size);
+                _device.updateBuffer(_id, offset, size, data);
             }
         }
 
@@ -104,27 +83,22 @@ namespace sge
          */
         void        getData(void* outData, size_t size = 0, size_t offset = 0)
         {
-            if (outData)
+            if (isValid() && outData)
             {
                 if (size == 0) size = _size - offset;
                 ASSERT(size > 0 && _size >= offset + size);
-                GraphicsDevice* device = _mgr->getDevice();
-                ASSERT(device);
-                device->getBufferData(_id, offset, outData, size);
+                _device.getBufferData(_id, offset, outData, size);
             }
         }
 
     private:
         NativeBufferId      _id;
-        uint                _size;
-        GraphicsSystem*     _mgr;
+        size_t              _size;
+        GraphicsDevice&     _device;
     };
 
 
-    using VetexBuffer = GpuBuffer<BufferType::VBO>;
-    using IndexBuffer = GpuBuffer<BufferType::IBO>;
-
-    using VBO = SharedPtr<VetexBuffer>;
-    using IBO = SharedPtr<IndexBuffer>;
+    using VetexBuffer = GpuBuffer<BufferType::kVertexBufferType>;
+    using IndexBuffer = GpuBuffer<BufferType::kIndexBufferType>;
 
 }

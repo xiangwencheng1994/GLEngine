@@ -126,6 +126,17 @@ namespace sge
     inline float abs(float x) { return fabsf(x); }
     inline double abs(double x) { return std::fabs(x); }
     
+    // next pot
+    inline int nextPOT(int x)
+    {
+        x = x - 1;
+        x = x | (x >> 1);
+        x = x | (x >> 2);
+        x = x | (x >> 4);
+        x = x | (x >> 8);
+        x = x | (x >> 16);
+        return x + 1;
+    }
 
     template<typename T> class Vector2;
     template<typename T> class Vector3;

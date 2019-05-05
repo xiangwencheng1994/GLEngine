@@ -57,6 +57,15 @@
 #define REMOVE_FLAG(item, flag)         ((item) &= ~(flag))
 #define SET_FLAG(item, flag, enable)    ((enable) ? ((item) |= (flag)) : ((item) &= ~(flag)))
 
+
+// format string
+#include <stdarg.h>
+#define FORMAT_ARG(out, maxSize, fmtStr)    va_list __vl;                       \
+                                        va_start(__vl, fmtStr);                 \
+                                        vsnprintf(out, maxSize, fmtStr, __vl);  \
+                                        va_end(__vl)
+
+
 #include <stdint.h>
 
 typedef int32_t four_char_enum;
