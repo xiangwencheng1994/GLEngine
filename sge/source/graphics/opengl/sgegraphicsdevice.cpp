@@ -67,6 +67,20 @@ namespace sge
         return GL_INVALID_ENUM;
     }
 
+    static GLenum getGLTextureWarpType(TextureWrapType wrap)
+    {
+        switch (wrap)
+        {
+        case sge::kTextureRepeat: return GL_REPEAT;
+        case sge::kTextureClamp: return GL_CLAMP;
+        case sge::kTextureBorder: return GL_CLAMP_TO_BORDER;
+        case sge::kTextureMirror: return GL_MIRRORED_REPEAT;
+        default:
+            break;
+        }
+        return GL_REPEAT;
+    }
+
     struct PixelFormatInfo
     {
         PixelFormatInfo(GLenum anInternalFormat, GLenum aFormat, GLenum aType, int aBpp, bool aCompressed, bool anAlpha)
@@ -394,21 +408,18 @@ namespace sge
         GLCall(glGenTextures(1, &id));
         GLCall(glBindTexture(GL_TEXTURE_2D, id));
 
-        //TODO: _antialiasEnabled
-        bool _antialiasEnabled = true;
-
         if (mipmapsNum == 1)
         {
-            GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, _antialiasEnabled ? GL_LINEAR : GL_NEAREST));
+            GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
         }
         else
         {
-            GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, _antialiasEnabled ? GL_LINEAR_MIPMAP_NEAREST : GL_NEAREST_MIPMAP_NEAREST));
+            GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST));
         }
 
-        GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, _antialiasEnabled ? GL_LINEAR : GL_NEAREST));
-        GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
-        GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
+        GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+        GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, getGLTextureWarpType(kTextureRepeat)));
+        GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, getGLTextureWarpType(kTextureRepeat)));
         
         // Specify OpenGL texture image
         for (int i = 0; i < mipmapsNum; ++i)
@@ -426,8 +437,10 @@ namespace sge
             }
             
             if (i > 0 && (width != height || nextPOT(width) != width))
+            {
                 Log::warn("[Graphics] Create Texture2D with Mipmap level %u is not squared. Texture won't render correctly. width=%d != height=%d", i, width, height);
-            
+            }
+
             width = MAX(width >> 1, 1);
             height = MAX(height >> 1, 1);
         }
@@ -438,6 +451,51 @@ namespace sge
     }
 
 
+    void GraphicsDevice::updateTextureWarp(NativeTextureId texture, TextureWrapType wrapS, TextureWrapType wrapT)
+    {
+        GLuint id = reinterpret_cast<GLuint>(texture);
+
+        GLuint oldBind = 0;
+        GLCall(glGetIntegerv(GL_TEXTURE_BINDING_2D, (GLint*)&oldBind));
+        GLCall(glBindTexture(GL_TEXTURE_2D, id));
+        GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, getGLTextureWarpType(wrapS)));
+        GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, getGLTextureWarpType(wrapT)));
+        GLCall(glBindTexture(GL_TEXTURE_2D, oldBind));
+    }
+
+
+    void GraphicsDevice::updateTextureMagnification(NativeTextureId texture, TextureMagnification mag)
+    {
+        GLuint id = reinterpret_cast<GLuint>(texture);
+
+        GLuint oldBind = 0;
+        GLCall(glGetIntegerv(GL_TEXTURE_BINDING_2D, (GLint*)&oldBind));
+        GLCall(glBindTexture(GL_TEXTURE_2D, id));
+        GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, mag == TextureMagnification::kTextureLinear ? GL_LINEAR : GL_NEAREST));
+        GLCall(glBindTexture(GL_TEXTURE_2D, oldBind));
+    }
+    
+    void GraphicsDevice::updateTextureMinification(NativeTextureId texture, TextureMinification min)
+    {
+        GLuint id = reinterpret_cast<GLuint>(texture);
+
+        GLenum filter;
+        switch (min)
+        {
+        case sge::kTextureNearestMipmapNearest: filter = GL_NEAREST_MIPMAP_NEAREST; break;
+        case sge::kTextureLinearMipmapNearest: filter = GL_LINEAR_MIPMAP_NEAREST; break;
+        case sge::kTextureNearestMipmapLinear: filter = GL_NEAREST_MIPMAP_LINEAR; break;
+        case sge::kTextureLinearMipmapLinear: filter = GL_LINEAR_MIPMAP_LINEAR; break;
+        default: filter = GL_NEAREST_MIPMAP_NEAREST; break;
+        }
+
+        GLuint oldBind = 0;
+        GLCall(glGetIntegerv(GL_TEXTURE_BINDING_2D, (GLint*)&oldBind));
+        GLCall(glBindTexture(GL_TEXTURE_2D, id));
+        GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filter));
+        GLCall(glBindTexture(GL_TEXTURE_2D, oldBind));
+    }
+
     void GraphicsDevice::updateTexture2D(NativeTextureId texture, const void * data, PixelFormat pixelFormat, int offsetX, int offsetY, int width, int height)
     {
         ASSERT(pixelFormat != PixelFormat::NONE && pixelFormat != PixelFormat::AUTO);
@@ -447,13 +505,9 @@ namespace sge
         
         GLuint oldBind = 0;
         GLCall(glGetIntegerv(GL_TEXTURE_BINDING_2D, (GLint*)&oldBind));
-        
-        GLCall(glGenTextures(1, &id));
         GLCall(glBindTexture(GL_TEXTURE_2D, id));
-        
         const PixelFormatInfo& info = d->_formatInfoMap.at(pixelFormat);
         GLCall(glTexSubImage2D(GL_TEXTURE_2D, 0, offsetX, offsetY, width, height, info.format, info.type, data));
-        
         GLCall(glBindTexture(GL_TEXTURE_2D, oldBind));
     }
 
@@ -462,7 +516,7 @@ namespace sge
     {
         GLuint id = reinterpret_cast<GLuint>(texture);
         GLCall(glDeleteTextures(1, &id));
-        texture = sge::kInvalidTextureId;
+        texture = kInvalidTextureId;
     }
 
 }

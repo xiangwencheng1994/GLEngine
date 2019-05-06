@@ -59,6 +59,7 @@ namespace sge
     using NativeShaderProgramId = NativeShaderProgram*;
     constexpr NativeShaderProgramId kInvalidProgramId = NULL;
 
+
     /**
      * Enum PixelFormat
      * Possible texture pixel formats
@@ -113,12 +114,59 @@ namespace sge
 
         NONE = -1
     };
-    
+
+    /**
+     * The wrap parameter for texture
+     */
+    enum TextureWrapType
+    {
+        //! repeat texture, igore integer part
+        kTextureRepeat,
+        //! use edge of texture if out of range [0, 1]
+        kTextureClamp,
+        //! wrap with border
+        kTextureBorder,
+        //! wrap with mirror
+        kTextureMirror,
+    };
+
+    /**
+     * The magnification filter type
+     */
+    enum TextureMagnification
+    {
+        //! The nearest neighbor point
+        kTextureNearest,
+        //! The linear interpolate
+        kTextureLinear,
+    };
+
+    /**
+     * The minification filter type
+     */
+    enum TextureMinification
+    {
+        //! The nearest neighbor point, with nearest mipmap layer
+        kTextureNearestMipmapNearest,
+        //! The linear interpolate, with nearest mipmap layer
+        kTextureLinearMipmapNearest,
+        //! The nearest neighbor point, with linear interpolate mipmap layer in two mipmap
+        kTextureNearestMipmapLinear,
+        //! The linear interpolate, with linear interpolate mipmap layer in two mipmap
+        kTextureLinearMipmapLinear,
+    };
+
+    /**
+     * The mipmap data info
+     */
     struct MipmapInfo
     {
+        //! The mipmap data memory address
         const byte* address;
+        //! The data size
         int         len;
     };
+
     class NativeTexture;
     using NativeTextureId = NativeTexture*;
     constexpr NativeTextureId kInvalidTextureId = NULL;
@@ -129,9 +177,6 @@ namespace sge
      */
     class SGE_API GraphicsDevice
     {
-    public:
-
-
     public:
         /**
          * Destructor
@@ -217,7 +262,8 @@ namespace sge
         void destoryShaderProgram(NativeShaderProgramId& program);
 
         /**
-         * Create texture 2d with with data.
+         * Create texture 2d with with data,
+         * the texture is warp parameter is kTextureRepeat & kTextureRepeat
          * @param data Specifies a pointer to the image data in memory, not be null
          * @param dataLen The image data length, must bigger than 0
          * @param pixelFormat The image pixelFormat.
@@ -227,14 +273,38 @@ namespace sge
         NativeTextureId createTexture2D(const void *data, size_t dataLen, PixelFormat pixelFormat, int width, int hight);
 
         /**
-         * Create texture 2d with mipmap infos
+         * Create texture 2d with mipmap infos,
+         * the texture is warp parameter is kTextureRepeat & kTextureRepeat
          * @param infos The mipmap infos, not be null
          * @param nums The count of infos, must bigger than 0
          */
         NativeTextureId createTexture2D(MipmapInfo* mipmaps, size_t mipmapsNum, PixelFormat pixelFormat, int width, int height);
 
         /**
-         * Update texture 2d with data.
+         * Update texture warp parameter
+         * @param texture The target texture, must be a valid texture
+         * @param wrapS The warp parameter for coordinate S
+         * @param wrapT The warp parameter for coordinate T
+         */
+        void updateTextureWarp(NativeTextureId texture, TextureWrapType wrapS, TextureWrapType wrapT);
+
+        /**
+         * Update texture the magnification filter
+         * @param texture The target texture, must be a valid texture
+         * @param mag The magnification filter
+         */
+        void updateTextureMagnification(NativeTextureId texture, TextureMagnification mag);
+
+        /**
+         * Update texture the minification filter
+         * @param texture The target texture, must be a valid texture
+         * @param min The minification filter
+         */
+        void updateTextureMinification(NativeTextureId texture, TextureMinification min);
+
+        /**
+         * Update texture 2d with data
+         * @param texture The target texture, must be a valid texture
          * @param data Specifies a pointer to the image data in memory.
          * @param offsetX Specifies a texel offset in the x direction within the texture array.
          * @param offsetY Specifies a texel offset in the y direction within the texture array.

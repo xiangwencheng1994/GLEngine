@@ -24,9 +24,8 @@ namespace sge
          * Constructor
          * @param fileName The fileName for open wanted 
          * @param ret The result of open the file
-         * @throw 
          */
-        FileReader(const char* fileName, bool* ret)
+        FileReader(const char* fileName, bool* ret = NULL)
         {
             bool isOpend = open(fileName);
             if (ret)
